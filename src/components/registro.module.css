@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+
+.formContainer {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 480px;
+    margin: 40px auto;
+    font-family: "Roboto";
+  }
+  
+  .formTitle {
+    color: #1e40af;
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  .formGroup {
+    margin-bottom: 24px;
+  }
+  
+  .formLabel {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 8px;
+  }
+  
+  .formInput {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .formInput:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+  
+  .errorMessage {
+    color: #dc2626;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+  
+  .documentGroup {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .documentType {
+    width: 80px;
+  }
+  
+  .documentNumber {
+    flex: 1;
+  }
+  
+  .submitButton {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #3b82f6;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  
+  .submitButton:hover {
+    background-color: #2563eb;
+  }
+  
+  .submitButton:active {
+    transform: translateY(1px);
+  }
+  
+  .submitButton:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+  }
+  
+  
