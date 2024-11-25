@@ -37,7 +37,7 @@ const validateCreate = [
   check("telephone_number").exists().notEmpty().trim(),
   check("password").exists().notEmpty().trim(),
   check("date_of_birth").exists().notEmpty().trim(),
-  validateResult, // Aquí se puede pasar directamente la función
+  validateResult,
 ];
 
 export default validateCreate;
