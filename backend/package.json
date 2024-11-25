@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev-back": "nodemon --env-file .env src/index.js"
+    "dev": "nodemon --env-file .env src/index.js"
   },
   "keywords": [],
   "author": "Jhonangel Briceño and Stephany Aranguren",

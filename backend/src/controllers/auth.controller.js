@@ -1,9 +1,14 @@
 import { pool } from "../db.js";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../libs/jwt.lib.js";
+import { validationResult } from "express-validator";
 
 export const register = async (req, res) => {
   const client = await pool.connect();
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { rows: roleRows } = await client.query(
       'SELECT id FROM public."classification" WHERE classification_type = $1',
@@ -24,36 +29,6 @@ export const register = async (req, res) => {
       password,
       date_of_birth,
     } = req.body;
-
-    if (
-      !name ||
-      !lastname ||
-      !identification ||
-      !email ||
-      !telephone_number ||
-      !password ||
-      !date_of_birth
-    )
-      return res.json({ message: "required fields" });
-
-    const { rows: emailExists } = await client.query(
-      'SELECT id FROM public."user" WHERE email = $1',
-      [email]
-    );
-
-    if (emailExists.length > 0) {
-      return res.status(400).json({ message: "The email already exists" });
-    }
-
-    const { rows: identificationExists } = await client.query(
-      'SELECT id FROM public."user" WHERE identification = $1',
-      [identification]
-    );
-    if (identificationExists.length > 0) {
-      return res
-        .status(400)
-        .json({ message: "The identification already exists" });
-    }
 
     const salt = await bcrypt.genSalt(10);
 
@@ -97,14 +72,13 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validar entrada (puedes usar una librería como Joi o express-validator)
     if (!email || !password) {
       return res
         .status(400)
         .json({ message: "Email and password are required." });
     }
 
-    const {rows} = await client.query(
+    const { rows } = await client.query(
       "SELECT email, password FROM public.user WHERE email = $1 LIMIT 1",
       [email]
     );
@@ -126,7 +100,6 @@ export const login = async (req, res) => {
 
     res.cookie("token", token);
     res.json({ message: "User  logged in successfully.", token });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -141,5 +114,3 @@ export const logout = async (req, res) => {
   });
   return res.sendStatus(200);
 };
-
-

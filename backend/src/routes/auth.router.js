@@ -1,9 +1,9 @@
 import { Router } from "express";
 import * as authCtrl from "../controllers/auth.controller.js";
-
+import validateCreate  from "../validators/auth.validator.js";
 const router = Router();
 
-router.post('/register', authCtrl.register);
+router.post('/register', validateCreate,authCtrl.register);
 router.post('/login', authCtrl.login);
 router.post('/logout', authCtrl.logout)
 
