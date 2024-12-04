@@ -1,7 +1,6 @@
 import { check } from "express-validator";
 import validateResult from "../middlewares/validate.middleware.js";
 import { pool } from "../db.js";
-import bcrypt from "bcryptjs";
 
 const validateCreate = [
   check("name")
