@@ -8,11 +8,11 @@ export const register = async (req, res) => {
 
     const { rows: roleRows } = await client.query(
       'SELECT id FROM public."classification" WHERE classification_type = $1',
-      ["usuario"]
+      ["cliente"]
     );
 
     if (roleRows.length === 0) {
-      return res.status(400).json({ message: "Rol de Usuario no encontrado." });
+      return res.status(400).json({ message: "Rol de cliente no encontrado." });
     }
     const RoleID = roleRows[0].id;
 

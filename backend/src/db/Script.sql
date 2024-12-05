@@ -31,9 +31,7 @@ CREATE TABLE IF NOT EXISTS public."user"(
     telephone_number VARCHAR(15)     NOT NULL,
     password         VARCHAR(255)    NOT NULL,
     role_id          BIGINT          NOT NULL,
-    gender_id        BIGINT          NOT NULL,
     date_of_birth    DATE                NULL,
-    address          VARCHAR(255)        NULL,
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT Pk_User_Id               PRIMARY KEY (Id),
