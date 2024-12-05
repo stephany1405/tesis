@@ -65,7 +65,7 @@ export const register = async (req, res) => {
 
     const { rows: createdUser } = await client.query(query, filteredValues);
 
-    const token = await createAccessToken({ email: createdUser[0].email });
+    const token = await createAccessToken({ email: createdUser[0].email, role_id: createdUser[0].role_id });
     res.cookie("token", token);
 
     // eslint-disable-next-line no-unused-vars
@@ -90,7 +90,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const { rows } = await client.query(
-      "SELECT email, password FROM public.user WHERE email = $1 LIMIT 1",
+      "SELECT email, password, role_id FROM public.user WHERE email = $1 LIMIT 1",
       [email]
     );
 
@@ -100,14 +100,14 @@ export const login = async (req, res) => {
     const user = rows[0];
     const userEmail = user.email;
     const userPassword = user.password;
+    const userRole = user.role_id;
     const comparePassword = await bcrypt.compare(password, userPassword);
 
     if (!comparePassword) {
       return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
-    const token = await createAccessToken({ email: userEmail });
-    console.log("Generando Token:", token);
+    const token = await createAccessToken({ email: userEmail, role_id: userRole });
 
     res.cookie("token", token);
     res.json({ message: "Usuario logeado exitosamente.", token });
