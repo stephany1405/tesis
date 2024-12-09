@@ -41,7 +41,7 @@ const TextMaskCustom = forwardRef(function TextMaskCustom(props, ref) {
   );
 });
 
-const RegistrationForm = () => {
+const Registro = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   return (
@@ -161,5 +161,5 @@ const RegistrationForm = () => {
   );
 };
 
-export default RegistrationForm;
+export default Registro;
 
