@@ -6,52 +6,19 @@ DROP TABLE IF EXISTS public."classification";
 
 CREATE TABLE IF NOT EXISTS public."classification"(
     Id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
-    classification_type VARCHAR(50) NOT NULL,       -- Nombre del tipo o valor de clasificación
-    parent_classification_id BIGINT NULL,           -- ID de la clasificación principal
-    icon_url TEXT NULL,                             -- URL del ícono de la clasificación
-
+    classification_type VARCHAR(50) NOT NULL,       
+    parent_classification_id BIGINT NULL,           
+    icon_url TEXT NULL,                          
+    services TEXT NULL,
+    description TEXT NULL,
+    price    NUMERIC(10,2) NULL,
     CONSTRAINT Pk_Classification_Id PRIMARY KEY(Id),
     CONSTRAINT fk_Classification_Parent FOREIGN KEY (parent_classification_id) REFERENCES public."classification"(Id)
 );
 
-
---Iconos a las clasificaciones.
-
--- Gender (masculino, femenino, otro.)
--- order_status (pendiente, en proceso, completado, cancelado)
--- user_role (usuario, especialista, administrador)
--- payment_method -> (tarjeta, pagomovil, efectivo)
--- log_Type ('evaluation', 'error', 'action', etc.)
-
 CREATE INDEX IF NOT EXISTS Idx_Classification_classification_type 
 ON public."classification"(classification_type);
 
-
-DROP TABLE IF EXISTS public."service"
-CREATE TABLE IF NOT EXISTS service(
-    Id                  BIGINT      NOT NULL GENERATED ALWAYS AS IDENTITY,
-    classification_id   BIGINT      NOT NULL,
-    service_name        VARCHAR(100)        ,
-    description         TEXT        NOT NULL,
-    duration_minutes    INT         NOT NULL,
-
-    CONSTRAINT pk_service_id        PRIMARY KEY(Id),
-    CONSTRAINT fk_classification_id FOREIGN KEY (classification_id) REFERENCES classification(Id)
-);
-
-
-DROP TABLE IF EXISTS public."services_prices";
-
-CREATE TABLE IF NOT EXISTS service_prices (
-    Id              BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY,
-    service_id      BIGINT          NOT NULL,
-    price           DECIMAL(10,2)   NOT NULL,
-
-    CONSTRAINT pk_service_prices_id PRIMARY KEY(Id),
-    CONSTRAINT chk_service_price_positive CHECK(price > 0),
-
-    CONSTRAINT fk_service_id FOREIGN KEY(service_id) REFERENCES service(Id)
-);
 
 DROP TABLE IF EXISTS public."user";
 
@@ -64,9 +31,7 @@ CREATE TABLE IF NOT EXISTS public."user"(
     telephone_number VARCHAR(15)     NOT NULL,
     password         VARCHAR(255)    NOT NULL,
     role_id          BIGINT          NOT NULL,
-    gender_id        BIGINT          NOT NULL,
     date_of_birth    DATE                NULL,
-    address          VARCHAR(255)        NULL,
     created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT Pk_User_Id               PRIMARY KEY (Id),
@@ -89,26 +54,14 @@ CREATE TABLE IF NOT EXISTS public."specialist_details"(
     profile_picture     TEXT            NULL,
     average_rating      INT             NULL,
     experience          INT         NOT NULL,
+    specialization_id   BIGINT NOT NULL,
     CONSTRAINT Pk_Specialist_Details_Id PRIMARY KEY(Id),
-    CONSTRAINT fk_user_id 			FOREIGN KEY (user_id) REFERENCES public."user"(Id)
+    CONSTRAINT fk_user_id 			FOREIGN KEY (user_id) REFERENCES public."user"(Id),
+    CONSTRAINT fk_specialization_type FOREIGN KEY(specialization_id) REFERENCES classification(Id)
 );
 
 CREATE INDEX IF NOT EXISTS Idx_Specialist_Details_User_Id ON public."specialist_details"(user_id);
 CREATE INDEX IF NOT EXISTS Idx_Specialist_Details_Verification_Status ON public."specialist_details"(verification_status);
-
-
-DROP TABLE IF EXISTS public."specialist_specializations";
-
-CREATE TABLE specialist_specializations (
-    Id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
-    specialist_id BIGINT NOT NULL,
-    specialization_id BIGINT NOT NULL,
-
-    CONSTRAINT pk_specialist_specializations_id PRIMARY KEY(Id),
-    CONSTRAINT fk_specialization_specialist FOREIGN KEY(specialist_id) REFERENCES specialist_details(Id),
-    CONSTRAINT fk_specialization_type FOREIGN KEY(specialization_id) REFERENCES classification(Id),
-    CONSTRAINT uq_specialist_specialization UNIQUE(specialist_id, specialization_id)
-);
 
 
 DROP TABLE IF EXISTS public."bank_accounts";
@@ -145,7 +98,7 @@ CREATE TABLE IF NOT EXISTS public."appointment"(
 
     CONSTRAINT fk_user_id       FOREIGN KEY (user_id)           REFERENCES public."user"(Id),
     CONSTRAINT fk_specialist_id FOREIGN KEY (specialist_id)     REFERENCES public."user"(Id),
-    CONSTRAINT fk_service_id    FOREIGN KEY (service_id)        REFERENCES public."service"(Id),
+    CONSTRAINT fk_service_id    FOREIGN KEY (service_id)        REFERENCES public."classification"(Id),
     CONSTRAINT fk_status_id     FOREIGN KEY (status_id)         REFERENCES public."classification"(Id)
 );
 

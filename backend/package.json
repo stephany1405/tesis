@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev-back": "nodemon --env-file .env src/index.js"
+    "dev": "nodemon --env-file .env src/index.js"
   },
   "keywords": [],
   "author": "Jhonangel Briceño and Stephany Aranguren",
@@ -12,10 +12,13 @@
   "description": "TESIS IUJO",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
     "express": "^4.21.1",
+    "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "pg-format": "^1.0.4"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
