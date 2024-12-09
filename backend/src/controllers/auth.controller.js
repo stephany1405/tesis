@@ -24,8 +24,7 @@ export const register = async (req, res) => {
       date_of_birth,
     } = req.body;
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const tableName = "user";
     const schemaName = "public";
@@ -66,7 +65,7 @@ export const register = async (req, res) => {
       email: createdUser[0].email,
       role_id: createdUser[0].role_id,
     });
-    res.cookie("token", token);
+    res.cookie("token", token, { httpOnly: true, secure: true });
 
     // eslint-disable-next-line no-unused-vars
     const { password: _, ...userWithoutPassword } = createdUser[0];
@@ -93,14 +92,14 @@ export const login = async (req, res) => {
     console.log(userData)
     
     if (!userData) {
-      return res.status(400).json({ message: "Usuario no encontrado" });
+      return res.status(400).json({ message: "Credenciales Incorrectas" });
     }
     const { email: userEmail, password: userPassword, role_id: userRole } = userData;
 
-    const comparePassword = await bcrypt.compare(password, userPassword);
+    const passwordIsValid  = await bcrypt.compare(password, userPassword);
 
-    if (!comparePassword) {
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+    if (!passwordIsValid ) {
+      return res.status(401).json({ message: "Credenciales Incorrectas" });
     }
 
     const token = await createAccessToken({
@@ -108,8 +107,8 @@ export const login = async (req, res) => {
       role_id: userRole,
     });
 
-    res.cookie("token", token);
-    res.json({ message: "se ha iniciado sesión exitosamente.", token });
+    res.cookie("token", token, { httpOnly: true, secure: true });
+    res.status(200).json({ message: "Inicio de sesión exitoso", token });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error interno del servidor." });

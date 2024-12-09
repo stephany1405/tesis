@@ -11,9 +11,7 @@ const getRoleId = async () => {
 
     const { rows } = await client.query(query);
 
-    if (rows.length === 0) return null;
-
-    return rows[0];
+    return rows.length > 0 ? rows[0] : null;
   } catch (err) {
     console.error("Error al obtener el role_id:", err);
     throw err;
@@ -30,8 +28,7 @@ const getUser = async (email) => {
       values: [email],
     };
     const { rows } = await client.query(query);
-    if(rows.length === 0) return null;
-    return rows[0]
+    return rows.length > 0 ? rows[0] : null;
   } catch (err) {
     console.error("Error al obtener el usuario: ", err);
     throw new Error("Error al obtener el usuario");
