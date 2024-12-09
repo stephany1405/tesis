@@ -1,20 +1,18 @@
 import { pool } from "../db.js";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../libs/jwt.lib.js";
+import { getRoleId, getUser } from "../models/user.model.js";
 
 export const register = async (req, res) => {
   const client = await pool.connect();
   try {
+    const role = await getRoleId();
 
-    const { rows: roleRows } = await client.query(
-      'SELECT id FROM public."classification" WHERE classification_type = $1',
-      ["cliente"]
-    );
-
-    if (roleRows.length === 0) {
+    if (!role) {
       return res.status(400).json({ message: "Rol de cliente no encontrado." });
     }
-    const RoleID = roleRows[0].id;
+
+    const RoleID = role.id;
 
     const {
       name,
@@ -38,7 +36,6 @@ export const register = async (req, res) => {
     );
 
     const columnNames = columns.map((col) => col.column_name);
-
 
     const data = {
       name,
@@ -65,13 +62,16 @@ export const register = async (req, res) => {
 
     const { rows: createdUser } = await client.query(query, filteredValues);
 
-    const token = await createAccessToken({ email: createdUser[0].email, role_id: createdUser[0].role_id });
+    const token = await createAccessToken({
+      email: createdUser[0].email,
+      role_id: createdUser[0].role_id,
+    });
     res.cookie("token", token);
 
     // eslint-disable-next-line no-unused-vars
     const { password: _, ...userWithoutPassword } = createdUser[0];
     res.status(201).json({
-      message: "User created successfully",
+      message: "Usuario creado exitosamente.",
       user: userWithoutPassword,
       token: token,
     });
@@ -89,28 +89,27 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const { rows } = await client.query(
-      "SELECT email, password, role_id FROM public.user WHERE email = $1 LIMIT 1",
-      [email]
-    );
-
-    if (rows.length === 0)
+    const userData = await getUser(email); 
+    console.log(userData)
+    
+    if (!userData) {
       return res.status(400).json({ message: "Usuario no encontrado" });
+    }
+    const { email: userEmail, password: userPassword, role_id: userRole } = userData;
 
-    const user = rows[0];
-    const userEmail = user.email;
-    const userPassword = user.password;
-    const userRole = user.role_id;
     const comparePassword = await bcrypt.compare(password, userPassword);
 
     if (!comparePassword) {
       return res.status(401).json({ message: "Contraseña incorrecta" });
     }
 
-    const token = await createAccessToken({ email: userEmail, role_id: userRole });
+    const token = await createAccessToken({
+      email: userEmail,
+      role_id: userRole,
+    });
 
     res.cookie("token", token);
-    res.json({ message: "Usuario logeado exitosamente.", token });
+    res.json({ message: "se ha iniciado sesión exitosamente.", token });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error interno del servidor." });
