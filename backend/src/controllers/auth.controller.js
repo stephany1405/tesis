@@ -83,7 +83,6 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const client = await pool.connect();
 
   try {
     const { email, password } = req.body;
@@ -112,8 +111,6 @@ export const login = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error interno del servidor." });
-  } finally {
-    if (client) client.release();
   }
 };
 

@@ -21,6 +21,6 @@ export const getServicesByCategory = async (req, res, next) => {
     res.status(200).json(rows);
   } catch (error) {
     console.error("Error en getServicesByCategory:", error);
-    next(error); // Pasa el error al middleware de errores
+    next(error);
   }
 };

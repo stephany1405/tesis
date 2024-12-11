@@ -17,32 +17,22 @@ export const authRequired = (req, res, next) => {
   }
 };
 
-export const authAdmin = (req, res, next) => {
-  if (req.role_id === 55)
-    return res.status(200).json({ message: "Admin autorizado" }, next());
-
-  return res
-    .status(403)
-    .status(403)
-    .json({ message: "Token no autorizado, solo usuario administrador" });
+const authorizedRoles = {
+  admin: new Set([55]),
+  client: new Set([53, 55]),
+  specialist: new Set([54, 55]),
 };
 
-export const authClient = (req, res, next) => {
-  if (req.role_id === 53 || req.role_id === 55)
-    return res.status(200).json({ message: "Cliente autorizado" }, next());
-
-  return res
-    .status(403)
-    .status(403)
-    .json({ message: "Token no autorizado, solo usuario cliente" });
+export const authMiddleware = (role) => {
+  return (req, res, next) => {
+    if (authorizedRoles[role].has(req.role_id)) {
+      next();
+    } else {
+      res.status(403).json({ message: `No autorizado: Solo se permite ${role}` });
+    }
+  };
 };
 
-export const authSpecialist = (req, res, next) => {
-  if (req.role_id === 54 || req.role_id === 55)
-    return res.status(200).json({ message: "Especialista autorizado" }, next());
-
-  return res
-    .status(403)
-    .status(403)
-    .json({ message: "Token no autorizado, solo usuario especialista" });
-};
+export const authAdmin = authMiddleware('admin');
+export const authClient = authMiddleware('client');
+export const authSpecialist = authMiddleware('specialist');

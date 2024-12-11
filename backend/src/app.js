@@ -14,7 +14,7 @@ app.use(errorHandler)
 
 app.use(morgan("dev"));
 
-app.use("/api", authRoutes);
+app.use("/api/usuario", authRoutes);
 app.use("/api/servicios", appointmentRoutes)
 
 app.get("/", (req, res) => {
