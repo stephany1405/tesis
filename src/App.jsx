@@ -1,6 +1,4 @@
-import Registro from "./components/registro";
-import Inicio from "./components/inicio";
-import Login from "./components/login";
+import Inicio from "./components/inicio/inicio";
 function App() {
   return (
     <>

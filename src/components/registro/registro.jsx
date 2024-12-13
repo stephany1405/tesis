@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { IMaskInput } from "react-imask";
 import { forwardRef } from "react";
-import styles from "../components/registro.module.css";
+import styles from "./registro.module.css";
 
 const TextMaskCustom2 = forwardRef(function TextMaskCustom2(props, ref) {
   const { onChange, ...other } = props;

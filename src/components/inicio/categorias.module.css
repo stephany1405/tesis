@@ -4,7 +4,7 @@
     background-color: #fff;
   }
   
-  .categoriesWrapper {
+  .categoriesWrapper { 
     display: flex;
     gap: 2rem;
     overflow-x: auto;

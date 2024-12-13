@@ -1,7 +1,7 @@
 import React from 'react';
-import styles from "./Inicio.module.css";
-import Carrusel from './Carrusel';
-import CategoriasList from './CategoriasList';
+import Header from "./header";
+import Carrusel from './carrusel';
+import CategoriasList from './categoriasList';
 
 const photos = [
   { src: '/imagenes/cara(4).jpeg' },
@@ -58,15 +58,9 @@ const categorias = [
 const Inicio = () => {
   return (
     <>
-      <header className={styles.header}>
-        <a href="/" className={styles.logo}>uñimas</a>
-        <nav className={styles.nav}>
-          <a href="/catalogo" className={styles.navItem}>Catálogo</a>
-          <a href="/agenda" className={styles.navItem}>Agenda</a>
-          <a href="/perfil" className={styles.navItem}>Carrito</a>
-          <a href="/perfil" className={styles.navItem}>Perfil</a>
-        </nav>
-      </header>
+       <div className="App">
+        <Header />
+      </div>
       <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
         <Carrusel images={photos} autoPlayInterval={6000} />
       </div>
