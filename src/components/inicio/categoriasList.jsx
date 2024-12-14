@@ -1,12 +1,13 @@
 import React from 'react';
 import styles from './categorias.module.css';
 
+
 const CategoriasList = ({ categorias }) => {
   return (
     <div className={styles.container}>
       <div className={styles.categoriesWrapper}>
         {categorias.map((category) => (
-          <a 
+          <a
             key={category.id} 
             href={category.link} 
             className={styles.categoryCard}

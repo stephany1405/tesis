@@ -16,3 +16,23 @@ export const authRequired = (req, res, next) => {
     return res.status(400).status({ error: "Token Invalido" });
   }
 };
+
+const authorizedRoles = {
+  admin: new Set([55]),
+  client: new Set([53, 55]),
+  specialist: new Set([54, 55]),
+};
+
+export const authMiddleware = (role) => {
+  return (req, res, next) => {
+    if (authorizedRoles[role].has(req.role_id)) {
+      next();
+    } else {
+      res.status(403).json({ message: `No autorizado: Solo se permite ${role}` });
+    }
+  };
+};
+
+export const authAdmin = authMiddleware('admin');
+export const authClient = authMiddleware('client');
+export const authSpecialist = authMiddleware('specialist');

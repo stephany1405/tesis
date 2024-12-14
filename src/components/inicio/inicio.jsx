@@ -3,6 +3,8 @@ import Header from "./header";
 import Carrusel from './carrusel';
 import CategoriasList from './categoriasList';
 
+
+
 const photos = [
   { src: '/imagenes/cara(4).jpeg' },
   { src: '/imagenes/cara(3).jpeg' },
@@ -15,7 +17,7 @@ const categorias = [
     id: 1,
     name: 'Tratamientos faciales',
     imageUrl: '/placeholder.svg',
-    link: '/servicios/faciales'
+    Link: '/Categorias/Facial/'
   },
   {
     id: 2,
@@ -58,7 +60,7 @@ const categorias = [
 const Inicio = () => {
   return (
     <>
-       <div className="App">
+      <div className="App">
         <Header />
       </div>
       <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
