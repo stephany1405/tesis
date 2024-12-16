@@ -2,6 +2,7 @@ import React from 'react';
 import Header from "./header";
 import Carrusel from './carrusel';
 import CategoriasList from './categoriasList';
+import { Link } from 'react-router-dom';
 
 
 
@@ -17,7 +18,7 @@ const categorias = [
     id: 1,
     name: 'Tratamientos faciales',
     imageUrl: '/placeholder.svg',
-    Link: '/Categorias/Facial/'
+    link: '/servicios/Facial/'
   },
   {
     id: 2,
@@ -35,7 +36,7 @@ const categorias = [
     id: 4,
     name: 'Extensiones de pestañas',
     imageUrl: '/placeholder.svg',
-    link: '/servicios/pestanas'
+    link: '/servicios/extension'
   },
   {
     id: 5,
@@ -74,4 +75,5 @@ const Inicio = () => {
 };
 
 export default Inicio;
+
 

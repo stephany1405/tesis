@@ -1,15 +1,15 @@
 import React from 'react';
 import styles from './categorias.module.css';
-
+import { Link } from 'react-router-dom';
 
 const CategoriasList = ({ categorias }) => {
   return (
     <div className={styles.container}>
       <div className={styles.categoriesWrapper}>
         {categorias.map((category) => (
-          <a
+          <Link
             key={category.id} 
-            href={category.link} 
+            to={category.link} 
             className={styles.categoryCard}
           >
             <div className={styles.imageContainer}>
@@ -20,7 +20,7 @@ const CategoriasList = ({ categorias }) => {
               />
             </div>
             <h3 className={styles.categoryName}>{category.name}</h3>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
@@ -28,3 +28,4 @@ const CategoriasList = ({ categorias }) => {
 };
 
 export default CategoriasList;
+
