@@ -1,15 +1,41 @@
-import styles from './modelo.module.css'
-import Header from '../inicio/header'
+import React, { useState } from 'react';
+import styles from './modelo.module.css';
+import Header from '../inicio/header';
+import ProductModal from './product-modal';
 
-const ProductCard = ({ product }) => (
-  <div key={product.id} className={styles.card}>
-    <div className={styles.header} />
-    <h3 className={styles.productTitle}>{product.title}</h3>
-    <p className={styles.description}>{product.description}</p>
-    <div className={styles.price}>${product.price}</div>
-    <button className={styles.addButton}>+</button>
-  </div>
-);
+const ProductCard = ({ product }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  return (
+    <>
+      <div key={product.id} className={styles.card}>
+        <div className={styles.header}>
+          {product.image && (
+            <img 
+              src={product.image} 
+              alt={product.title}
+              className={styles.productImage}
+            />
+          )}
+        </div>
+        <h3 className={styles.productTitle}>{product.title}</h3>
+        <p className={styles.description}>{product.description}</p>
+        <div className={styles.price}>${product.price}</div>
+        <button 
+          className={styles.addButton}
+          onClick={() => setIsModalOpen(true)}
+        >
+          +
+        </button>
+      </div>
+      <ProductModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        product={product}
+      />
+    </>
+  );
+};
 
 const Modelo = ({ title, products }) => {
   const groupedProducts = products.some(item => item.title && Array.isArray(item.products));
@@ -41,5 +67,6 @@ const Modelo = ({ title, products }) => {
     </>
   );
 };
- export default Modelo;
+
+export default Modelo;
 
