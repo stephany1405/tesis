@@ -1,12 +1,13 @@
 import express from "express";
 import morgan from "morgan";
 import helmet from "helmet";
+import cors from "cors";
 import authRoutes from "./routes/auth.router.js";
 import appointmentRoutes from "./routes/appointment.router.js";
 import { errorHandler } from "./middlewares/catch.middleware.js";
 
 const app = express();
-
+app.use(cors());
 app.use(helmet());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());

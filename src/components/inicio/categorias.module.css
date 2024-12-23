@@ -6,7 +6,7 @@
   
   .categoriesWrapper { 
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
     overflow-x: auto;
     padding: 1rem 0.5rem;
     scroll-behavior: smooth;

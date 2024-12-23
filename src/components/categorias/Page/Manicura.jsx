@@ -6,7 +6,6 @@ const Manicura = () => {
       <>
         <Modelo title="Manicura" products={productosManicura} />
         
-        
         </>
   );
 };

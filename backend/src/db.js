@@ -13,13 +13,16 @@ export const pool = new pg.Pool({
   password: DB_PASSWORD,
   database: DB_DATABASE,
   port: DB_PORT,
+  ssl: {
+    rejectUnauthorized : false
+  }
 });
 
 pool.query("SELECT NOW()")
   .then((result) => {
-    console.log("Connection successful!");
+    console.log("Conexión exitosa.");
     console.log(result.rows[0].now);
   })
   .catch((err) => {
-    console.error("Error connecting to database:", err);
+    console.error("Error conectando la base de datos.", err);
   });

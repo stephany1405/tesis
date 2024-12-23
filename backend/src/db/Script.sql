@@ -8,10 +8,11 @@ CREATE TABLE IF NOT EXISTS public."classification"(
     Id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
     classification_type VARCHAR(50) NOT NULL,       
     parent_classification_id BIGINT NULL,           
-    icon_url TEXT NULL,                          
-    services TEXT NULL,
+    icon_url TEXT NULL,           
+    service_image text NULL             
     description TEXT NULL,
     price    NUMERIC(10,2) NULL,
+    service_category BOOLEAN NULL,
     CONSTRAINT Pk_Classification_Id PRIMARY KEY(Id),
     CONSTRAINT fk_Classification_Parent FOREIGN KEY (parent_classification_id) REFERENCES public."classification"(Id)
 );

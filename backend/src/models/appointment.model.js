@@ -4,7 +4,7 @@ export const getAllCategory = async (req, res, next) => {
   const client = await pool.connect();
   try {
     const query = {
-      text: `SELECT id,classification_type, description FROM classification WHERE service_category = TRUE`,
+      text: `SELECT id,classification_type, description, service_image FROM classification WHERE service_category = TRUE`,
     };
     const { rows } = await client.query(query);
     return rows.length > 0 ? rows : null;
@@ -20,7 +20,7 @@ export const getServices = async (categoryID) => {
   const client = await pool.connect();
   try {
     const query = {
-      text: `SELECT classification_type, description, price FROM classification WHERE parent_classification_id = $1`,
+      text: `SELECT classification_type, description, service_image, price, time FROM classification WHERE parent_classification_id = $1`,
       values: [categoryID],
     };
 
