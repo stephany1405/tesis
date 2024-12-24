@@ -14,13 +14,13 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Inicio />} />
-        <Route path="/servicios/manicura" element={<Manicura />} />
-        <Route path="/servicios/corporales" element={<Corporal />} />
-        <Route path="/servicios/pedicura" element={<Pedicura />} />
-        <Route path="/servicios/extension" element={<Extension />} />
-        <Route path="/servicios/epilacion" element={<Epilacion />} />
-        <Route path="/servicios/facial" element={<Facial />} />
-        <Route path="/servicios/quiropodia" element={<Quiropodia />} />
+        <Route path="/servicios/manicura/:categoryID" element={<Manicura />} />
+        <Route path="/servicios/corporales/:categoryID" element={<Corporal />} />
+        <Route path="/servicios/pedicura/:categoryID" element={<Pedicura />} />
+        <Route path="/servicios/extension/:categoryID" element={<Extension />} />
+        <Route path="/servicios/epilacion/:categoryID" element={<Epilacion />} />
+        <Route path="/servicios/facial/:categoryID" element={<Facial />} />
+        <Route path="/servicios/quiropodia/:categoryID" element={<Quiropodia />} />
       </Routes>
     </Router>
   );
