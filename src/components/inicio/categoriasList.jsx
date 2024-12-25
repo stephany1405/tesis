@@ -14,7 +14,7 @@ const CategoriasList = () => {
           id: category.id,
           name: category.classification_type,
           imageUrl: category.service_image,   
-          link: `/servicios/manicura/${category.id}`,
+          link: `/servicios/${category.classification_type.toLowerCase()}/${category.id}`,
         }));
         setCategorias(transformedCategorias);
       } catch (error) {

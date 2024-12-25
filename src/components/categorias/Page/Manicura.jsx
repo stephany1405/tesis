@@ -1,4 +1,4 @@
-import React from "React";
+import React from 'react';
 import Modelo from "../modelo.jsx";
 import useManiServices from "../data/productosManicura.jsx";
 import { useParams } from 'react-router-dom';
@@ -13,7 +13,7 @@ const Manicura = () => {
 
   return (
     <>
-      <Modelo title="Manicura" products={serviciosManicura} />
+      <Modelo title="Servicios Manicura" products={serviciosManicura} />
     </>
   );
 };
