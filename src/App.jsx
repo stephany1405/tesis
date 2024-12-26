@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Inicio from "./components/inicio/inicio";
 import Manicura from "./components/categorias/Page/Manicura";
