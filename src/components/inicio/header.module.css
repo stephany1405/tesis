@@ -1,33 +1,31 @@
+/* header.module.css */
+
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    background-color: #f8f9fa;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
-  .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #ff69b4;
-    text-decoration: none;
-  }
-  
-  .nav {
-    display: flex;
-    gap: 1.5rem;
-  }
-  
-  .navItem {
-    color: #333;
-    text-decoration: none;
-    font-size: 1rem;
-    transition: color 0.3s ease;
-  }
-  
-  .navItem:hover {
-    color: #d569ff;
-  }
-  
-  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #f0f0f0; /* Color de fondo del encabezado */
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+}
+
+.navItem {
+  margin-left: 20px;
+  text-decoration: none;
+  color: #333;
+}
+
+/* Estilos adicionales (opcional) */
+.navItem:hover {
+  color: #007bff; /* Cambia el color al pasar el mouse */
+}

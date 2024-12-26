@@ -33,7 +33,7 @@ const Carrusel = ({ images, autoPlayInterval = 5000 }) => {
         {images.map((image, index) => (
           <div key={index} className={styles.carouselItem}>
             <img src={image.src} alt={`Slide ${index + 1}`} />
-            <div className={styles.caption}>{image.caption}</div>
+            {/* <div className={styles.caption}>{image.caption}</div> */}
           </div>
         ))}
       </div>
