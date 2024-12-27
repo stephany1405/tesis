@@ -20,6 +20,7 @@ const ProductCard = ({ product }) => {
         </div>
         <h3 className={styles.productTitle}>{product.title}</h3>
         <p className={styles.description}>{product.description}</p>
+        <p className={styles.description}>Estimación de tiempo: {product.time}</p>
         <div className={styles.price}>${product.price}</div>
         <button 
           className={styles.addButton}
