@@ -35,7 +35,7 @@ const ProductModal = ({ isOpen, onClose, product }) => {
           <div className={styles.productInfo}>
             <h3 className={styles.productTitle}>{product.title}</h3>
             <p className={styles.productDescription}>{product.description}</p>
-            <p className={styles.productDuration}>Duración: {product.duration}</p>
+            <p className={styles.productDuration}>Duración: {product.time}</p>
             <div className={styles.productPrice}>${product.price}</div>
           </div>
           <div className={styles.noteContainer}>
