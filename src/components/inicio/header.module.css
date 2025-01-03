@@ -1,11 +1,10 @@
-/* header.module.css */
-
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  background-color: #f0f0f0; /* Color de fondo del encabezado */
+  background-color: white;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .logo {
@@ -17,15 +16,36 @@
 
 .nav {
   display: flex;
+  align-items: center;
+  gap: 24px;
 }
 
 .navItem {
-  margin-left: 20px;
   text-decoration: none;
   color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-/* Estilos adicionales (opcional) */
 .navItem:hover {
-  color: #007bff; /* Cambia el color al pasar el mouse */
+  color: #666;
+}
+
+.cartContainer {
+  position: relative;
+}
+
+/* Añadir estos estilos para asegurar que el desplegable se muestre correctamente */
+.cartContainer:hover .dropdown {
+  display: block;
+}
+
+.cartContainer {
+  position: relative;
+}
+
+.cartContainer:hover .dropdown {
+  display: block;
 }

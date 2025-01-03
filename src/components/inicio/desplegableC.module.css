@@ -1,0 +1,99 @@
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 250px; 
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 12px;
+  z-index: 1000;
+  margin-top: 8px;
+  display: block;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; 
+  margin-bottom: 12px; 
+  max-height: 300px; 
+  overflow-y: auto;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1fr 24px;
+  gap: 8px;
+  align-items: start;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.itemDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-size: 0.85rem; 
+  color: #333;
+  line-height: 1.2;
+}
+
+.quantityPrice {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #333;
+  margin-top: 4px;
+}
+
+.price {
+  font-weight: 500;
+  color: #e65100;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  padding: 2px; 
+  cursor: pointer;
+  color: #666;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.removeButton:hover {
+  color: #dc2626;
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  margin: 12px 0; 
+  padding-top: 8px; 
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.95rem; 
+}
+
+.button {
+  width: 100%;
+  padding: 10px; 
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9rem; 
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background: #333;
+}
+

@@ -43,9 +43,8 @@ const Modelo = ({ title, products }) => {
 
   return (
     <>
-      <div>
-        <Header />
-      </div>
+      
+      
       <h1 className={styles.title}>{title}</h1>
       {groupedProducts ? (
         products.map((group, index) => (
