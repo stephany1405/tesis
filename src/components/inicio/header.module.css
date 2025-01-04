@@ -1,31 +1,78 @@
-/* header.module.css */
-
 .header {
+  background-color: #f3f4f6; 
+  color: #333;
+  padding: 15px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  background-color: #f0f0f0; /* Color de fondo del encabezado */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
+
 .logo {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
-  color: #333;
+  color: #a7c5eb; 
   text-decoration: none;
+  transition: color 0.3s ease;
 }
+
+.logo:hover {
+  color: #8db8e8; 
+}
+
 
 .nav {
   display: flex;
+  gap: 20px;
 }
 
 .navItem {
-  margin-left: 20px;
+  font-size: 16px;
+  color: #555; 
   text-decoration: none;
-  color: #333;
+  padding: 10px 20px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Estilos adicionales (opcional) */
 .navItem:hover {
-  color: #007bff; /* Cambia el color al pasar el mouse */
+  background-color: #f7c6c9; 
+  color: #333; 
+}
+
+.navItem:active {
+  background-color: #f4a4b2;
+}
+
+button.navItem {
+  background-color: #c9d9f2; 
+  border: none;
+  cursor: pointer;
+}
+
+button.navItem:hover {
+  background-color: #b8c9f5;
+}
+
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .navItem {
+    width: 100%;
+    text-align: left;
+    padding: 12px 20px;
+  }
 }

@@ -93,7 +93,7 @@ export const login = async (req, res) => {
     if (!userData) {
       return res.status(400).json({ message: "Credenciales Incorrectas" });
     }
-    const { email: userEmail, password: userPassword, role_id: userRole } = userData;
+    const { email: userEmail, password: userPassword, role_id: userRole, id: userId } = userData;
 
     const passwordIsValid  = await bcrypt.compare(password, userPassword);
 
@@ -104,6 +104,7 @@ export const login = async (req, res) => {
     const token = await createAccessToken({
       email: userEmail,
       role_id: userRole,
+      id: userId,
     });
 
     res.cookie("token", token, { httpOnly: true, secure: true });

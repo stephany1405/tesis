@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS public."appointment"(
     note                            TEXT                NULL,
     start_appointment               TIMESTAMP           NULL,
     end_appointment                 TIMESTAMP           NULL,
+    note_of_services                TEXT                NULL,   
 
     CONSTRAINT Pk_Appointment_Id    PRIMARY KEY(Id),
     CONSTRAINT chk_appointment_future_date CHECK(scheduled_date > CURRENT_TIMESTAMP),

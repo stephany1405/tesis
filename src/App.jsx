@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Login from "./components/login/login.jsx";
+import Registro from "./components/registro/registro.jsx";
 import Inicio from "./components/inicio/inicio";
 import Manicura from "./components/categorias/Page/Manicura";
 import Corporal from "./components/categorias/Page/Corporal";
@@ -13,7 +15,9 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Inicio />} />
+        <Route path="/login" element={<Login/>} />
+        <Route path="/registro" element={<Registro/>} />
+        <Route path="/cliente" element={<Inicio />} />
         <Route path="/servicios/manicuras/:categoryID" element={<Manicura />} />
         <Route
           path="/servicios/corporales/:categoryID"
