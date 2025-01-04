@@ -25,33 +25,10 @@ const CategoriasList = () => {
     fetchCategorias();
   }, []);
 
-  const centralizeLastThree = categorias.slice(-3);
-
   return (
     <div className={styles.container}>
       <div className={styles.categoriesWrapper}>
-        {categorias.slice(0, categorias.length - 3).map((category) => (
-          <Link
-            key={category.id}
-            to={category.link}
-            className={styles.categoryCard}
-          >
-            <div className={styles.imageContainer}>
-              <img
-                src={category.imageUrl}
-                alt={category.name}
-                className={styles.categoryImage}
-              />
-            </div>
-            <h3 className={styles.categoryName}>{category.name}</h3>
-            <p className={styles.categoryDescription}>{category.description}</p>
-          </Link>
-        ))}
-      </div>
-
-      {/* Centralizing last 3 categories */}
-      <div className={styles.centralizedWrapper}>
-        {centralizeLastThree.map((category) => (
+        {categorias.map((category) => (
           <Link
             key={category.id}
             to={category.link}

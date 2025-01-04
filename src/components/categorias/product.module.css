@@ -1,158 +1,118 @@
-/* product.module.css */
 .modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-  backdrop-filter: blur(5px); 
-}
-
-.modalContent {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 20px;  
-  max-width: 400px; 
-  width: 85%;
-  position: relative;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-50px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
   }
-}
-
-.closeButton {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background-color: transparent;
-  border: none;
-  font-size: 26px;
-  color: #4a90e2;
-  cursor: pointer;
-  transition: color 0.3s ease;
-  z-index: 1;
-}
-
-.closeButton:hover {
-  color: #e7f3fb;
-}
-
-.modalTitle {
-  font-size: 20px;  
-  font-weight: 600;
-  color: #4a90e2;
-  text-align: center;
-  margin-bottom: 10px;  
-}
-
-.modalBody {
-  display: flex;
-  flex-direction: column;
-  gap: 15px; 
-}
-
-.imageContainer {
-  display: flex;
-  justify-content: center;
-}
-
-.productImage {
-  width: 140px; 
-  height: 140px;
-  border-radius: 12px;
-  object-fit: cover;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.productInfo {
-  text-align: center;
-}
-
-.productTitle {
-  font-size: 18px; 
-  font-weight: bold;
-  color: #333;
-  margin: 5px 0;  
-}
-
-.productDescription {
-  font-size: 13px; 
-  color: #666;
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-
-.productDuration {
-  font-size: 12px; 
-  color: #777;
-  margin-top: 5px;
-}
-
-.productPrice {
-  font-size: 16px;  
-  font-weight: bold;
-  color: #4a90e2;
-  margin-top: 10px;  
-}
-
-.noteContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;  
-}
-
-.noteLabel {
-  font-size: 13px;  
-  color: #5f6368;
-}
-
-.noteTextarea {
-  width: 100%;
-  height: 80px; 
-  padding: 10px; 
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  font-size: 13px; 
-  color: #333;
-  resize: none;
-  transition: border-color 0.3s ease;
-  box-sizing: border-box;
-}
-
-.noteTextarea:focus {
-  border-color: #4a90e2;
-}
-
-.addButton {
-  background-color: #4a90e2;
-  color: white;
-  padding: 10px 20px;  
-  font-size: 14px; 
-  font-weight: 600;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  margin-top: 15px;  
-  align-self: center;
-}
-
-.addButton:hover {
-  background-color: #3578b3;
-  transform: scale(1.05);
-}
+  
+  .closeButton {
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+  
+  .modalTitle {
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+  
+  .modalBody {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .imageContainer {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  
+  .productImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .productInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .productTitle {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  .productDescription {
+    font-size: 0.9em;
+    color: #666;
+  }
+  
+  .productDuration {
+    font-size: 0.9em;
+  }
+  
+  .productPrice {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #e63946;
+  }
+  
+  .noteContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .noteLabel {
+    font-size: 0.9em;
+    font-weight: bold;
+  }
+  
+  .noteTextarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+  }
+  
+  .addButton {
+    background-color: #000;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s;
+  }
+  
+  .addButton:hover {
+    background-color: #333;
+  }
+  
+  
