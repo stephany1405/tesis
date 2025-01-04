@@ -5,10 +5,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+<<<<<<< HEAD
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
+=======
+  padding: 20px;
+  background-color: white;
+  border-bottom: 1px solid #e0e0e0;
+>>>>>>> 9dfa6364e97d5b90445affaa0753b9d91fe89f5d
 }
 
 
@@ -27,6 +33,7 @@
 
 .nav {
   display: flex;
+<<<<<<< HEAD
   gap: 20px;
 }
 
@@ -75,4 +82,38 @@ button.navItem:hover {
     text-align: left;
     padding: 12px 20px;
   }
+=======
+  align-items: center;
+  gap: 24px;
+}
+
+.navItem {
+  text-decoration: none;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navItem:hover {
+  color: #666;
+}
+
+.cartContainer {
+  position: relative;
+}
+
+/* Añadir estos estilos para asegurar que el desplegable se muestre correctamente */
+.cartContainer:hover .dropdown {
+  display: block;
+}
+
+.cartContainer {
+  position: relative;
+}
+
+.cartContainer:hover .dropdown {
+  display: block;
+>>>>>>> 9dfa6364e97d5b90445affaa0753b9d91fe89f5d
 }

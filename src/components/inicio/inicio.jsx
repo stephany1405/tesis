@@ -62,7 +62,7 @@ const Inicio = () => {
   return (
     <>
       <div className="App">
-        <Header />
+      
       </div>
       <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
         <Carrusel images={photos} autoPlayInterval={6000} />
