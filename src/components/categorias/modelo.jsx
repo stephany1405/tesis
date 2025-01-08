@@ -43,8 +43,6 @@ const Modelo = ({ title, products }) => {
 
   return (
     <>
-      
-      
       <h1 className={styles.title}>{title}</h1>
       {groupedProducts ? (
         products.map((group, index) => (
@@ -69,4 +67,3 @@ const Modelo = ({ title, products }) => {
 };
 
 export default Modelo;
-

@@ -1,13 +1,13 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const useCorporalesServices = (categoryID) => {
     const [serviciosCorporales, setserviciosCorporales] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect( () => {
+    useEffect(() => {
         const fetchServiciosCorporales = async () => {
-            try{
+            try {
                 setLoading(true);
                 const response = await axios.get(`http://localhost:3000/api/servicios/categoria/${categoryID}`);
 
@@ -20,15 +20,16 @@ const useCorporalesServices = (categoryID) => {
                     time: item.time,
                 }));
                 setserviciosCorporales(transformedServices);
-            }catch(error){
+            } catch (error) {
                 console.error('Error fetching servicio corporales:', error);
-            }finally{
+            } finally {
                 setLoading(false);
             }
         };
         fetchServiciosCorporales();
     }, [categoryID]);
-    return {serviciosCorporales, loading};
+
+    return { serviciosCorporales, loading };
 }
 
-export default useCorporalesServices;
+export default useCorporalesServices;   

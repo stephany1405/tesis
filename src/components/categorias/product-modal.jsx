@@ -1,23 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import styles from './product.module.css';
+import React, { useState, useEffect } from "react";
+import styles from "./product.module.css";
+import { useCart } from "../inicio/useContext";
 
 const ProductModal = ({ isOpen, onClose, product }) => {
+  const { addToCart } = useCart();
   const [note, setNote] = useState("");
 
   useEffect(() => {
     const handleEsc = (event) => {
       if (event.keyCode === 27) onClose();
     };
-    window.addEventListener('keydown', handleEsc);
+    window.addEventListener("keydown", handleEsc);
 
     return () => {
-      window.removeEventListener('keydown', handleEsc);
+      window.removeEventListener("keydown", handleEsc);
     };
   }, [onClose]);
 
-  const handleAddToBag = () => {
-    // Add to cart logic here
-    console.log("Added to bag with note:", note);
+  const handleAddToCart = () => {
+    if (!product.id || !product.title || !product.price) {
+      console.error("Información del producto incompleta:", product);
+      return;
+    }
+    const productInfo = {
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      duration: product.time,
+      quantity: 1,
+      note: note,
+    };
+    addToCart(productInfo);
+    console.log(productInfo);
     onClose();
   };
 
@@ -25,17 +39,25 @@ const ProductModal = ({ isOpen, onClose, product }) => {
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
-        <button className={styles.closeButton} onClick={onClose}>&times;</button>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <button className={styles.closeButton} onClick={onClose}>
+          &times;
+        </button>
         <h2 className={styles.modalTitle}>{product.title}</h2>
         <div className={styles.modalBody}>
           <div className={styles.imageContainer}>
-            <img src={product.image} alt={product.title} className={styles.productImage} />
+            <img
+              src={product.image}
+              alt={product.title}
+              className={styles.productImage}
+            />
           </div>
           <div className={styles.productInfo}>
             <h3 className={styles.productTitle}>{product.title}</h3>
             <p className={styles.productDescription}>{product.description}</p>
-            <p className={styles.productDuration}>Duración: {product.duration}</p>
+            <p className={styles.productDuration}>
+              Duración: {product.duration}
+            </p>
             <div className={styles.productPrice}>${product.price}</div>
           </div>
           <div className={styles.noteContainer}>
@@ -50,7 +72,7 @@ const ProductModal = ({ isOpen, onClose, product }) => {
               className={styles.noteTextarea}
             />
           </div>
-          <button onClick={handleAddToBag} className={styles.addButton}>
+          <button onClick={handleAddToCart} className={styles.addButton}>
             Agregar a la bolsa
           </button>
         </div>
@@ -60,4 +82,3 @@ const ProductModal = ({ isOpen, onClose, product }) => {
 };
 
 export default ProductModal;
-

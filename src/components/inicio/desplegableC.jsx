@@ -1,77 +1,85 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './DesplegableC.module.css';
-import  { useState } from 'react';
+import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./desplegableC.module.css";
+import { useCart } from "./useContext";
 
 export function DesplegableC() {
+  const { cartItems, removeFromCart } = useCart();
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Tratamiento Facial Completo",
-      price: 45.99,
-      duration: "60 min",
-      quantity: 1
-    },
-    {
-      id: 2,
-      name: "Manicure y Pedicure",
-      price: 32.99,
-      duration: "45 min",
-      quantity: 1
-    },
-    {
-      id: 3,
-      name: "Masaje Relajante",
-      price: 55.99,
-      duration: "90 min",
-      quantity: 1
-    }
-  ]);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const hideTimeoutRef = useRef(null);
 
-  const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   const handleVerBolsa = () => {
-    navigate('/bolsa');
+    navigate("/bolsa");
   };
 
-  const removeFromCart = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+  const handleMouseEnter = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+    setIsDropdownVisible(true);
+  };
+
+  const handleMouseLeave = () => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsDropdownVisible(false);
+    }, 1000); // Retraso de 300ms antes de ocultar el recuadro
   };
 
   return (
-    <div className={styles.dropdown}>
-      {cartItems.length > 0 ? (
-        <>
-          <div className={styles.items}>
-            {cartItems.map((item) => (
-              <div key={item.id} className={styles.item}>
-                <div className={styles.itemDetails}>
-                  <span className={styles.name}>{item.name}</span>
-                  <div className={styles.quantityPrice}>
-                    <span>Cantidad: {item.quantity}</span>
-                    <span className={styles.price}>${(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                </div>
-                <button className={styles.removeButton} onClick={() => removeFromCart(item.id)}>
-                  ×
-                </button>
+    <div
+      className={styles.dropdownContainer}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        className={styles.dropdownButton}
+      >
+        Carrito ({cartItems.length})
+      </button>
+      {isDropdownVisible && (
+        <div
+          className={styles.dropdownContent}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          {cartItems.length > 0 ? (
+            <>
+              <ul className={styles.cartItems}>
+                {cartItems.map((item) => (
+                  <li key={item.id} className={styles.cartItem}>
+                    <span>{item.title}</span>
+                    <span>
+                      {item.quantity} x ${item.price}
+                    </span>
+                    <button onClick={() => removeFromCart(item.id)}>
+                      Eliminar
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div className={styles.cartTotal}>
+                <span>Total: ${total.toFixed(2)}</span>
               </div>
-            ))}
-          </div>
-          <div className={styles.total}>
-            <span>Total:</span>
-            <span>${total.toFixed(2)}</span>
-          </div>
-          <button className={styles.button} onClick={handleVerBolsa}>
-            VER BOLSA ({cartItems.length})
-          </button>
-        </>
-      ) : (
-        <div className={styles.emptyCart}>
-          <p>Tu bolsa está vacía</p>
+              <button
+                className={styles.viewCartButton}
+                onClick={handleVerBolsa}
+              >
+                Ver Bolsa
+              </button>
+            </>
+          ) : (
+            <p>El carrito está vacío</p>
+          )}
         </div>
       )}
     </div>
   );
 }
+
+export default DesplegableC;
