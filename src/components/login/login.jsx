@@ -1,13 +1,36 @@
-import React from 'react';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import styles from "../login/login.module.css";
 
-const Login= () => {
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/usuario/login",
+        { email, password },
+        { withCredentials: true }
+      );
+      console.log("Inicio de sesión exitoso:", response.data);
+      localStorage.setItem("token", response.data.token);
+      navigate("/inicio");
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      setError("Credenciales incorrectas. Por favor, inténtelo de nuevo.");
+    }
+  };
 
   return (
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit}>
         <h2 className={styles.title}>Iniciar Sesión</h2>
+        {error && <p className={styles.error}>{error}</p>}
         <div className={styles.inputGroup}>
           <label htmlFor="email" className={styles.label}>
             Correo Electrónico
@@ -43,4 +66,3 @@ const Login= () => {
 };
 
 export default Login;
-

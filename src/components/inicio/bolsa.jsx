@@ -1,16 +1,26 @@
-'use client'
-
-import React, { useState } from 'react';
-import styles from './bolsa.module.css';
-import Header from './header';
-import { useCart } from './useContext';
+import React, { useState, useEffect } from "react";
+import styles from "./bolsa.module.css";
+import Header from "./header";
+import { useCart } from "./useContext";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Bolsa = () => {
-  const { cartItems, updateQuantity, removeFromCart } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, resetCart } = useCart();
   const [selectedItems, setSelectedItems] = useState(cartItems.map(() => true));
+  const navigate = useNavigate();
 
-  const subtotal = cartItems.reduce((sum, item, index) => 
-    sum + (selectedItems[index] ? item.price * item.quantity : 0), 0
+  const subtotal = cartItems.reduce(
+    (sum, item, index) =>
+      sum + (selectedItems[index] ? item.price * item.quantity : 0),
+    0
   );
 
   const iva = subtotal * 0.16;
@@ -34,14 +44,108 @@ const Bolsa = () => {
     removeFromCart(cartItems[index].id);
   };
 
+  const [showForm, setShowForm] = useState(false);
+
+  const toggleForm = () => {
+    setShowForm(!showForm);
+  };
+
+  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+  const useCheckout = (total) => {
+    const stripe = useStripe();
+    const elements = useElements();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const processPayment = async () => {
+      if (!stripe || !elements) {
+        throw new Error("Stripe.js aún no se ha cargado.");
+      }
+
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        throw new Error("CardElement no encontrado.");
+      }
+
+      const { error: paymentError, paymentMethod } =
+        await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
+        });
+
+      if (paymentError) {
+        throw paymentError;
+      }
+
+      const { id } = paymentMethod;
+
+      const response = await axios.post(
+        "http://localhost:3000/api/orden/checkout",
+        {
+          id: id,
+          amount: Math.round(total * 100),
+          products: cartItems.filter((_, index) => selectedItems[index]),
+        }
+      );
+
+      return response.data;
+    };
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await processPayment();
+        console.log("Pago exitoso:", data);
+        elements.getElement(CardElement).clear();
+        resetCart();
+        navigate("/success");
+      } catch (err) {
+        console.error("Error durante la verificación:", err);
+        setError(err.message || "Algo salió mal.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return { handleSubmit, loading, error };
+  };
+
+  const CheckOutForm = ({ total }) => {
+    const { handleSubmit, loading, error } = useCheckout(total);
+
+    return (
+      <form onSubmit={handleSubmit} className={styles.paymentForm}>
+        <div className={styles.cardElementContainer}>
+          <CardElement options={{ hidePostalCode: true }} />
+        </div>
+        {error && <div className={styles.error}>{error}</div>}
+        <button
+          type="submit"
+          className={styles.paymentButton}
+          disabled={loading}
+        >
+          {loading ? <span className={styles.loader}></span> : "Pagar"}
+        </button>
+      </form>
+    );
+  };
+
   return (
     <>
       <div className={styles.bolsaContainer}>
+        <Header />
         <div className={styles.bolsaContent}>
           <div className={styles.bolsaItems}>
             <div className={styles.itemsHeader}>
               <h2>SERVICIOS SELECCIONADOS ({cartItems.length})</h2>
-              <button className={styles.selectAllButton} onClick={handleSelectAll}>
+              <button
+                className={styles.selectAllButton}
+                onClick={handleSelectAll}
+              >
                 Seleccionar Todo
               </button>
             </div>
@@ -56,16 +160,20 @@ const Bolsa = () => {
                 />
                 <div className={styles.itemDetails}>
                   <h3>{item.title}</h3>
-                  <div className={styles.itemVariant}>Duración: {item.duration}</div>
+                  <div className={styles.itemVariant}>
+                    Duración: {item.duration}
+                  </div>
                   <div className={styles.itemActions}>
                     <select
                       value={item.quantity}
-                      onChange={(e) => handleQuantityChange(index, e.target.value)}
+                      onChange={(e) =>
+                        handleQuantityChange(index, e.target.value)
+                      }
                       className={styles.quantitySelect}
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
                         <option key={num} value={num}>
-                          {num} {num === 1 ? 'sesión' : 'sesiones'}
+                          {num} {num === 1 ? "sesión" : "sesiones"}
                         </option>
                       ))}
                     </select>
@@ -86,7 +194,7 @@ const Bolsa = () => {
 
           <div className={styles.orderSummary}>
             <h2>Resumen De Servicios</h2>
-            
+
             <div className={styles.summaryDetails}>
               <div className={styles.summaryRow}>
                 <span>Subtotal:</span>
@@ -102,16 +210,25 @@ const Bolsa = () => {
               </div>
             </div>
 
-            <button className={styles.payButton}>
-              RESERVAR AHORA ({cartItems.filter((_, index) => selectedItems[index]).length})
+            <button onClick={toggleForm} className={styles.payButton}>
+              {showForm
+                ? "Ocultar Formulario de Pago"
+                : "Mostrar Formulario de Pago"}{" "}
+              ({cartItems.filter((_, index) => selectedItems[index]).length})
             </button>
-
-            <div className={styles.paymentMethods}>
-              <p>Métodos de pago aceptados:</p>
-              <div className={styles.paymentIcons}>
-                <div className={styles.paymentIcon}>Pago con Tarjeta</div>
+            {!showForm && (
+              <div className={styles.paymentMethods}>
+                <p>Métodos de pago aceptados:</p>
+                <div className={styles.paymentIcons}>
+                  <div className={styles.paymentIcon}>Pago con Tarjeta</div>
+                </div>
               </div>
-            </div>
+            )}
+            {showForm && (
+              <Elements stripe={stripePromise}>
+                <CheckOutForm total={total} />
+              </Elements>
+            )}
           </div>
         </div>
       </div>

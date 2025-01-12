@@ -1,6 +1,7 @@
-import { useForm } from "react-hook-form";
-import { IMaskInput } from "react-imask";
-import { forwardRef } from "react";
+import React, { useState, forwardRef } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { IMaskInput } from 'react-imask';
 import styles from "./registro.module.css";
 
 const TextMaskCustom2 = forwardRef(function TextMaskCustom2(props, ref) {
@@ -14,152 +15,139 @@ const TextMaskCustom2 = forwardRef(function TextMaskCustom2(props, ref) {
         onChange({ target: { name: props.name, value: mask._unmaskedValue } });
       }}
       overwrite
-      className={`${styles.formInput} ${styles.documentNumber}`}
-    />
-  );
-});
-
-const TextMaskCustom = forwardRef(function TextMaskCustom(props, ref) {
-  const { onChange, ...other } = props;
-  return (
-    <IMaskInput
-      {...other}
-      mask="(#@%*) 000-0000"
-      definitions={{
-        "#": /[0-0]/,
-        "@": /[2-4]/,
-        "%": /[1-9]/,
-        "*": /[1-9]/,
-      }}
-      inputRef={ref}
-      onAccept={(value, mask) => {
-        onChange({ target: { name: props.name, value: mask._unmaskedValue } });
-      }}
-      overwrite
-      className={styles.formInput}
+      className={styles.input}
     />
   );
 });
 
 const Registro = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const [formData, setFormData] = useState({
+    name: '',
+    lastname: '',
+    identification: '',
+    email: '',
+    telephone_number: '',
+    password: '',
+    date_of_birth: '',
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:3000/api/usuario/register', formData);
+      console.log('Registro exitoso:', response.data);
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000); // Redirige después de 2 segundos
+    } catch (error) {
+      console.error('Error al registrar:', error);
+      setError('Error al registrar. Por favor, inténtelo de nuevo.');
+    }
+  };
 
   return (
-    <div className={styles.formContainer}>
-      <form onSubmit={handleSubmit((data) => console.log(data))}>
-        <h2 className={styles.formTitle}>Regístrate aquí</h2>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="nombre" className={styles.formLabel}>Nombre</label>
+    <div className={styles.container}>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <h2 className={styles.title}>Registro</h2>
+        {error && <p className={styles.error}>{error}</p>}
+        {success && <p className={styles.success}>Registrado exitosamente. Redirigiendo...</p>}
+        <div className={styles.inputGroup}>
+          <label htmlFor="name" className={styles.label}>Nombre</label>
           <input
-            id="nombre"
             type="text"
-            className={styles.formInput}
-            {...register("nombre", {
-              required: "Requerido",
-              minLength: 3,
-              maxLength: 13,
-              pattern: { value: /^[A-Z]{2,40}$/i, message: "Invalido" },
-            })}
+            id="name"
+            name="name"
+            className={styles.input}
+            value={formData.name}
+            onChange={handleChange}
+            required
           />
-          {errors.nombre && (
-            <p className={styles.errorMessage}>
-              {errors.nombre.type === "required" && "El nombre es requerido"}
-              {errors.nombre.type === "minLength" && "El nombre debe tener mínimo 3 caracteres"}
-              {errors.nombre.type === "maxLength" && "El nombre debe tener máximo 13 caracteres"}
-              {errors.nombre.type === "pattern" && "El nombre debe contener solo letras"}
-            </p>
-          )}
         </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="apellido" className={styles.formLabel}>Apellido</label>
+        <div className={styles.inputGroup}>
+          <label htmlFor="lastname" className={styles.label}>Apellido</label>
           <input
-            id="apellido"
             type="text"
-            className={styles.formInput}
-            {...register("apellido", {
-              required: "Requerido",
-              minLength: 3,
-              maxLength: 13,
-              pattern: { value: /^[A-Z]{2,40}$/i, message: "Invalido" },
-            })}
+            id="lastname"
+            name="lastname"
+            className={styles.input}
+            value={formData.lastname}
+            onChange={handleChange}
+            required
           />
-          {errors.apellido && (
-            <p className={styles.errorMessage}>
-              {errors.apellido.type === "required" && "El apellido es requerido"}
-              {errors.apellido.type === "minLength" && "El apellido debe tener mínimo 3 caracteres"}
-              {errors.apellido.type === "maxLength" && "El apellido debe tener máximo 13 caracteres"}
-              {errors.apellido.type === "pattern" && "El apellido debe contener solo letras"}
-            </p>
-          )}
         </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="correo" className={styles.formLabel}>Correo</label>
+        <div className={styles.inputGroup}>
+          <label htmlFor="identification" className={styles.label}>Identificación</label>
+          <TextMaskCustom2
+            id="identification"
+            name="identification"
+            value={formData.identification}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className={styles.inputGroup}>
+          <label htmlFor="email" className={styles.label}>Correo Electrónico</label>
           <input
-            id="correo"
             type="email"
-            className={styles.formInput}
-            {...register("correo", {
-              required: true,
-              pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/i,
-                message: "Correo no es válido",
-              },
-            })}
+            id="email"
+            name="email"
+            className={styles.input}
+            value={formData.email}
+            onChange={handleChange}
+            required
           />
-          {errors.correo && (
-            <p className={styles.errorMessage}>
-              {errors.correo.type === "required" && "El correo es requerido"}
-              {errors.correo.type === "pattern" && "El correo no es válido"}
-            </p>
-          )}
         </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="telefono" className={styles.formLabel}>Teléfono</label>
-          <TextMaskCustom
-            {...register("telefono", {
-              required: "Requerido",
-            })}
+        <div className={styles.inputGroup}>
+          <label htmlFor="telephone_number" className={styles.label}>Número de Teléfono</label>
+          <input
+            type="tel"
+            id="telephone_number"
+            name="telephone_number"
+            className={styles.input}
+            value={formData.telephone_number}
+            onChange={handleChange}
+            required
           />
-          {errors.telefono && (
-            <p className={styles.errorMessage}>
-              {errors.telefono.type === "required" && "El teléfono es requerido"}
-            </p>
-          )}
         </div>
-
-        <div className={styles.formGroup}>
-          <label htmlFor="tipoDocumento" className={styles.formLabel}>Documento de Identidad</label>
-          <div className={styles.documentGroup}>
-            <select
-              id="tipoDocumento"
-              name="documento"
-              className={`${styles.formInput} ${styles.documentType}`}
-            >
-              <option value="venezolano">V</option>
-              <option value="extrangero">E</option>
-            </select>
-            <TextMaskCustom2
-              {...register("nroDocumento", {
-                required: "Requerido",
-              })}
-            />
-          </div>
-          {errors.nroDocumento && (
-            <p className={styles.errorMessage}>
-              {errors.nroDocumento.type === "required" && "El documento de identidad es requerido"}
-            </p>
-          )}
+        <div className={styles.inputGroup}>
+          <label htmlFor="password" className={styles.label}>Contraseña</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            className={styles.input}
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
         </div>
-
-        <button type="submit" className={styles.submitButton}>Enviar</button>
+        <div className={styles.inputGroup}>
+          <label htmlFor="date_of_birth" className={styles.label}>Fecha de Nacimiento</label>
+          <input
+            type="date"
+            id="date_of_birth"
+            name="date_of_birth"
+            className={styles.input}
+            value={formData.date_of_birth}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button type="submit" className={styles.button}>Registrarse</button>
       </form>
     </div>
   );
 };
 
 export default Registro;
-

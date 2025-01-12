@@ -101,13 +101,15 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Credenciales Incorrectas" });
     }
 
-    const token = await createAccessToken({
+    const token = await createAccessToken({ 
       email: userEmail,
       role_id: userRole,
       id: userId,
     });
 
-    res.cookie("token", token, { httpOnly: true, secure: true });
+    // res.cookie("token", token, { httpOnly: true, secure: true });
+    res.cookie("token", token);
+
     res.status(200).json({ message: "Inicio de sesión exitoso", token });
   } catch (error) {
     console.log(error);
