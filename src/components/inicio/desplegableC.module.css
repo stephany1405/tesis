@@ -16,7 +16,7 @@
 .dropdownContent {
   display: none;
   position: absolute;
-  righ: 30px; /* Desplaza el recuadro más a la derecha */
+  right: 30px; /* Desplaza el recuadro más a la derecha */
   top: 100%; /* Asegura que el recuadro aparezca debajo del botón */
   background-color: white;
   min-width: 200px;

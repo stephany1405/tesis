@@ -137,7 +137,7 @@ const Bolsa = () => {
   return (
     <>
       <div className={styles.bolsaContainer}>
-        <Header />
+        
         <div className={styles.bolsaContent}>
           <div className={styles.bolsaItems}>
             <div className={styles.itemsHeader}>
