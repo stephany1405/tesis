@@ -4,8 +4,8 @@
 }
 
 .dropdownButton {
-  background-color: #4CAF50;
-  color: white;
+  background-color:rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
   padding: 10px 20px;
   border: none;
   cursor: pointer;
@@ -16,8 +16,8 @@
 .dropdownContent {
   display: none;
   position: absolute;
-  right: 30px; /* Desplaza el recuadro más a la derecha */
-  top: 100%; /* Asegura que el recuadro aparezca debajo del botón */
+  left: 50px;
+  top: 100%; 
   background-color: white;
   min-width: 200px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
@@ -71,6 +71,7 @@ button {
   padding: 5px 10px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-size: 16px
 }
 
 button:hover {

@@ -13,9 +13,13 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Bolsa = () => {
-  const { cartItems, updateQuantity, removeFromCart, resetCart } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, resetCart, updateHomeService } = useCart();
   const [selectedItems, setSelectedItems] = useState(cartItems.map(() => true));
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setSelectedItems(cartItems.map(() => true));
+  }, [cartItems]);
 
   const subtotal = cartItems.reduce(
     (sum, item, index) =>
@@ -42,6 +46,13 @@ const Bolsa = () => {
 
   const handleRemoveItem = (index) => {
     removeFromCart(cartItems[index].id);
+  };
+
+  const handleGlobalHomeServiceChange = () => {
+    const allHomeService = cartItems.every(item => item.homeService);
+    cartItems.forEach(item => {
+      updateHomeService(item.id, !allHomeService);
+    });
   };
 
   const [showForm, setShowForm] = useState(false);
@@ -137,17 +148,28 @@ const Bolsa = () => {
   return (
     <>
       <div className={styles.bolsaContainer}>
-        
         <div className={styles.bolsaContent}>
           <div className={styles.bolsaItems}>
             <div className={styles.itemsHeader}>
               <h2>SERVICIOS SELECCIONADOS ({cartItems.length})</h2>
-              <button
-                className={styles.selectAllButton}
-                onClick={handleSelectAll}
-              >
-                Seleccionar Todo
-              </button>
+              <div className={styles.headerActions}>
+                <button
+                  className={styles.selectAllButton}
+                  onClick={handleSelectAll}
+                >
+                  Seleccionar Todo
+                </button>
+                <div className={styles.homeServiceOption}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={cartItems.every(item => item.homeService)}
+                      onChange={handleGlobalHomeServiceChange}
+                    />
+                    Servicio a domicilio 
+                  </label>
+                </div>
+              </div>
             </div>
 
             {cartItems.map((item, index) => (
@@ -162,6 +184,9 @@ const Bolsa = () => {
                   <h3>{item.title}</h3>
                   <div className={styles.itemVariant}>
                     Duración: {item.duration}
+                  </div>
+                  <div className={styles.itemDescription}>
+                    <strong>Descripción:</strong> {item.description}
                   </div>
                   <div className={styles.itemActions}>
                     <select
@@ -237,3 +262,4 @@ const Bolsa = () => {
 };
 
 export default Bolsa;
+

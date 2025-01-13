@@ -25,6 +25,24 @@ const Header = () => {
       console.error("Error al cerrar sesión:", error);
     }
   };
+  const [showServices, setShowServices] = useState(false);
+
+  const toggleServices = () => {
+    setShowServices(!showServices);
+  };
+
+  const toggleCart = () => {
+    setShowCart(!showCart);
+  };
+  const services = [
+    { name: 'Manicuras', path: '/servicios/manicuras/1' },
+    { name: 'Corporales', path: '/servicios/corporales/2' },
+    { name: 'Pedicura', path: '/servicios/pedicura/3' },
+    { name: 'Extensiones', path: '/servicios/extension/4' },
+    { name: 'Epilación', path: '/servicios/epilacion/5' },
+    { name: 'Facial', path: '/servicios/facial/6' },
+    { name: 'Quiropodia', path: '/servicios/quiropodia/7' },
+  ];
 
   return (
     <header className={styles.header}>
@@ -37,25 +55,36 @@ const Header = () => {
         <Link to="/inicio" className={location.pathname === "/" ? styles.active : ""}>
           Inicio
         </Link>
-        <Link
-          to="/servicios"
-          className={location.pathname === "/servicios" ? styles.active : ""}
-        >
-          Servicios
-        </Link>
-        <Link
+        <div className={styles.dropdownContainer}>
+          <span onClick={toggleServices} className={styles.dropdownButton}>
+            Servicios
+          </span>
+          {showServices && (
+            <div className={styles.dropdownContent}>
+              {services.map((service, index) => (
+                <Link key={index} to={service.path}>
+                  {service.name}
+                </Link>
+              ))}
+            </div>
+          )}
+          </div>
+        
+        <div className={styles.cartContainer}>
+        <DesplegableC />
+      </div> 
+      <Link
           to="/perfil"
           className={location.pathname === "/perfil" ? styles.active : ""}
         >
           Perfil
         </Link>
+
         <button onClick={handleLogout}>
           Cerrar Sesión
         </button>
       </nav>
-      <div className={styles.cartContainer}>
-        <DesplegableC />
-      </div>
+      
     </header>
   );
 };
