@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { CartProvider } from "./components/inicio/useContext";
 import Layout from "./components/layouts/layout.jsx";
 import Inicio from "./components/inicio/inicio.jsx";
@@ -20,6 +20,7 @@ const App = () => {
     <CartProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<Navigate to="/inicio" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
           <Route

@@ -21,11 +21,9 @@ export const CartProvider = ({ children }) => {
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
-        console.log("Updated Cart Items:", updatedCartItems);
         return updatedCartItems;
       } else {
         const newCartItems = [...prevCartItems, product];
-        console.log("New Cart Items:", newCartItems);
         return newCartItems;
       }
     });
@@ -36,7 +34,6 @@ export const CartProvider = ({ children }) => {
       const updatedCartItems = prevCartItems.filter(
         (item) => item.id !== productId
       );
-      console.log("Updated Cart Items after removal:", updatedCartItems);
       return updatedCartItems;
     });
   };
@@ -46,17 +43,12 @@ export const CartProvider = ({ children }) => {
       const updatedCartItems = prevCartItems.map((item) =>
         item.id === productId ? { ...item, quantity: newQuantity } : item
       );
-      console.log(
-        "Updated Cart Items after quantity change:",
-        updatedCartItems
-      );
       return updatedCartItems;
     });
   };
 
   const resetCart = () => {
     setCartItems([]);
-    console.log("Carrito Reseteado");
   };
 
   return (
