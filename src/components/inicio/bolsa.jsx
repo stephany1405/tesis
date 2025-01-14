@@ -241,14 +241,7 @@ const Bolsa = () => {
                 : "Mostrar Formulario de Pago"}{" "}
               ({cartItems.filter((_, index) => selectedItems[index]).length})
             </button>
-            {!showForm && (
-              <div className={styles.paymentMethods}>
-                <p>Métodos de pago aceptados:</p>
-                <div className={styles.paymentIcons}>
-                  <div className={styles.paymentIcon}>Pago con Tarjeta</div>
-                </div>
-              </div>
-            )}
+           
             {showForm && (
               <Elements stripe={stripePromise}>
                 <CheckOutForm total={total} />

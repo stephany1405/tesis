@@ -35,13 +35,15 @@ const Header = () => {
     setShowCart(!showCart);
   };
   const services = [
-    { name: 'Manicuras', path: '/servicios/manicuras/1' },
+    { name: 'Facial', path: '/servicios/facial/1' },
     { name: 'Corporales', path: '/servicios/corporales/2' },
-    { name: 'Pedicura', path: '/servicios/pedicura/3' },
-    { name: 'Extensiones', path: '/servicios/extension/4' },
-    { name: 'Epilación', path: '/servicios/epilacion/5' },
-    { name: 'Facial', path: '/servicios/facial/6' },
-    { name: 'Quiropodia', path: '/servicios/quiropodia/7' },
+    { name: 'Manicuras', path: '/servicios/manicuras/3' },
+    { name: 'Pedicura', path: '/servicios/pedicura/4' },
+    { name: 'Quiropodia', path: '/servicios/quiropodia/5' },
+    { name: 'Epilación', path: '/servicios/epilacion/6' },
+    { name: 'Extensiones', path: '/servicios/extension/7' },
+
+    
   ];
 
   return (
@@ -68,12 +70,10 @@ const Header = () => {
               ))}
             </div>
           )}
-          </div>
+        </div>
         
-        <div className={styles.cartContainer}>
         <DesplegableC />
-      </div> 
-      <Link
+        <Link
           to="/perfil"
           className={location.pathname === "/perfil" ? styles.active : ""}
         >
@@ -90,3 +90,4 @@ const Header = () => {
 };
 
 export default Header;
+
