@@ -285,12 +285,12 @@
 }
 .loader::after,
 .loader::before {
-  content: '';  
+  content: "";
   box-sizing: border-box;
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 2px solid #FFF;
+  border: 2px solid #fff;
   position: absolute;
   left: 0;
   top: 0;
@@ -347,7 +347,7 @@
 }
 
 .homeServiceButton {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   border: none;
   color: white;
   padding: 15px 32px;
@@ -390,7 +390,7 @@
 }
 
 .scheduleServiceButton {
-  background-color: #4A90E2;
+  background-color: #4a90e2;
   border: none;
   color: white;
   padding: 15px 32px;
@@ -405,7 +405,7 @@
 }
 
 .scheduleServiceButton:hover {
-  background-color: #357ABD;
+  background-color: #357abd;
 }
 
 .calendarPlaceholder {
@@ -427,3 +427,116 @@
   }
 }
 
+.stepIndicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.step {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.step.active {
+  background: #007bff;
+  color: white;
+}
+
+.stepContainer {
+  margin-bottom: 2rem;
+}
+
+.calendarContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.selectedAppointment {
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.appointmentHeader {
+  margin-bottom: 0.5rem;
+}
+
+.appointmentHeader h3 {
+  color: #4f46e5;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.appointmentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.appointmentDetails p {
+  margin: 0;
+  color: #374151;
+}
+.mapContainer {
+  height: 500px;
+  margin: 1rem 0;
+}
+
+.searchBox {
+  margin-bottom: 1rem;
+}
+
+.addressInput {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.navigationButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.prevButton,
+.nextButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.prevButton {
+  background: #6c757d;
+  color: white;
+}
+
+.nextButton {
+  background: #007bff;
+  color: white;
+}
+
+.nextButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.homeServiceToggle {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
