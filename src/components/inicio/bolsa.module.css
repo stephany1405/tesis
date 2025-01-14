@@ -22,6 +22,7 @@
   margin-bottom: 20px;
   padding-bottom: 10px;
   border-bottom: 2px solid #f0f0f0;
+  flex-wrap: wrap;
 }
 
 .itemsHeader h2 {
@@ -341,14 +342,88 @@
   gap: 20px;
 }
 
-.itemsHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.homeServiceSection {
   margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #f0f0f0;
-  flex-wrap: wrap;
 }
 
+.homeServiceButton {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.addressInputContainer {
+  margin-top: 10px;
+}
+
+.addressInput {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.mapPlaceholder {
+  width: 100%;
+  height: 200px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.scheduleServiceSection {
+  margin-bottom: 20px;
+}
+
+.scheduleServiceButton {
+  background-color: #4A90E2;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.scheduleServiceButton:hover {
+  background-color: #357ABD;
+}
+
+.calendarPlaceholder {
+  width: 100%;
+  height: 300px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .scheduleServiceButton,
+  .homeServiceButton {
+    width: 100%;
+  }
+}
 

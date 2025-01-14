@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./desplegableC.module.css";
+import styles from "./Header.module.css";
 import { useCart } from "./useContext";
 
 export function DesplegableC() {
@@ -38,7 +38,7 @@ export function DesplegableC() {
       onMouseLeave={handleMouseLeave}
     >
       <button
-        className={styles.dropdownButton}
+        className={`${styles.cartButton} ${styles.dropdownButton}`}
       >
         Carrito ({cartItems.length})
       </button>
@@ -83,3 +83,4 @@ export function DesplegableC() {
 }
 
 export default DesplegableC;
+
