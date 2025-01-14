@@ -16,6 +16,9 @@ const Bolsa = () => {
   const { cartItems, updateQuantity, removeFromCart, resetCart, updateHomeService } = useCart();
   const [selectedItems, setSelectedItems] = useState(cartItems.map(() => true));
   const navigate = useNavigate();
+  const [showHomeService, setShowHomeService] = useState(false);
+  const [address, setAddress] = useState('');
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     setSelectedItems(cartItems.map(() => true));
@@ -53,6 +56,14 @@ const Bolsa = () => {
     cartItems.forEach(item => {
       updateHomeService(item.id, !allHomeService);
     });
+  };
+
+  const handleHomeServiceToggle = () => {
+    setShowHomeService(!showHomeService);
+  };
+
+  const handleCalendarToggle = () => {
+    setShowCalendar(!showCalendar);
   };
 
   const [showForm, setShowForm] = useState(false);
@@ -218,6 +229,38 @@ const Bolsa = () => {
           </div>
 
           <div className={styles.orderSummary}>
+            <div className={styles.homeServiceSection}>
+              <button onClick={handleHomeServiceToggle} className={styles.homeServiceButton}>
+                {showHomeService ? 'Desactivar servicio a domicilio' : 'Activar servicio a domicilio'}
+              </button>
+              {showHomeService && (
+                <div className={styles.addressInputContainer}>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Introduce tu dirección"
+                    className={styles.addressInput}
+                  />
+                  <div className={styles.mapPlaceholder}>
+                    {/* Aquí irá el mapa */}
+                    <p>Mapa se mostrará aquí</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className={styles.scheduleServiceSection}>
+              
+                <p> Agenda tu servicio</p> 
+              {showCalendar && (
+                <div className={styles.calendarPlaceholder}>
+                  {/* Aquí irá el calendario */}
+                  <p>Calendario se mostrará aquí</p>
+                </div>
+              )}
+            </div>
+
             <h2>Resumen De Servicios</h2>
 
             <div className={styles.summaryDetails}>

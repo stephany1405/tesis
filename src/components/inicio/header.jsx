@@ -57,6 +57,9 @@ const Header = () => {
         <Link to="/inicio" className={location.pathname === "/" ? styles.active : ""}>
           Inicio
         </Link>
+        <Link to="/agenda" className={location.pathname === "/" ? styles.active : ""}>
+          Agenda
+        </Link>
         <div className={styles.dropdownContainer}>
           <span onClick={toggleServices} className={styles.dropdownButton}>
             Servicios
