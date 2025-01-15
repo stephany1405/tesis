@@ -4,7 +4,7 @@ import styles from "./bolsa.module.css";
 export const AddressForm = ({ onLocationSelect }) => {
   const [formData, setFormData] = useState({
     estado: "Distrito Capital",
-    municipio: "Caracas",
+    municipio: "Libertador",
     parroquia: "",
     tipoVia: "",
     nombreVia: "",

@@ -453,41 +453,60 @@
 }
 
 .calendarContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  background: white;
+  padding: 20px;
+  background: #fff;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fc {
+  font-family: "Arial", sans-serif;
+}
+
+.fc .fc-toolbar-title {
+  color: #ff69b4;
+  font-size: 1.5em !important;
+}
+
+.fc .fc-button-primary {
+  background-color: #ff69b4 !important;
+  border-color: #ff69b4 !important;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #ff1493 !important;
+  border-color: #ff1493 !important;
+}
+
+.fc .fc-timegrid-slot {
+  height: 45px !important;
+}
+
+.fc .fc-event {
+  border-radius: 4px;
+  font-size: 0.9em;
 }
 
 .selectedAppointment {
-  background: #f3f4f6;
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #fff0f5;
+  border: 1px solid #ff69b4;
+  border-radius: 8px;
 }
 
 .appointmentHeader {
-  margin-bottom: 0.5rem;
-}
-
-.appointmentHeader h3 {
-  color: #4f46e5;
-  font-size: 1.25rem;
-  font-weight: 600;
+  color: #ff69b4;
+  margin-bottom: 10px;
 }
 
 .appointmentDetails {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  font-size: 0.9em;
+  color: #666;
 }
 
 .appointmentDetails p {
-  margin: 0;
-  color: #374151;
+  margin: 5px 0;
 }
 .mapContainer {
   height: 500px;
@@ -625,7 +644,7 @@
 .textareabag {
   width: 100%;
   height: 100px;
-  resize: none;     
+  resize: none;
   padding: 8px 12px;
   border: 1px solid #ff4fa7;
   border-radius: 4px;

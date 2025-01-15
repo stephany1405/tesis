@@ -6,19 +6,73 @@ import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
 import styles from "./bolsa.module.css";
 
-export const AppointmentCalendar = ({ onDateSelect }) => {
+export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedInfo, setSelectedInfo] = useState(null);
+  const BUSINESS_HOURS = {
+    start: 9,
+    end: 20,
+  };
 
-  const handleDateSelect = (selectInfo) => {
+  const formatDuration = (duration) => {
+    const hours = Math.floor(duration);
+    const minutes = Math.round((duration - hours) * 60);
+
+    let formattedDuration = "";
+
+    if (hours > 0) {
+      formattedDuration += `${hours} hora${hours > 1 ? "s" : ""}`;
+    }
+
+    if (minutes > 0) {
+      if (formattedDuration) {
+        formattedDuration += " ";
+      }
+      formattedDuration += `${minutes} minuto${minutes > 1 ? "s" : ""}`;
+    }
+
+    if (!formattedDuration) {
+      formattedDuration = "0 minutos";
+    }
+
+    return formattedDuration;
+  };
+
+  const handleDateClick = (clickInfo) => { 
     const now = new Date();
-    if (selectInfo.start < now) {
+    if (clickInfo.date < now) {
       alert("No puedes seleccionar fechas pasadas");
       return;
     }
 
-    const startDate = new Date(selectInfo.start);
-    const endDate = new Date(selectInfo.end);
+    const startDate = new Date(clickInfo.date);
+    const durationInMs = totalDuration * 60 * 60 * 1000;
+    const endDate = new Date(startDate.getTime() + durationInMs);
+
+    const maxEndTime = new Date(startDate);
+    maxEndTime.setHours(BUSINESS_HOURS.end, 0, 0);
+
+    if (endDate > maxEndTime) {
+      const horasDisponibles = BUSINESS_HOURS.end - startDate.getHours();
+      alert(`No es posible agendar esta cita aquí.
+            La duración total es de ${formatDuration(totalDuration)},
+            pero solo quedan ${horasDisponibles} horas disponibles en este día.
+            Por favor selecciona un horario más temprano.`);
+      return;
+    }
+
+    const eventInfo = {
+      id: new Date().getTime(),
+      title: `Cita Reservada (${formatDuration(totalDuration)})`,
+      start: startDate,
+      end: endDate,
+      backgroundColor: "#FF69B4",
+      borderColor: "#FF69B4",
+      display: "block",
+    };
+
+    setSelectedEvent(eventInfo);
+
     const formattedStart = startDate.toLocaleString("es-ES", {
       weekday: "long",
       year: "numeric",
@@ -32,28 +86,23 @@ export const AppointmentCalendar = ({ onDateSelect }) => {
       minute: "2-digit",
     });
 
-    const eventInfo = {
-      id: new Date().getTime(),
-      title: "Cita Reservada",
-      start: selectInfo.start,
-      end: selectInfo.end,
-      backgroundColor: "#4F46E5",
-      borderColor: "#4F46E5",
-      display: "block",
-    };
-
-    setSelectedEvent(eventInfo);
     setSelectedInfo({
       formattedStart,
       formattedEnd,
     });
 
     onDateSelect({
-      start: selectInfo.start,
-      end: selectInfo.end,
+      start: startDate,
+      end: endDate,
       formattedStart,
       formattedEnd,
     });
+  };
+
+  const handleUnselect = () => {
+    setSelectedEvent(null);
+    setSelectedInfo(null);
+    onDateSelect(null);
   };
 
   return (
@@ -64,20 +113,19 @@ export const AppointmentCalendar = ({ onDateSelect }) => {
             <h3>Cita Seleccionada</h3>
           </div>
           <div className={styles.appointmentDetails}>
-            <p>Fecha y hora: {selectedInfo.formattedStart}</p>
-            <p>Hasta: {selectedInfo.formattedEnd}</p>
+            <p>Inicio: {selectedInfo.formattedStart}</p>
+            <p>Fin: {selectedInfo.formattedEnd}</p>
+            <p>Duración total: {formatDuration(totalDuration)}</p>
           </div>
         </div>
       )}
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
-        selectable={true}
-        selectMirror={true}
         dayMaxEvents={true}
         weekends={true}
         locale={esLocale}
-        select={handleDateSelect}
+        dateClick={handleDateClick} // ¡USAR dateClick!
         headerToolbar={{
           left: "prev,next today",
           center: "title",
@@ -91,17 +139,16 @@ export const AppointmentCalendar = ({ onDateSelect }) => {
         slotMinTime="09:00:00"
         slotMaxTime="20:00:00"
         allDaySlot={false}
-        slotDuration="01:00:00"
+        slotDuration="00:30:00"
         selectConstraint={{
           startTime: "09:00",
           endTime: "20:00",
         }}
         events={selectedEvent ? [selectedEvent] : []}
-        unselect={() => {
-          setSelectedEvent(null);
-          setSelectedInfo(null);
-        }}
+        unselect={handleUnselect}
       />
     </div>
   );
 };
+
+export default AppointmentCalendar;

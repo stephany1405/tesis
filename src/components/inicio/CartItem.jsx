@@ -9,6 +9,7 @@ export const CartItem = ({
   onQuantityChange,
   onRemove,
 }) => {
+
   return (
     <div className={styles.item}>
       <input
@@ -21,7 +22,7 @@ export const CartItem = ({
         <h3>{item.title}</h3>
         <div className={styles.itemVariant}>Duración: {item.duration}</div>
         <div className={styles.itemDescription}>
-          <strong>Descripción:</strong> {item.description}
+          <strong>Nota:</strong> {item.note}
         </div>
         <div className={styles.itemActions}>
           <select
