@@ -1,7 +1,12 @@
-export function getJWT(CookieName) {
+export function getJWT(cookieName) {
   const cookies = document.cookie.split("; ");
 
-  const cookie = cookies.find((cookie) => cookie.startsWith(`${CookieName}=`));
+  for (const cookie of cookies) {
+    const [name, value] = cookie.split("=");
+    if (name.trim() === cookieName) {
+      return value;
+    }
+  }
 
-  return cookie ? cookie.split("=")[1] : null;
+  return null;
 }

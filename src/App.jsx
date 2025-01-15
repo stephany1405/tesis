@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import { CartProvider } from "./components/inicio/useContext";
 import Layout from "./components/layouts/layout.jsx";
 import Inicio from "./components/inicio/inicio.jsx";
@@ -14,6 +19,7 @@ import Quiropodia from "./components/categorias/Page/Quiropodia.jsx";
 import Login from "./components/login/login.jsx";
 import Registro from "./components/registro/registro.jsx";
 import ProtectedRoute from "./components/middlewares/protectedRoute.jsx";
+import CheckOutSuccess from "./components/inicio/CheckSuccess.jsx";
 
 const App = () => {
   return (
@@ -30,6 +36,14 @@ const App = () => {
                 <Layout>
                   <Inicio />
                 </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkout/success"
+            element={
+              <ProtectedRoute>
+                <CheckOutSuccess />
               </ProtectedRoute>
             }
           />
