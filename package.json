@@ -21,6 +21,7 @@
     "@stripe/stripe-js": "^5.5.0",
     "axios": "^1.7.9",
     "esbuild": "^0.24.2",
+    "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",

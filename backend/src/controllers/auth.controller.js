@@ -2,7 +2,7 @@ import { pool } from "../db.js";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../libs/jwt.lib.js";
 import { getRoleId, getUser } from "../models/user.model.js";
-
+import Cookies from 'js-cookie';
 export const register = async (req, res) => {
   const client = await pool.connect();
   try {
@@ -65,7 +65,10 @@ export const register = async (req, res) => {
       email: createdUser[0].email,
       role_id: createdUser[0].role_id,
     });
-    res.cookie("token", token, { httpOnly: true, secure: true });
+    res.cookie("token", token,{
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000
+    });
 
     // eslint-disable-next-line no-unused-vars
     const { password: _, ...userWithoutPassword } = createdUser[0];
@@ -108,7 +111,10 @@ export const login = async (req, res) => {
     });
 
     // res.cookie("token", token, { httpOnly: true, secure: true });
-    res.cookie("token", token);
+    res.cookie("token", token,{
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/'
+    });
 
     res.status(200).json({ message: "Inicio de sesión exitoso", token });
   } catch (error) {
@@ -118,6 +124,8 @@ export const login = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  res.clearCookie("token");
-  res.json({ message: 'Sesión cerrada correctamente' });
+  res.cookie("token", "", {
+    expires: new Date(0),
+  });
+  return res.sendStatus(200);
 };

@@ -3,9 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DesplegableC } from "./desplegableC";
 import axios from "axios";
 import styles from "./Header.module.css";
+import Cookies from 'js-cookie'; // Importar js-cookie
 
 const Header = () => {
   const [showCart, setShowCart] = useState(false);
+  const [showServices, setShowServices] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -16,6 +18,10 @@ const Header = () => {
       );
 
       if (response.status === 200) {
+        localStorage.clear();
+        Cookies.remove('token', { path: '/' });
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        
         console.log("Sesión cerrada correctamente.");
         navigate("/login");
       } else {
@@ -25,7 +31,6 @@ const Header = () => {
       console.error("Error al cerrar sesión:", error);
     }
   };
-  const [showServices, setShowServices] = useState(false);
 
   const toggleServices = () => {
     setShowServices(!showServices);
@@ -34,6 +39,7 @@ const Header = () => {
   const toggleCart = () => {
     setShowCart(!showCart);
   };
+
   const services = [
     { name: 'Facial', path: '/servicios/facial/1' },
     { name: 'Corporales', path: '/servicios/corporales/2' },
@@ -42,8 +48,6 @@ const Header = () => {
     { name: 'Quiropodia', path: '/servicios/quiropodia/5' },
     { name: 'Epilación', path: '/servicios/epilacion/6' },
     { name: 'Extensiones', path: '/servicios/extension/7' },
-
-    
   ];
 
   return (
@@ -83,14 +87,12 @@ const Header = () => {
           Perfil
         </Link>
 
-        <button onClick={handleLogout}>
+        <button onClick={handleLogout} className={styles.logoutButton}>
           Cerrar Sesión
         </button>
       </nav>
-      
     </header>
   );
 };
 
 export default Header;
-
