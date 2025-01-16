@@ -4,15 +4,18 @@
   padding: 20px;
   font-family: "Helvetica Neue", Arial, sans-serif;
   background-color: #fff;
+  word-wrap: break-word;
 }
 
 .bolsaContent {
   display: flex;
   gap: 30px;
+  flex-wrap: wrap;
 }
 
 .bolsaItems {
   flex: 2;
+  overflow: hidden;
 }
 
 .itemsHeader {
@@ -47,6 +50,7 @@
   margin-bottom: 15px;
   border-radius: 8px;
   transition: box-shadow 0.3s ease;
+  word-wrap: break-word;
 }
 
 .item:hover {
@@ -62,12 +66,14 @@
 
 .itemDetails {
   flex: 1;
+  word-wrap: break-word;
 }
 
 .itemDetails h3 {
   color: #333;
   margin: 0 0 8px 0;
   font-size: 1.1rem;
+  word-wrap: break-word;
 }
 
 .itemVariant {
@@ -314,6 +320,7 @@
   font-size: 0.9rem;
   color: #666;
   margin: 5px 0 10px;
+  word-wrap: break-word;
 }
 
 .itemDescription strong {
@@ -459,34 +466,46 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.fc {
-  font-family: "Arial", sans-serif;
-}
-
-.fc .fc-toolbar-title {
-  color: #ff69b4;
-  font-size: 1.5em !important;
-}
-
-.fc .fc-button-primary {
-  background-color: #ff69b4 !important;
-  border-color: #ff69b4 !important;
-}
-
-.fc .fc-button-primary:hover {
-  background-color: #ff1493 !important;
-  border-color: #ff1493 !important;
-}
-
+/* Añade o actualiza estas clases en tu archivo CSS */
 .fc .fc-timegrid-slot {
-  height: 45px !important;
+  height: 40px !important; /* Altura fija para todos los slots */
+  min-height: 40px !important;
+  border-bottom: 1px solid #ddd !important;
+}
+
+.fc .fc-timegrid-slot-lane {
+  height: 100% !important;
+}
+
+.fc .fc-timegrid-slots tr {
+  height: 40px !important;
+}
+
+.fc .fc-timegrid-col {
+  min-height: 40px !important;
+}
+
+.fc .fc-timegrid-event {
+  min-height: 40px !important;
+  margin: 1px 0 !important;
 }
 
 .fc .fc-event {
-  border-radius: 4px;
-  font-size: 0.9em;
+  min-height: 40px !important;
+  margin: 1px 2px !important;
+  padding: 2px 4px !important;
 }
 
+.fc td,
+.fc th {
+  padding: 0 !important;
+  vertical-align: top !important;
+}
+
+.fc-timegrid-slots table {
+  border-spacing: 0 !important;
+  border-collapse: collapse !important;
+}
 .selectedAppointment {
   margin-bottom: 20px;
   padding: 15px;
@@ -565,7 +584,22 @@
   margin: 0 auto;
   padding: 20px;
 }
-
+.addressFormContainerr {
+  width: 100%; 
+  padding: 10px; 
+  margin: 10px 0; 
+  background-color: #f9f9f9; 
+  border-radius: 5px; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  word-wrap: break-word; 
+  white-space: pre-wrap;
+}
+@media (max-width: 768px) {
+  .addressContainerr {
+    font-size: 14px; 
+    padding: 8px;
+  }
+}
 .addressForm {
   display: flex;
   flex-direction: column;
@@ -649,4 +683,116 @@
   border: 1px solid #ff4fa7;
   border-radius: 4px;
   font-size: 16px;
+}
+.orderSummaryContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.orderSummary {
+  flex: 2; /* Más espacio para el resumen */
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.addressBox {
+  background-color: #f8f9fa; 
+  padding: 20px; 
+  border-radius: 8px; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  margin-top: 20px; 
+  border: 1px solid #ced4da; 
+  overflow-wrap: break-word; 
+}
+
+.addressBox h3 {
+  color: #333; 
+  margin-bottom: 15px; 
+  font-size: 1.2rem; 
+  font-weight: 600; 
+}
+
+.addressBox pre {
+  white-space: pre-wrap; 
+  color: #555; 
+  font-size: 1rem; 
+  line-height: 1.5; 
+  margin: 0; 
+}
+
+@media (max-width: 768px) {
+  .addressBox {
+    padding: 15px; 
+    margin-top: 15px; 
+  }
+
+  .addressBox h3 {
+    font-size: 1.1rem; 
+    margin-bottom: 10px;
+  }
+
+  .addressBox pre {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 768px) {
+  .orderSummaryContainer {
+    flex-direction: column; 
+  }
+
+  .orderSummary,
+  .addressBox {
+    max-width: 100%; 
+  }
+}
+.cartSummaryItem {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cartSummaryItem .itemTitle {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.cartSummaryItem .itemDuration,
+.cartSummaryItem .itemPrice,
+.cartSummaryItem .itemNote {
+  font-size: 1rem;
+  color: #666;
+}
+
+.cartSummaryItem .itemDuration {
+  font-style: italic;
+}
+
+.cartSummaryItem .itemPrice {
+  font-weight: bold;
+  color: #27ae60;
+}
+
+.cartSummaryItem .itemNote {
+  color: #e74c3c;
+}
+
+.cartSummaryItem .itemNote::before {
+  content: "📌 ";
+  margin-right: 5px;
+}
+
+.cartSummaryItem:last-child {
+  margin-bottom: 0;
 }

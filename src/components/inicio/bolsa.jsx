@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import clsx from "clsx";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "./useContext";
 import styles from "./bolsa.module.css";
+import { pyDolarVenezuela } from "consulta-dolar-venezuela";
 
 import { CheckOutForm } from "./CheckoutForm.jsx";
 import { AddressForm } from "./AddressForm.jsx";
@@ -24,7 +26,12 @@ const Bolsa = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [checkoutStep, setCheckoutStep] = useState(1);
+  const [isAddressFormValid, setIsAddressFormValid] = useState(false);
+  const [loadingMobile, setLoadingMobile] = useState(false);
+  const [dolarPrice, setDolarPrice] = useState(null);
+
   const navigate = useNavigate();
+  const pyDolar = new pyDolarVenezuela("bcv");
 
   useEffect(() => {
     if (redirect) {
@@ -43,7 +50,26 @@ const Bolsa = () => {
   useEffect(() => {
     setSelectedItems(cartItems.map(() => true));
   }, [cartItems]);
-
+  useEffect(() => {
+    if (loadingMobile) {
+      setTimeout(() => {
+        setLoadingMobile(false);
+        setRedirect(true);
+      }, 2000);
+    }
+  }, [loadingMobile]);
+  useEffect(() => {
+    pyDolar
+      .getMonitor("USD")
+      .then((response) => {
+        console.log(response);
+        setDolarPrice(response.price);
+      })
+      .catch((error) => {
+        console.error("Error al obtener el valor del dólar", error);
+      });
+  }, []);
+  const conversion = dolarPrice;
   const parseDuration = (durationString) => {
     if (!durationString) return 0;
 
@@ -57,20 +83,19 @@ const Bolsa = () => {
 
       if (parts[i + 1] === "hora" || parts[i + 1] === "horas") {
         hours = value;
-        i++; // Saltar la palabra "hora"
+        i++;
       } else if (parts[i + 1] === "minuto" || parts[i + 1] === "minutos") {
         minutes = value;
-        i++; // Saltar la palabra "minutos"
+        i++;
       }
     }
 
-    return hours + minutes / 60; // Duración total en horas
+    return hours + minutes / 60;
   };
-  
+
   const calculateTotalDuration = () => {
     return cartItems.reduce((total, item, index) => {
       if (selectedItems[index] && item.duration) {
-        // Comprobar si item.duration existe
         const duration = parseDuration(item.duration);
         return total + duration * item.quantity;
       }
@@ -86,6 +111,13 @@ const Bolsa = () => {
   const iva = subtotal * 0.16;
   const total = subtotal + iva;
 
+  const handleMobilePayment = () => {
+    setLoadingMobile(true);
+  };
+
+  const handleFormValidityChange = (isValid) => {
+    setIsAddressFormValid(isValid);
+  };
   const toggleForm = () => {
     setShowForm(!showForm);
   };
@@ -138,6 +170,9 @@ const Bolsa = () => {
       setCheckoutStep(checkoutStep - 1);
     }
   };
+  const formattedAddress = selectedLocation?.address
+    ? selectedLocation.address.replace(/, /g, ",\n")
+    : "No se ha especificado la dirección";
 
   const renderStep = () => {
     switch (checkoutStep) {
@@ -197,7 +232,10 @@ const Bolsa = () => {
           <div className={styles.stepContainer}>
             <h2>Ubicación del Servicio</h2>
             {isHomeService ? (
-              <AddressForm onLocationSelect={handleLocationSelect} />
+              <AddressForm
+                onLocationSelect={handleLocationSelect}
+                onFormValidityChange={handleFormValidityChange}
+              />
             ) : (
               <div className={styles.noLocationRequired}>
                 <p>No se requiere ubicación para este servicio.</p>
@@ -211,61 +249,115 @@ const Bolsa = () => {
 
       case 4:
         return (
-          <div className={styles.orderSummary}>
-            <h2>Resumen De Servicios</h2>
-            <div className={styles.summaryDetails}>
-              <div className={styles.summaryRow}>
-                <span>Subtotal:</span>
-                <span>${subtotal.toFixed(2)}</span>
+          <div className={styles.orderSummaryContainer}>
+            <div className={styles.orderSummary}>
+              <h2>Resumen De Servicios</h2>
+              {cartItems.map((item, index) => (
+                <div
+                  key={index}
+                  className={clsx(
+                    styles.cartItemSummary,
+                    styles.cartSummaryItem
+                  )}
+                >
+                  <div className={styles.itemTitle}>
+                    {item.title} - {item.quantity} sesión(es)
+                  </div>
+                  <div className={styles.itemDuration}>
+                    Duración: {item.duration}
+                  </div>
+                  <div className={styles.itemPrice}>
+                    Precio: ${item.price * item.quantity}
+                  </div>
+                  <div className={styles.itemNote}>
+                    Nota: {item.note ? item.note : "Sin nota"}
+                  </div>
+                </div>
+              ))}
+
+              <div className={styles.summaryDetails}>
+                <div className={styles.summaryRow}>
+                  <span>Subtotal:</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className={styles.summaryRow}>
+                  <span>IVA:</span>
+                  <span>${iva.toFixed(2)}</span>
+                </div>
+                <div className={`${styles.summaryRow} ${styles.total}`}>
+                  <span>Total USD:</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+                <div className={`${styles.summaryRow} ${styles.total}`}>
+                  <span>Total Bs.S :</span>
+                  <span>
+                    {dolarPrice
+                      ? (total * conversion).toFixed(2)
+                      : "Cargando..."}
+                  </span>
+                </div>
               </div>
-              <div className={styles.summaryRow}>
-                <span>IVA:</span>
-                <span>${iva.toFixed(2)}</span>
-              </div>
-              <div className={`${styles.summaryRow} ${styles.total}`}>
-                <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
+              <label>
+                Método de pago:
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className={styles.paymentMethodSelect}
+                >
+                  <option value="Tarjeta">Tarjeta</option>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="PagoMovil">Pago Móvil</option>
+                </select>
+              </label>
+              {paymentMethod === "Tarjeta" ? (
+                <button onClick={toggleForm} className={styles.payButton}>
+                  {showForm
+                    ? "Ocultar Formulario de Pago"
+                    : "Mostrar Formulario de Pago"}
+                </button>
+              ) : paymentMethod === "Efectivo" ? (
+                <button
+                  className={styles.payButton}
+                  onClick={handleCashPayment}
+                  disabled={loadingCash}
+                >
+                  {loadingCash ? (
+                    <span className={styles.loader}></span>
+                  ) : (
+                    "Siguiente"
+                  )}
+                </button>
+              ) : (
+                paymentMethod === "PagoMovil" && (
+                  <button
+                    className={styles.payButton}
+                    onClick={handleMobilePayment}
+                    disabled={loadingMobile}
+                  >
+                    {loadingMobile ? (
+                      <span className={styles.loader}></span>
+                    ) : (
+                      "Siguiente"
+                    )}
+                  </button>
+                )
+              )}
+              {showForm && paymentMethod === "Tarjeta" && (
+                <Elements stripe={stripePromise}>
+                  <CheckOutForm
+                    total={total}
+                    cartItems={cartItems}
+                    selectedItems={selectedItems}
+                    resetCart={resetCart}
+                  />
+                </Elements>
+              )}
             </div>
-            <label>
-              Método de pago:
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className={styles.paymentMethodSelect}
-              >
-                <option value="Tarjeta">Tarjeta</option>
-                <option value="Efectivo">Efectivo</option>
-              </select>
-            </label>
-            {paymentMethod === "Tarjeta" ? (
-              <button onClick={toggleForm} className={styles.payButton}>
-                {showForm
-                  ? "Ocultar Formulario de Pago"
-                  : "Mostrar Formulario de Pago"}
-              </button>
-            ) : (
-              <button
-                className={styles.payButton}
-                onClick={handleCashPayment}
-                disabled={loadingCash}
-              >
-                {loadingCash ? (
-                  <span className={styles.loader}></span>
-                ) : (
-                  "Siguiente"
-                )}
-              </button>
-            )}
-            {showForm && paymentMethod === "Tarjeta" && (
-              <Elements stripe={stripePromise}>
-                <CheckOutForm
-                  total={total}
-                  cartItems={cartItems}
-                  selectedItems={selectedItems}
-                  resetCart={resetCart}
-                />
-              </Elements>
+            {isHomeService && selectedLocation?.address && (
+              <div className={styles.addressBox}>
+                <h3>Dirección de entrega</h3>
+                <pre>{formattedAddress}</pre>{" "}
+              </div>
             )}
           </div>
         );
@@ -320,7 +412,9 @@ const Bolsa = () => {
               cartItems.length === 0 ||
               !hasSelectedItems() ||
               (checkoutStep === 2 && !selectedDate) ||
-              (checkoutStep === 3 && isHomeService && !selectedLocation)
+              (checkoutStep === 3 &&
+                isHomeService &&
+                (!selectedLocation || !isAddressFormValid))
             }
           >
             Siguiente

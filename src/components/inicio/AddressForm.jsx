@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo,useEffect } from "react";
 import styles from "./bolsa.module.css";
 
-export const AddressForm = ({ onLocationSelect }) => {
+export const AddressForm = ({ onLocationSelect, onFormValidityChange }) => {
   const [formData, setFormData] = useState({
     estado: "Distrito Capital",
     municipio: "Libertador",
@@ -15,7 +15,6 @@ export const AddressForm = ({ onLocationSelect }) => {
     nombreZona: "",
     referencia: "",
   });
-
   const parroquias = [
     "Santa Rosalía",
     "El Valle",
@@ -49,21 +48,30 @@ export const AddressForm = ({ onLocationSelect }) => {
     }));
   };
 
+  const isFormValid = () => {
+    return Object.values(formData).every((value) => value.trim() !== "");
+  };
+
+  const isFormFilled = useMemo(() => {
+    return Object.values(formData).some((val) => val.trim() !== "");
+  }, [formData]);
+
+  useEffect(() => {
+    onFormValidityChange(isFormValid());
+  }, [formData, onFormValidityChange]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!isFormValid()) return;
     const direccionCompleta =
       `${formData.estado}, ${formData.municipio}, ${formData.parroquia}, 
       ${formData.tipoVia} ${formData.nombreVia}, 
       ${formData.tipoInmueble} ${formData.nombreInmueble} #${formData.numeroHabitacion}, 
-      ${formData.tipoZona} ${formData.nombreZona} ${formData.referencia}`
+      ${formData.tipoZona} ${formData.nombreZona}, Referencia ${formData.referencia}`
         .replace(/\s+/g, " ")
         .trim();
 
     onLocationSelect({ address: direccionCompleta });
-  };
-
-  const isFormValid = () => {
-    return Object.values(formData).every((value) => value.trim() !== "");
   };
 
   return (
@@ -233,7 +241,7 @@ export const AddressForm = ({ onLocationSelect }) => {
         <button
           type="submit"
           className={styles.submitButton}
-          disabled={!isFormValid()}
+          disabled={!isFormValid() || !isFormFilled}
         >
           Confirmar Dirección
         </button>

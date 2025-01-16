@@ -125,7 +125,7 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
         dayMaxEvents={true}
         weekends={true}
         locale={esLocale}
-        dateClick={handleDateClick} // ¡USAR dateClick!
+        dateClick={handleDateClick}
         headerToolbar={{
           left: "prev,next today",
           center: "title",
@@ -140,6 +140,10 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
         slotMaxTime="20:00:00"
         allDaySlot={false}
         slotDuration="00:30:00"
+        slotEventOverlap = {false} //agg
+        eventMinHeight={20} //agg
+        contentHeight="auto"//agg
+        expandRows={true}
         selectConstraint={{
           startTime: "09:00",
           endTime: "20:00",
