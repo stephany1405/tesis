@@ -1,0 +1,37 @@
+.infoContainer {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .infoTitle {
+    color: #ff69b4;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+  }
+  
+  .infoGroup {
+    margin-bottom: 1.5rem;
+  }
+  
+  .infoLabel {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.25rem;
+  }
+  
+  .infoValue {
+    color: #555;
+  }
+  
+  .infoDescription {
+    font-style: italic;
+    color: #666;
+    margin-top: 0.5rem;
+  }
+  
+  
