@@ -1,17 +1,17 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "./useContext";
 import styles from "./bolsa.module.css";
-import { pyDolarVenezuela } from "consulta-dolar-venezuela";
 
 import { CheckOutForm } from "./CheckoutForm.jsx";
 import { AddressForm } from "./AddressForm.jsx";
 import { AppointmentCalendar } from "./AppointmentCalendar.jsx";
 import { CartItem } from "./CartItem.jsx";
-
+import { formatDuration } from "./hooks/utils.js";
+import { useSelectedAppointment } from "./hooks/useSelectedAppointment.js";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const Bolsa = () => {
@@ -30,8 +30,8 @@ const Bolsa = () => {
   const [loadingMobile, setLoadingMobile] = useState(false);
   const [dolarPrice, setDolarPrice] = useState(null);
 
+  const selectedAppointmentData = useSelectedAppointment(selectedDate);
   const navigate = useNavigate();
-  const pyDolar = new pyDolarVenezuela("bcv");
 
   useEffect(() => {
     if (redirect) {
@@ -59,15 +59,19 @@ const Bolsa = () => {
     }
   }, [loadingMobile]);
   useEffect(() => {
-    pyDolar
-      .getMonitor("USD")
-      .then((response) => {
-        console.log(response);
-        setDolarPrice(response.price);
-      })
-      .catch((error) => {
-        console.error("Error al obtener el valor del dólar", error);
-      });
+    const fetchDolar = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/dolar");
+        if (!response.ok) {
+          throw new Error(`Error en consulta API DOLAR:  ${response.status}`);
+        }
+        const data = await response.json();
+        setDolarPrice(data.price);
+      } catch (error) {
+        console.error("Error consultando API DOLAR", error);
+      }
+    };
+    fetchDolar();
   }, []);
   const conversion = dolarPrice;
   const parseDuration = (durationString) => {
@@ -274,6 +278,18 @@ const Bolsa = () => {
                   </div>
                 </div>
               ))}
+              {selectedDate && (
+                <div className={styles.selectedAppointment}>
+                  <h3>Cita Seleccionada</h3>
+                  <div className={styles.appointmentDetails}>
+                    <p>Inicio: {selectedDate.formattedStart}</p>
+                    <p>Fin: {selectedDate.formattedEnd}</p>
+                    <p>
+                      Duración total: {formatDuration(calculateTotalDuration())}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div className={styles.summaryDetails}>
                 <div className={styles.summaryRow}>
@@ -349,6 +365,8 @@ const Bolsa = () => {
                     cartItems={cartItems}
                     selectedItems={selectedItems}
                     resetCart={resetCart}
+                    selectedAppointment={selectedAppointmentData}
+                    deliveryAddress={selectedLocation?.address || null}
                   />
                 </Elements>
               )}

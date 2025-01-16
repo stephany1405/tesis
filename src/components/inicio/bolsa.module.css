@@ -585,18 +585,18 @@
   padding: 20px;
 }
 .addressFormContainerr {
-  width: 100%; 
-  padding: 10px; 
-  margin: 10px 0; 
-  background-color: #f9f9f9; 
-  border-radius: 5px; 
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-  word-wrap: break-word; 
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word;
   white-space: pre-wrap;
 }
 @media (max-width: 768px) {
   .addressContainerr {
-    font-size: 14px; 
+    font-size: 14px;
     padding: 8px;
   }
 }
@@ -700,38 +700,38 @@
 }
 
 .addressBox {
-  background-color: #f8f9fa; 
-  padding: 20px; 
-  border-radius: 8px; 
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
-  margin-top: 20px; 
-  border: 1px solid #ced4da; 
-  overflow-wrap: break-word; 
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  border: 1px solid #ced4da;
+  overflow-wrap: break-word;
 }
 
 .addressBox h3 {
-  color: #333; 
-  margin-bottom: 15px; 
-  font-size: 1.2rem; 
-  font-weight: 600; 
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .addressBox pre {
-  white-space: pre-wrap; 
-  color: #555; 
-  font-size: 1rem; 
-  line-height: 1.5; 
-  margin: 0; 
+  white-space: pre-wrap;
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
 }
 
 @media (max-width: 768px) {
   .addressBox {
-    padding: 15px; 
-    margin-top: 15px; 
+    padding: 15px;
+    margin-top: 15px;
   }
 
   .addressBox h3 {
-    font-size: 1.1rem; 
+    font-size: 1.1rem;
     margin-bottom: 10px;
   }
 
@@ -743,12 +743,12 @@
 
 @media (max-width: 768px) {
   .orderSummaryContainer {
-    flex-direction: column; 
+    flex-direction: column;
   }
 
   .orderSummary,
   .addressBox {
-    max-width: 100%; 
+    max-width: 100%;
   }
 }
 .cartSummaryItem {
@@ -795,4 +795,40 @@
 
 .cartSummaryItem:last-child {
   margin-bottom: 0;
+}
+
+.appointmentDetails {
+  background-color: #f9f9f9; 
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.appointmentDetails p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+.appointmentDetails p:nth-child(1) {
+  font-weight: bold;
+  color: #333;
+}
+
+.appointmentDetails p:nth-child(2) {
+  font-style: italic;
+}
+
+.appointmentDetails p:nth-child(3) {
+  color: #27ae60; 
+  font-weight: bold;
+}
+
+.appointmentDetails p:nth-child(3)::before {
+  content: "⏱️ "; /* Clock icon */
+  margin-right: 5px;
 }

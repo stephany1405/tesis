@@ -5,6 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
 import styles from "./bolsa.module.css";
+import { formatDuration } from "./hooks/utils.js";
 
 export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -14,29 +15,6 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
     end: 20,
   };
 
-  const formatDuration = (duration) => {
-    const hours = Math.floor(duration);
-    const minutes = Math.round((duration - hours) * 60);
-
-    let formattedDuration = "";
-
-    if (hours > 0) {
-      formattedDuration += `${hours} hora${hours > 1 ? "s" : ""}`;
-    }
-
-    if (minutes > 0) {
-      if (formattedDuration) {
-        formattedDuration += " ";
-      }
-      formattedDuration += `${minutes} minuto${minutes > 1 ? "s" : ""}`;
-    }
-
-    if (!formattedDuration) {
-      formattedDuration = "0 minutos";
-    }
-
-    return formattedDuration;
-  };
 
   const handleDateClick = (clickInfo) => { 
     const now = new Date();
@@ -140,9 +118,9 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
         slotMaxTime="20:00:00"
         allDaySlot={false}
         slotDuration="00:30:00"
-        slotEventOverlap = {false} //agg
-        eventMinHeight={20} //agg
-        contentHeight="auto"//agg
+        slotEventOverlap = {false}
+        eventMinHeight={20}
+        contentHeight="auto"
         expandRows={true}
         selectConstraint={{
           startTime: "09:00",

@@ -8,12 +8,16 @@ export const CheckOutForm = ({
   cartItems,
   selectedItems,
   resetCart,
+  selectedAppointment,
+  deliveryAddress
 }) => {
   const { handleSubmit, loading, error } = useCheckout(
     total,
     cartItems,
     selectedItems,
-    resetCart
+    resetCart,
+    selectedAppointment,
+    deliveryAddress 
   );
 
   return (
