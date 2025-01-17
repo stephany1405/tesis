@@ -77,8 +77,11 @@ function ServiceStatus() {
                 onClick={() => setRating(star)}
               />
             ))}
+            
           </div>
+          <button className={styles.button}> Enviar </button>
         </div>
+        
       )}
     </div>
   );

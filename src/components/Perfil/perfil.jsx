@@ -114,15 +114,6 @@ const Profile = () => {
         </div>
       )}
 
-      <div className={styles.section}>
-        <h2>Historial de Servicios</h2>
-        <ul className={styles.serviceList}>
-          <li>Manicura - 22/06/2024</li>
-          <li>Extensiones - 22/06/2024</li>
-          <li>Masaje - 10/07/2024</li>
-        </ul>
-      </div>
-
       <button onClick={handleEdit} className={styles.editButton}>
         {isEditing ? 'Guardar Cambios' : 'Modificar Información'}
       </button>

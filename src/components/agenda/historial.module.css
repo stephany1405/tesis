@@ -1,0 +1,32 @@
+.historyList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .historyItem {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .historyItem:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-color: #ff69b4;
+  }
+  
+  .serviceName {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.25rem;
+  }
+  
+  .serviceDate {
+    color: #666;
+    font-size: 0.875rem;
+  }
+  
+  
