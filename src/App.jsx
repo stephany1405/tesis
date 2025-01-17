@@ -20,6 +20,8 @@ import Login from "./components/login/login.jsx";
 import Registro from "./components/registro/registro.jsx";
 import ProtectedRoute from "./components/middlewares/protectedRoute.jsx";
 import CheckOutSuccess from "./components/inicio/CheckSuccess.jsx";
+import Agenda from "./components/agenda/agenda.jsx"
+import Perfil from "./components/Perfil/perfil.jsx"
 
 const App = () => {
   return (
@@ -124,6 +126,26 @@ const App = () => {
               <ProtectedRoute>
                 <Layout>
                   <Bolsa />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agenda"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Agenda />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Perfil/>
                 </Layout>
               </ProtectedRoute>
             }
