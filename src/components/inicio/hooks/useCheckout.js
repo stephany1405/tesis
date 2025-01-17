@@ -110,15 +110,16 @@ export const useCheckout = (
       }
 
       const response = await axios.post(
-        "http://localhost:3000/api/orden/checkout",
+        "http://localhost:3000/api/orden/checkout/card",
         {
           id: paymentMethod.id,
           userId: decodedUserId,
           amount: Math.round(total * 100),
+          PrecioTotal: total,
           products: cartItems.filter((_, index) => selectedItems[index]),
           noteOfServices: note,
           cita: appointmentData,
-          dirección: deliveryAddress || null,
+          dirección: deliveryAddress || 'Presencial en el Salón de Belleza',
         }
       );
 

@@ -9,6 +9,40 @@ export const CartItem = ({
   onQuantityChange,
   onRemove,
 }) => {
+  const calculateTotalDuration = (duration, quantity) => {
+    const durationParts = duration.split(" ");
+    let hours = 0;
+    let minutes = 0;
+
+    for (let i = 0; i < durationParts.length; i++) {
+      const value = parseInt(durationParts[i]);
+      if (isNaN(value)) continue;
+
+      if (durationParts[i + 1]?.includes("hora")) {
+        hours = value;
+        i++;
+      } else if (durationParts[i + 1]?.includes("minuto")) {
+        minutes = value;
+        i++;
+      }
+    }
+
+    const totalMinutes = (hours * 60 + minutes) * quantity;
+    const totalHours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+
+    let result = "";
+    if (totalHours > 0) {
+      result += `${totalHours} ${totalHours === 1 ? "hora" : "horas"}`;
+    }
+    if (remainingMinutes > 0) {
+      if (result) result += " ";
+      result += `${remainingMinutes} ${
+        remainingMinutes === 1 ? "minuto" : "minutos"
+      }`;
+    }
+    return result || "0 minutos";
+  };
 
   return (
     <div className={styles.item}>
@@ -20,7 +54,11 @@ export const CartItem = ({
       />
       <div className={styles.itemDetails}>
         <h3>{item.title}</h3>
-        <div className={styles.itemVariant}>Duración: {item.duration}</div>
+        <div className={styles.itemVariant}>
+          Duración por sesión: {item.duration}
+          <br />
+          Duración total: {calculateTotalDuration(item.duration, item.quantity)}
+        </div>
         <div className={styles.itemDescription}>
           <strong>Nota:</strong> {item.note}
         </div>

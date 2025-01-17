@@ -5,7 +5,10 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "./useContext";
 import styles from "./bolsa.module.css";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
+import { getJWT } from "../middlewares/getToken.jsx";
 import { CheckOutForm } from "./CheckoutForm.jsx";
 import { AddressForm } from "./AddressForm.jsx";
 import { AppointmentCalendar } from "./AppointmentCalendar.jsx";
@@ -29,7 +32,8 @@ const Bolsa = () => {
   const [isAddressFormValid, setIsAddressFormValid] = useState(false);
   const [loadingMobile, setLoadingMobile] = useState(false);
   const [dolarPrice, setDolarPrice] = useState(null);
-
+  const [decodedUserId, setDecodedUserId] = useState(null);
+  
   const selectedAppointmentData = useSelectedAppointment(selectedDate);
   const navigate = useNavigate();
 
@@ -73,6 +77,25 @@ const Bolsa = () => {
     };
     fetchDolar();
   }, []);
+
+  useEffect(() => {
+    const handleToken = async () => {
+      const token = getJWT("token");
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+
+      try {
+        const { id: decodedUserId } = jwtDecode(token);
+        setDecodedUserId(decodedUserId);
+      } catch (error) {
+        console.log("Error decoding token:", error);
+      }
+    };
+    handleToken();
+  }, []);
+
   const conversion = dolarPrice;
   const parseDuration = (durationString) => {
     if (!durationString) return 0;
@@ -115,8 +138,54 @@ const Bolsa = () => {
   const iva = subtotal * 0.16;
   const total = subtotal + iva;
 
-  const handleMobilePayment = () => {
-    setLoadingMobile(true);
+  const handleMobilePayment = async () => {
+    const confirmPayment = window.confirm(
+      `Para continuar, realice el pago móvil con los siguientes datos:\n\nBanco: Banco Ejemplo\nNúmero: 0123-4567890\nCédula/RIF: V-12345678\nMonto: ${(
+        total * conversion
+      ).toFixed(2)} Bs.S\n\n¿Desea confirmar que el pago ha sido realizado?`
+    );
+
+    if (confirmPayment) {
+      try {
+        setLoadingMobile(true);
+
+        const note = cartItems
+          .filter((_, index) => selectedItems[index])
+          .map((item) => item.note || "Sin nota");
+
+        let appointmentData = null;
+        if (selectedDate) {
+          appointmentData = {
+            start: selectedDate.formattedStart,
+            end: selectedDate.formattedEnd,
+            duration: formatDuration(calculateTotalDuration()),
+          };
+        }
+
+        const response = await axios.post(
+          "http://localhost:3000/api/orden/checkout/mobilePayment",
+          {
+            userId: decodedUserId,
+            PrecioTotal: total,
+            products: cartItems.filter((_, index) => selectedItems[index]),
+            noteOfServices: note,
+            cita: appointmentData,
+            dirección:
+              selectedLocation?.address || "Presencial en el Salón de Belleza",
+          }
+        );
+
+        if (response.data.success) {
+          resetCart();
+          setRedirect(true);
+        }
+      } catch (error) {
+        console.error("Error procesando pago móvil:", error);
+        alert("Hubo un error al procesar el pago móvil");
+      } finally {
+        setLoadingMobile(false);
+      }
+    }
   };
 
   const handleFormValidityChange = (isValid) => {
@@ -151,8 +220,52 @@ const Bolsa = () => {
     removeFromCart(cartItems[index].id);
   };
 
-  const handleCashPayment = () => {
-    setLoadingCash(true);
+  const handleCashPayment = async () => {
+    const confirmCash = window.confirm(
+      "¿Está seguro de que desea pagar en efectivo al momento del servicio?"
+    );
+
+    if (confirmCash) {
+      try {
+        setLoadingCash(true);
+
+        const note = cartItems
+          .filter((_, index) => selectedItems[index])
+          .map((item) => item.note || "Sin nota");
+
+        let appointmentData = null;
+        if (selectedDate) {
+          appointmentData = {
+            start: selectedDate.formattedStart,
+            end: selectedDate.formattedEnd,
+            duration: formatDuration(calculateTotalDuration()),
+          };
+        }
+
+        const response = await axios.post(
+          "http://localhost:3000/api/orden/checkout/cash",
+          {
+            userId: decodedUserId,
+            PrecioTotal: total,
+            products: cartItems.filter((_, index) => selectedItems[index]),
+            noteOfServices: note,
+            cita: appointmentData,
+            dirección:
+              selectedLocation?.address || "Presencial en el Salón de Belleza",
+          }
+        );
+
+        if (response.data.success) {
+          resetCart();
+          setRedirect(true);
+        }
+      } catch (error) {
+        console.error("Error procesando pago en efectivo:", error);
+        alert("Hubo un error al procesar el pago en efectivo");
+      } finally {
+        setLoadingCash(false);
+      }
+    }
   };
 
   const handleDateSelect = (dateInfo) => {
@@ -216,6 +329,28 @@ const Bolsa = () => {
                   onRemove={handleRemoveItem}
                 />
               ))}
+              <div className={styles.summaryDetails}>
+                <div className={styles.summaryRow}>
+                  <span>Subtotal:</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className={styles.summaryRow}>
+                  <span>IVA:</span>
+                  <span>${iva.toFixed(2)}</span>
+                </div>
+                <div className={`${styles.summaryRow} ${styles.total}`}>
+                  <span>Total USD:</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+                <div className={`${styles.summaryRow} ${styles.total}`}>
+                  <span>Total Bs.S :</span>
+                  <span>
+                    {dolarPrice
+                      ? (total * conversion).toFixed(2)
+                      : "Cargando..."}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         );
