@@ -54,7 +54,7 @@ const Header = () => {
     <header className={styles.header}>
       <div className={styles.logoContainer}>
         <Link to="/inicio" className={styles.logo}>
-          uñimas
+          uñimass
         </Link>
       </div>
       <nav className={styles.nav}>

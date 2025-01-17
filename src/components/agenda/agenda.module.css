@@ -1,0 +1,64 @@
+.container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mainTitle {
+  color: #ff69b4;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.75rem;
+}
+
+.twoColumnLayout {
+  display: flex;
+  gap: 2rem;
+}
+
+.column {
+  flex: 1;
+  min-width: 0;
+}
+
+.columnTitle {
+  color: #ff69b4;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.infoContainer {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.infoGroup {
+  margin-bottom: 1.5rem;
+}
+
+.infoLabel {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.infoValue {
+  color: #555;
+}
+
+.infoDescription {
+  font-style: italic;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .twoColumnLayout {
+    flex-direction: column;
+  }
+}
+
