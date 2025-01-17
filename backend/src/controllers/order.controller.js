@@ -5,7 +5,7 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const orderPaymentController = async (req, res) => {
-  const { id, amount, products, noteOfServices, userId, cita,dirección } = req.body;
+  const { id, amount, products, noteOfServices, userId, cita,dirección,PrecioTotal } = req.body;
   try {
     const payment = await stripe.paymentIntents.create({
       amount: parseInt(amount, 10),
@@ -33,7 +33,8 @@ export const orderPaymentController = async (req, res) => {
         products: productsWithNotes,
         userId: userId,
         cita: cita,
-        direccion: dirección
+        direccion: dirección,
+        PrecioTotal: PrecioTotal + " $"
       });
     } else {
       throw new Error("El pago no pudo ser procesado.");

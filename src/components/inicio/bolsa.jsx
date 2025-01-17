@@ -216,6 +216,28 @@ const Bolsa = () => {
                   onRemove={handleRemoveItem}
                 />
               ))}
+              <div className={styles.summaryDetails}>
+                <div className={styles.summaryRow}>
+                  <span>Subtotal:</span>
+                  <span>${subtotal.toFixed(2)}</span>
+                </div>
+                <div className={styles.summaryRow}>
+                  <span>IVA:</span>
+                  <span>${iva.toFixed(2)}</span>
+                </div>
+                <div className={`${styles.summaryRow} ${styles.total}`}>
+                  <span>Total USD:</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+                <div className={`${styles.summaryRow} ${styles.total}`}>
+                  <span>Total Bs.S :</span>
+                  <span>
+                    {dolarPrice
+                      ? (total * conversion).toFixed(2)
+                      : "Cargando..."}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         );

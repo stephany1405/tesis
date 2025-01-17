@@ -15,8 +15,7 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
     end: 20,
   };
 
-
-  const handleDateClick = (clickInfo) => { 
+  const handleDateClick = (clickInfo) => {
     const now = new Date();
     if (clickInfo.date < now) {
       alert("No puedes seleccionar fechas pasadas");
@@ -58,10 +57,12 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: true,
     });
     const formattedEnd = endDate.toLocaleTimeString("es-ES", {
       hour: "2-digit",
       minute: "2-digit",
+      hour12: true,
     });
 
     setSelectedInfo({
@@ -114,11 +115,23 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
           week: "Semana",
           day: "Día",
         }}
+        slotLabelFormat={{
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+          meridiem: "short",
+        }}
+        eventTimeFormat={{
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+          meridiem: "short",
+        }}
         slotMinTime="09:00:00"
         slotMaxTime="20:00:00"
         allDaySlot={false}
         slotDuration="00:30:00"
-        slotEventOverlap = {false}
+        slotEventOverlap={false}
         eventMinHeight={20}
         contentHeight="auto"
         expandRows={true}
