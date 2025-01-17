@@ -27,12 +27,10 @@ export const CartItem = ({
       }
     }
 
-    // Multiplicar la duración por la cantidad de sesiones
     const totalMinutes = (hours * 60 + minutes) * quantity;
     const totalHours = Math.floor(totalMinutes / 60);
     const remainingMinutes = totalMinutes % 60;
 
-    // Formatear el resultado
     let result = "";
     if (totalHours > 0) {
       result += `${totalHours} ${totalHours === 1 ? "hora" : "horas"}`;

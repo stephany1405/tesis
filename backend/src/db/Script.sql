@@ -65,43 +65,28 @@ CREATE INDEX IF NOT EXISTS Idx_Specialist_Details_User_Id ON public."specialist_
 CREATE INDEX IF NOT EXISTS Idx_Specialist_Details_Verification_Status ON public."specialist_details"(verification_status);
 
 
-DROP TABLE IF EXISTS public."bank_accounts";
-CREATE TABLE IF NOT EXISTS public."bank_accounts"(
-    Id              BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY,
-    user_id         BIGINT          NOT NULL,
-    bank_name       VARCHAR(255)    NOT NULL,
-    account_number  VARCHAR(50)     NOT NULL,
-    account_type    VARCHAR(45)     NOT NULL,
-    created_at      TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT Pk_Bank_Accounts_Id  PRIMARY KEY(Id),
-    CONSTRAINT uq_account_number    UNIQUE(account_number),
-    CONSTRAINT fk_user_id           FOREIGN KEY (user_id)  REFERENCES public."user"(Id)
-);
-
-CREATE INDEX IF NOT EXISTS Idx_Bank_Accounts_User_Id ON public."bank_accounts"(user_id);
-
-
 DROP TABLE IF EXISTS public."appointment";
 CREATE TABLE IF NOT EXISTS public."appointment"(
     Id                              BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY,
     user_id                         BIGINT          NOT NULL,
-    specialist_id                   BIGINT          NOT NULL,
-    service_id                      BIGINT          NOT NULL,
+    specialist_id                   BIGINT              NULL,
+    services                        TEXT            NOT NULL,
     status_id                       BIGINT          NOT NULL,
-    scheduled_date                  TIMESTAMP           NULL,
-    note                            TEXT                NULL,
+    scheduled_date                  TEXT                NULL,
     start_appointment               TIMESTAMP           NULL,
     end_appointment                 TIMESTAMP           NULL,
-    note_of_services                TEXT                NULL,   
+    status_order                    BOOLEAN         NOT NULL,
+    paid                            BOOLEAN         NOT NULL,
+    address                         TEXT            NOT NULL,
+    payment_method                  BINGINT         NOT NULL,
+    amount                          TEXT            NOT NULL, 
 
     CONSTRAINT Pk_Appointment_Id    PRIMARY KEY(Id),
-    CONSTRAINT chk_appointment_future_date CHECK(scheduled_date > CURRENT_TIMESTAMP),
 
-    CONSTRAINT fk_user_id       FOREIGN KEY (user_id)           REFERENCES public."user"(Id),
-    CONSTRAINT fk_specialist_id FOREIGN KEY (specialist_id)     REFERENCES public."user"(Id),
-    CONSTRAINT fk_service_id    FOREIGN KEY (service_id)        REFERENCES public."classification"(Id),
-    CONSTRAINT fk_status_id     FOREIGN KEY (status_id)         REFERENCES public."classification"(Id)
+    CONSTRAINT fk_user_id               FOREIGN KEY (user_id)           REFERENCES public."user"(Id),
+    CONSTRAINT fk_specialist_id         FOREIGN KEY (specialist_id)     REFERENCES public."user"(Id),
+    CONSTRAINT fk_status_id             FOREIGN KEY (status_id)         REFERENCES public."classification"(Id)
+    CONSTRAINT fk_payment_method_id     FOREIGN KEY (payment_method)    REFERENCES public."classification"(Id)
 );
 
 CREATE INDEX IF NOT EXISTS Idx_appointment_user_id ON public."appointment"(user_id);
