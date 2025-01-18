@@ -37,6 +37,7 @@ const App = () => {
           {/* termina ruta publica */}
 
           {/* ruta Usuario */}
+
           <Route
             path="/inicio"
             element={
