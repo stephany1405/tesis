@@ -19,7 +19,15 @@ const Login = () => {
       );
       console.log("Inicio de sesión exitoso:", response.data);
       localStorage.setItem("token", response.data.token);
-      navigate("/inicio");
+      const role = response.data.role;
+
+      if (role === "57") {
+        navigate("/inicio");
+      } else if (role === "58") {
+        navigate("/especialista");
+      } else if (role === "56") {
+        navigate("/administrador");
+      }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       setError("Credenciales incorrectas. Por favor, inténtelo de nuevo.");

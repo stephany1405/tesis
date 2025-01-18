@@ -5,6 +5,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
+//rutas para cliente
 import { CartProvider } from "./components/inicio/useContext";
 import Layout from "./components/layouts/layout.jsx";
 import Inicio from "./components/inicio/inicio.jsx";
@@ -22,7 +23,9 @@ import Agenda from "./components/agenda/agenda.jsx";
 import Perfil from "./components/Perfil/perfil.jsx";
 import { useRoles } from "./components/inicio/hooks/useRoles.js";
 import { PublicRoutes } from "./components/routes/PublicRoutes.jsx";
+//rutas para especialista
 
+import Bienvenida from "./components/especialista/dashboard.jsx";
 const App = () => {
   const roles = useRoles();
   return (
@@ -154,8 +157,9 @@ const App = () => {
             }
           />
           {/* termina ruta usuario */}
-
-          
+          {/* inicia ruta especialista  */}
+          <Route path="/especialista" element={<Bienvenida />} />
+          {/* termina ruta especialista */}
         </Routes>
       </Router>
     </CartProvider>
