@@ -2,6 +2,7 @@ import { pool } from "../db.js";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../libs/jwt.lib.js";
 import { getRoleId, getUser } from "../models/user.model.js";
+
 export const register = async (req, res) => {
   const client = await pool.connect();
   try {
