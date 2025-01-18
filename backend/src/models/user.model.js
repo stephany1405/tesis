@@ -19,6 +19,44 @@ const getRoleId = async () => {
     client.release();
   }
 };
+const getRoleIdSpecialist = async () => {
+  const client = await pool.connect();
+
+  try {
+    const query = {
+      text: `SELECT id FROM public."classification" WHERE classification_type = $1`,
+      values: ["especialista"],
+    };
+
+    const { rows } = await client.query(query);
+
+    return rows.length > 0 ? rows[0] : null;
+  } catch (err) {
+    console.error("Error al obtener el role_id:", err);
+    throw err;
+  } finally {
+    client.release();
+  }
+};
+const getRoleIdAdministrator = async () => {
+  const client = await pool.connect();
+
+  try {
+    const query = {
+      text: `SELECT id FROM public."classification" WHERE classification_type = $1`,
+      values: ["administrador"],
+    };
+
+    const { rows } = await client.query(query);
+
+    return rows.length > 0 ? rows[0] : null;
+  } catch (err) {
+    console.error("Error al obtener el role_id:", err);
+    throw err;
+  } finally {
+    client.release();
+  }
+};
 
 const getUser = async (email) => {
   const client = await pool.connect();
@@ -37,4 +75,4 @@ const getUser = async (email) => {
   }
 };
 
-export { getRoleId, getUser };
+export { getRoleId, getUser, getRoleIdAdministrator, getRoleIdSpecialist };

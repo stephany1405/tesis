@@ -2,7 +2,6 @@ import { pool } from "../db.js";
 import bcrypt from "bcryptjs";
 import { createAccessToken } from "../libs/jwt.lib.js";
 import { getRoleId, getUser } from "../models/user.model.js";
-import Cookies from 'js-cookie';
 export const register = async (req, res) => {
   const client = await pool.connect();
   try {
@@ -110,13 +109,12 @@ export const login = async (req, res) => {
       id: userId,
     });
 
-    // res.cookie("token", token, { httpOnly: true, secure: true });
     res.cookie("token", token,{
       maxAge: 24 * 60 * 60 * 1000,
       path: '/'
     });
 
-    res.status(200).json({ message: "Inicio de sesión exitoso", token });
+    res.status(200).json({ message: "Inicio de sesión exitoso", token, role: userRole });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Error interno del servidor." });

@@ -16,25 +16,28 @@ import Extension from "./components/categorias/Page/Extension.jsx";
 import Epilacion from "./components/categorias/Page/Epilacion.jsx";
 import Facial from "./components/categorias/Page/Facial.jsx";
 import Quiropodia from "./components/categorias/Page/Quiropodia.jsx";
-import Login from "./components/login/login.jsx";
-import Registro from "./components/registro/registro.jsx";
 import ProtectedRoute from "./components/middlewares/protectedRoute.jsx";
 import CheckOutSuccess from "./components/inicio/CheckSuccess.jsx";
-import Agenda from "./components/agenda/agenda.jsx"
-import Perfil from "./components/Perfil/perfil.jsx"
+import Agenda from "./components/agenda/agenda.jsx";
+import Perfil from "./components/Perfil/perfil.jsx";
+import { useRoles } from "./components/inicio/hooks/useRoles.js";
+import { PublicRoutes } from "./components/routes/PublicRoutes.jsx";
 
 const App = () => {
+  const roles = useRoles();
   return (
     <CartProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/inicio" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/registro" element={<Registro />} />
+          {/* ruta publica */}
+          <Route path="/*" element={<PublicRoutes />} />
+          {/* termina ruta publica */}
+
+          {/* ruta Usuario */}
           <Route
             path="/inicio"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Inicio />
                 </Layout>
@@ -44,7 +47,7 @@ const App = () => {
           <Route
             path="/checkout/success"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <CheckOutSuccess />
               </ProtectedRoute>
             }
@@ -53,7 +56,7 @@ const App = () => {
           <Route
             path="/servicios/manicuras/:categoryID"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Manicura />
                 </Layout>
@@ -63,7 +66,7 @@ const App = () => {
           <Route
             path="/servicios/corporales/:categoryID"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Corporal />
                 </Layout>
@@ -73,7 +76,7 @@ const App = () => {
           <Route
             path="/servicios/pedicura/:categoryID"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Pedicura />
                 </Layout>
@@ -83,7 +86,7 @@ const App = () => {
           <Route
             path="/servicios/extension/:categoryID"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Extension />
                 </Layout>
@@ -93,7 +96,7 @@ const App = () => {
           <Route
             path="/servicios/epilacion/:categoryID"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Epilacion />
                 </Layout>
@@ -103,7 +106,7 @@ const App = () => {
           <Route
             path="/servicios/facial/:categoryID"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Facial />
                 </Layout>
@@ -113,7 +116,7 @@ const App = () => {
           <Route
             path="/servicios/quiropodia/:categoryID"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Quiropodia />
                 </Layout>
@@ -123,7 +126,7 @@ const App = () => {
           <Route
             path="/bolsa"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Bolsa />
                 </Layout>
@@ -133,7 +136,7 @@ const App = () => {
           <Route
             path="/agenda"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
                   <Agenda />
                 </Layout>
@@ -143,13 +146,16 @@ const App = () => {
           <Route
             path="/perfil"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole={roles.cliente}>
                 <Layout>
-                  <Perfil/>
+                  <Perfil />
                 </Layout>
               </ProtectedRoute>
             }
           />
+          {/* termina ruta usuario */}
+
+          
         </Routes>
       </Router>
     </CartProvider>
