@@ -158,7 +158,14 @@ const App = () => {
           />
           {/* termina ruta usuario */}
           {/* inicia ruta especialista  */}
-          <Route path="/especialista" element={<Bienvenida />} />
+          <Route
+            path="/especialista"
+            element={
+              <ProtectedRoute requiredRole={roles.specialist}>
+                <Bienvenida />
+              </ProtectedRoute>
+            }
+          />
           {/* termina ruta especialista */}
         </Routes>
       </Router>
