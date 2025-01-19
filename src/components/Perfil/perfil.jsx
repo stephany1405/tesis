@@ -3,6 +3,8 @@ import styles from "./perfil.module.css";
 import axios from "axios";
 import { getJWT } from "../middlewares/getToken";
 import { jwtDecode } from "jwt-decode";
+import { FaUser, FaEnvelope, FaPhone, FaIdCard, FaLock } from 'react-icons/fa';
+import Telefono from "../Mascaras/telefono";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -43,7 +45,6 @@ const Profile = () => {
           `http://localhost:3000/api/profile/${decodedUserId}`,
           {
             telephone_number: userData.telephone_number,
-            email: userData.email,
           },
           {
             headers: {
@@ -69,7 +70,7 @@ const Profile = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setUserData({ ...userData, [name]: value });
+    setUserData({ ...userData, [name]: value.replace(/\D/g, '') });
   };
 
   const handleImageChange = async (event) => {
@@ -136,12 +137,18 @@ const Profile = () => {
     }
   };
 
+  const handleSecurityQuestionChange = async (event) => {
+    event.preventDefault();
+    // Implement the logic to change the security question
+    alert("Funcionalidad de cambio de pregunta de seguridad aún no implementada");
+  };
+
   return (
     <div className={styles.profileContainer}>
-      <h1 className={styles.title}>Perfil</h1>
+      <h1 className={styles.title}>Perfil de Usuario</h1>
 
       <div className={styles.section}>
-        <h2>Información Personal</h2>
+        <h2><FaUser /> Información Personal</h2>
         <img
           src={
             userData.picture_profile
@@ -159,52 +166,44 @@ const Profile = () => {
             className={styles.fileInput}
           />
         )}
-        <p>
-          <strong>Nombre:</strong> {userData.name}
-        </p>
-        <p>
-          <strong>Apellido:</strong> {userData.lastname}
-        </p>
-        <p>
-          <strong>Identificación:</strong> {userData.identification}
-        </p>
+        <div className={styles.infoItem}>
+          <span className={styles.infoLabel}>Nombre:</span>
+          <span className={styles.infoValue}>{userData.name}</span>
+        </div>
+        <div className={styles.infoItem}>
+          <span className={styles.infoLabel}>Apellido:</span>
+          <span className={styles.infoValue}>{userData.lastname}</span>
+        </div>
+        <div className={styles.infoItem}>
+          <span className={styles.infoLabel}>Identificación:</span>
+          <span className={styles.infoValue}>{userData.identification}</span>
+        </div>
       </div>
 
       <div className={styles.section}>
-        <h2>Datos de Contacto</h2>
-        <p>
-          <strong>Teléfono:</strong>
+        <h2><FaEnvelope /> Datos de Contacto</h2>
+        <div className={styles.infoItem}>
+          <span className={styles.infoLabel}>Teléfono:</span>
           {isEditing ? (
-            <input
-              type="text"
+            <Telefono
               name="telephone_number"
               value={userData.telephone_number}
               onChange={handleChange}
               className={styles.input}
             />
           ) : (
-            userData.telephone_number
+            <span className={styles.infoValue}>{userData.telephone_number}</span>
           )}
-        </p>
-        <p>
-          <strong>Correo:</strong>
-          {isEditing ? (
-            <input
-              type="email"
-              name="email"
-              value={userData.email}
-              onChange={handleChange}
-              className={styles.input}
-            />
-          ) : (
-            userData.email
-          )}
-        </p>
+        </div>
+        <div className={styles.infoItem}>
+          <span className={styles.infoLabel}>Correo:</span>
+          <span className={styles.infoValue}>{userData.email}</span>
+        </div>
       </div>
 
       {isEditing && (
         <div className={styles.section}>
-          <h2>Cambiar Contraseña</h2>
+          <h2><FaLock /> Cambiar Contraseña</h2>
           <form onSubmit={handlePasswordChange}>
             <input
               type="password"
@@ -240,11 +239,44 @@ const Profile = () => {
         </div>
       )}
 
+      {isEditing && (
+        <div className={styles.section}>
+          <h2><FaIdCard /> Cambiar pregunta de seguridad</h2>
+          <form onSubmit={handleSecurityQuestionChange}>
+            <input
+              type="text"
+              placeholder="Nueva pregunta de seguridad"
+              name="securityQuestion"
+              className={styles.input}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Respuesta"
+              name="securityAnswer"
+              className={styles.input}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Confirmar nueva respuesta"
+              name="confirmSecurityAnswer"
+              className={styles.input}
+              required
+            />
+            <button type="submit" className={styles.passwordButton}>
+              Cambiar Pregunta de seguridad
+            </button>
+          </form>
+        </div>
+      )}
+
       <button onClick={handleEdit} className={styles.editButton}>
-        {isEditing ? "Guardar Cambios" : "Modificar Información"}
+        {isEditing ? "Guardar Cambios" : "Modificar Información y gestionar contraseñas"}
       </button>
     </div>
   );
 };
 
 export default Profile;
+

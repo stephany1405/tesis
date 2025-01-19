@@ -1,13 +1,12 @@
-// Status.jsx
-import React, { useState } from "react";
-import styles from "./status.module.css";
-import { Check, Star } from "lucide-react";
+import React, { useState } from "react"
+import styles from "./status.module.css"
+import { Check, Star } from "lucide-react"
 
-function ServiceStatus({ data }) { 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [specialist, setSpecialist] = useState(null);
-  const [showRating, setShowRating] = useState(false);
-  const [rating, setRating] = useState(0);
+function Status({ data }) {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [specialist, setSpecialist] = useState(null)
+  const [showRating, setShowRating] = useState(false)
+  const [rating, setRating] = useState(0)
 
   const steps = [
     { label: "Asignando especialista", time: "12:34 p.m." },
@@ -15,11 +14,11 @@ function ServiceStatus({ data }) {
     { label: "En camino", time: "12:56 p.m." },
     { label: "Inicio del servicio", time: "01:13 p.m." },
     { label: "Final del servicio", time: "02:15 p.m." },
-  ];
+  ]
 
   const handleStepClick = (index) => {
     if (index <= currentStep + 1) {
-      setCurrentStep(index);
+      setCurrentStep(index)
 
       if (index === 1 && !specialist) {
         setSpecialist({
@@ -27,23 +26,21 @@ function ServiceStatus({ data }) {
           apellido: data.especialista.apellido,
           rating: data.especialista.calificacion,
           photo: data.especialista.foto,
-        });
+        })
       }
 
       if (index === steps.length - 1) {
-        setShowRating(true);
+        setShowRating(true)
       }
     }
-  };
+  }
 
   return (
     <div className={styles.statusContainer}>
       {steps.map((step, index) => (
         <div
           key={index}
-          className={`${styles.statusItem} ${
-            index <= currentStep ? styles.completed : ""
-          }`}
+          className={`${styles.statusItem} ${index <= currentStep ? styles.completed : ""}`}
           onClick={() => handleStepClick(index)}
         >
           <div className={styles.checkContainer}>
@@ -59,10 +56,10 @@ function ServiceStatus({ data }) {
                   className={styles.specialistPhoto}
                 />
                 <div>
-                  <p className={styles.specialistName}>{specialist.name} {specialist.apellido}</p>
-                  <p className={styles.specialistRating}>
-                    ★ {specialist.rating}
+                  <p className={styles.specialistName}>
+                    {specialist.name} {specialist.apellido}
                   </p>
+                  <p className={styles.specialistRating}>★ {specialist.rating}</p>
                 </div>
               </div>
             )}
@@ -79,9 +76,7 @@ function ServiceStatus({ data }) {
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`${styles.star} ${
-                  star <= rating ? styles.active : ""
-                }`}
+                className={`${styles.star} ${star <= rating ? styles.active : ""}`}
                 onClick={() => setRating(star)}
               />
             ))}
@@ -90,7 +85,8 @@ function ServiceStatus({ data }) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default ServiceStatus;
+export default Status
+
