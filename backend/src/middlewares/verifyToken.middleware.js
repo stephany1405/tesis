@@ -1,14 +1,12 @@
 import jwt from "jsonwebtoken";
 import { SECRET_PASSWORD_JWT } from "../config.js";
 
-
 export const authRequiredWithRole = (requiredRole) => (req, res, next) => {
-  let { token } = req.cookies;
-  console.log(token)
-  if (!token) return res.status(401).json({ message: "No autorizado" });
+  const authHeader = req.headers["authorization"];
 
-  token = token.split(" ")[1];
+  if (!authHeader) return res.status(401).json({ message: "No autorizado" });
 
+  const token = authHeader.split(" ")[1];
   try {
     const { email, role_id } = jwt.verify(token, SECRET_PASSWORD_JWT);
     req.email = email;

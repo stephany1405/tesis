@@ -34,8 +34,13 @@
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
 }
-
+.section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 .sectionTitle {
   background-color: #fff;
   color: #ff69b4;
@@ -62,6 +67,7 @@
 
 .infoValue {
   color: #555;
+  font-size: 1rem;
 }
 
 .infoDescription {
@@ -121,33 +127,74 @@
   background-color: #ff1493;
 }
 
+.servicesSection {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 1rem;
+  padding-top: 1rem;
+}
+
+.serviceItem {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.serviceItem:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.serviceDetails {
+  margin-left: 1.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.serviceItem p {
+  margin: 0.25rem 0;
+}
+f .specialistSection {
+  margin-top: 2rem;
+}
+
 .specialistInfo {
   display: flex;
   align-items: center;
-  background-color: #fff;
-  padding: 0.75rem;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
   border-radius: 8px;
-  margin-top: 1rem;
 }
 
 .specialistPhoto {
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  margin-right: 1rem;
   object-fit: cover;
 }
-
+.specialistDetails {
+  flex: 1;
+}
 .specialistName {
-  font-weight: 500;
-  color: #333;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
 }
 
 .specialistRating {
-  color: #ff69b4;
-  font-size: 0.875rem;
+  color: #666;
+  font-size: 0.9rem;
 }
-
+.subsectionTitle {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
 @media (max-width: 768px) {
   .contentLayout {
     flex-direction: column;
@@ -159,3 +206,43 @@
   }
 }
 
+.noActiveServicesContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background-color: #f2f2f2;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.noActiveServicesContainer p {
+  font-size: 1.25rem;
+  color: #ff69b4;
+  font-weight: 600;
+}
+
+.redirectBar {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.redirectButton {
+  padding: 1rem 2rem;
+  background-color: #ff69b4;
+  color: white;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  max-width: 250px;
+}
+
+.redirectButton:hover {
+  background-color: #ff1493;
+}

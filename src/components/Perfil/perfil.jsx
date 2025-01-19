@@ -109,12 +109,12 @@ const Profile = () => {
     try {
       const token = getJWT("token");
       const response = await axios.put(
-        `http://localhost:3000/api/profile/${decodedUserId}/password`, 
+        `http://localhost:3000/api/profile/${decodedUserId}/password`,
         {
           currentPassword: userData.password,
           newPassword: userData.newPassword,
           confirmPassword: userData.confirmPassword,
-          userID: decodedUserId
+          userID: decodedUserId,
         },
         {
           headers: {

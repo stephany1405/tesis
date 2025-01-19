@@ -12,7 +12,7 @@ const ThankYouPage = () => {
         </p>
         <button
           className="return-button"
-          onClick={() => (window.location.href = "/")}
+          onClick={() => (window.location.href = "/inicio")}
         >
           Volver al inicio
         </button>

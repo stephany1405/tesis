@@ -108,7 +108,7 @@ export const useCheckout = (
           duration: formatDuration(calculateTotalDuration()) || null,
         };
       }
-
+      const token = getJWT("token");
       const response = await axios.post(
         "http://localhost:3000/api/orden/checkout/card",
         {
@@ -120,6 +120,11 @@ export const useCheckout = (
           noteOfServices: note,
           cita: appointmentData,
           dirección: deliveryAddress || 'Presencial en el Salón de Belleza',
+          referencePayment: ''
+        },{
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
       );
 

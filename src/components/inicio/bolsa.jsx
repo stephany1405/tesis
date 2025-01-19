@@ -33,7 +33,7 @@ const Bolsa = () => {
   const [loadingMobile, setLoadingMobile] = useState(false);
   const [dolarPrice, setDolarPrice] = useState(null);
   const [decodedUserId, setDecodedUserId] = useState(null);
-  
+
   const selectedAppointmentData = useSelectedAppointment(selectedDate);
   const navigate = useNavigate();
 
@@ -139,13 +139,41 @@ const Bolsa = () => {
   const total = subtotal + iva;
 
   const handleMobilePayment = async () => {
-    const confirmPayment = window.confirm(
+    alert(
       `Para continuar, realice el pago móvil con los siguientes datos:\n\nBanco: Banco Ejemplo\nNúmero: 0123-4567890\nCédula/RIF: V-12345678\nMonto: ${(
         total * conversion
-      ).toFixed(2)} Bs.S\n\n¿Desea confirmar que el pago ha sido realizado?`
+      ).toFixed(2)} Bs.S`
     );
+    let paymentReference = "";
+    let cancelado = false;
 
-    if (confirmPayment) {
+    while (paymentReference.length > 15 || paymentReference === "") {
+      paymentReference = prompt(
+        "Por favor, ingrese el número de referencia del pago (máximo 15 caracteres):"
+      );
+
+      if (paymentReference === null) {
+        cancelado = true;
+        break;
+      }
+
+      if (paymentReference.length > 15) {
+        alert(
+          "El número de referencia excede el límite de 20 caracteres. Por favor, inténtelo de nuevo."
+        );
+      }
+      if (paymentReference === "") {
+        alert("Por favor, ingrese un valor.");
+      }
+    }
+
+    if (!cancelado) {
+      console.log("Número de referencia:", paymentReference);
+    } else {
+      console.log("El usuario canceló la entrada.");
+    }
+
+    if (paymentReference) {
       try {
         setLoadingMobile(true);
 
@@ -161,7 +189,7 @@ const Bolsa = () => {
             duration: formatDuration(calculateTotalDuration()),
           };
         }
-
+        const token = getJWT("token");
         const response = await axios.post(
           "http://localhost:3000/api/orden/checkout/mobilePayment",
           {
@@ -172,6 +200,12 @@ const Bolsa = () => {
             cita: appointmentData,
             dirección:
               selectedLocation?.address || "Presencial en el Salón de Belleza",
+            referencePayment: paymentReference,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 
@@ -241,7 +275,7 @@ const Bolsa = () => {
             duration: formatDuration(calculateTotalDuration()),
           };
         }
-
+        const token = getJWT("token");
         const response = await axios.post(
           "http://localhost:3000/api/orden/checkout/cash",
           {
@@ -252,6 +286,12 @@ const Bolsa = () => {
             cita: appointmentData,
             dirección:
               selectedLocation?.address || "Presencial en el Salón de Belleza",
+            referencePayment: 'efectivo'
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 

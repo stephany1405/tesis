@@ -46,6 +46,7 @@ export const orderPaymentController = async (req, res) => {
         paid: true,
         address: dirección,
         amount: `${PrecioTotal} $`,
+        referencePayment: payment.id
       });
 
       res.status(200).json({
@@ -76,6 +77,7 @@ export const cashPaymentController = async (req, res) => {
     cita,
     dirección,
     PrecioTotal,
+    referencePayment
   } = req.body;
 
   try {
@@ -95,6 +97,7 @@ export const cashPaymentController = async (req, res) => {
       paid: false,
       address: dirección,
       amount: `${PrecioTotal} $`,
+      referencePayment
     });
 
     res.status(200).json({
@@ -120,6 +123,7 @@ export const mobilePaymentController = async (req, res) => {
     cita,
     dirección,
     PrecioTotal,
+    referencePayment
   } = req.body;
 
   try {
@@ -139,6 +143,7 @@ export const mobilePaymentController = async (req, res) => {
       paid: true,
       address: dirección,
       amount: `${PrecioTotal} $`,
+      referencePayment: referencePayment,
     });
 
     res.status(200).json({
