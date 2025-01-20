@@ -168,6 +168,16 @@ const App = () => {
             }
           />
           {/* termina ruta especialista */}
+          {/* Inicia Ruta Administrador */}
+          <Route
+            path="/administrador"
+            element={
+              <ProtectedRoute requiredRole={roles.administrador}>
+                <Bienvenida /> {/* aquí va el componente de administrador */}
+              </ProtectedRoute>
+            }
+          />
+          {/* Termina ruta Administrador */}
         </Routes>
       </Router>
     </CartProvider>
