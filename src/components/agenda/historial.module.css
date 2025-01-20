@@ -1,32 +1,122 @@
 .historyList {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.historyItem {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.historyItem:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-color: #ff69b4;
+  transform: translateY(-5px);
+}
+
+.historyItem:active {
+  transform: translateY(0);
+}
+
+.serviceName {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.serviceDate,
+.serviceDuration {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.paymentMethod,
+.serviceAddress,
+.serviceAmount {
+  color: #444;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.specialists {
+  margin-top: 1rem;
+}
+
+.specialistList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.specialistItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.specialistImage {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.specialistName {
+  font-weight: bold;
+  color: #333;
+}
+
+.loading,
+.error,
+.noHistory {
+  text-align: center;
+  padding: 2rem;
+  color: #ff69b4;
+  font-weight: bold;
+}
+
+.loading {
+  font-size: 1.25rem;
+}
+
+.error {
+  font-size: 1.15rem;
+}
+
+.noHistory {
+  font-size: 1.25rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
   .historyItem {
-    background-color: #fff;
     padding: 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid #e5e7eb;
   }
-  
-  .historyItem:hover {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-color: #ff69b4;
-  }
-  
+
   .serviceName {
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
   }
-  
-  .serviceDate {
-    color: #666;
-    font-size: 0.875rem;
+
+  .serviceDate,
+  .serviceDuration,
+  .paymentMethod,
+  .serviceAddress,
+  .serviceAmount {
+    font-size: 0.9rem;
   }
-  
-  
+
+  .specialistImage {
+    width: 35px;
+    height: 35px;
+  }
+}

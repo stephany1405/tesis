@@ -7,7 +7,7 @@ import esLocale from "@fullcalendar/core/locales/es";
 import styles from "./bolsa.module.css";
 import { formatDuration } from "./hooks/utils.js";
 
-export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
+export const AppointmentCalendar = ({ onDateSelect, totalDuration }) => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedInfo, setSelectedInfo] = useState(null);
   const BUSINESS_HOURS = {
@@ -23,7 +23,7 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
     }
 
     const startDate = new Date(clickInfo.date);
-    const durationInMs = totalDuration * 60 * 60 * 1000;
+    const durationInMs = totalDuration * 60 * 60 * 1000; 
     const endDate = new Date(startDate.getTime() + durationInMs);
 
     const maxEndTime = new Date(startDate);
@@ -32,7 +32,7 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
     if (endDate > maxEndTime) {
       const horasDisponibles = BUSINESS_HOURS.end - startDate.getHours();
       alert(`No es posible agendar esta cita aquí.
-            La duración total es de ${formatDuration(totalDuration)},
+            La duración total es de ${totalDuration} horas,
             pero solo quedan ${horasDisponibles} horas disponibles en este día.
             Por favor selecciona un horario más temprano.`);
       return;
@@ -40,7 +40,7 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
 
     const eventInfo = {
       id: new Date().getTime(),
-      title: `Cita Reservada (${formatDuration(totalDuration)})`,
+      title: `Cita Reservada (${totalDuration} horas)`,
       start: startDate,
       end: endDate,
       backgroundColor: "#FF69B4",
@@ -68,6 +68,7 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration = 0 }) => {
     setSelectedInfo({
       formattedStart,
       formattedEnd,
+      totalDuration,
     });
 
     onDateSelect({

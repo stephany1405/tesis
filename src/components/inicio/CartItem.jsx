@@ -54,11 +54,7 @@ export const CartItem = ({
       />
       <div className={styles.itemDetails}>
         <h3>{item.title}</h3>
-        <div className={styles.itemVariant}>
-          Duración por sesión: {item.duration}
-          <br />
-          Duración total: {calculateTotalDuration(item.duration, item.quantity)}
-        </div>
+        <div className={styles.itemVariant}>Duración: {item.duration} cada una</div>
         <div className={styles.itemDescription}>
           <strong>Nota:</strong> {item.note}
         </div>

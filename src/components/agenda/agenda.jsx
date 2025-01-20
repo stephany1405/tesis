@@ -1,104 +1,136 @@
-import React, { useState, useEffect } from "react"
-import styles from "./Agenda.module.css"
-import Status from "./Status"
-import InfoAgenda from "./infoAgenda"
-import Historial from "./Historial"
-import { getJWT } from "../middlewares/getToken.jsx"
-import { jwtDecode } from "jwt-decode"
-import axios from "axios"
+import React, { useState, useEffect } from "react";
+import styles from "./Agenda.module.css";
+import Status from "./Status";
+import InfoAgenda from "./infoAgenda";
+import Historial from "./Historial";
+import { getJWT } from "../middlewares/getToken.jsx";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 function Agenda() {
-  const [activeTab, setActiveTab] = useState("status")
-  const [selectedHistorialService, setSelectedHistorialService] = useState(null)
-  const [servicioActivo, setServicioActivo] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState("status");
+  const [serviciosActivos, setServiciosActivos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const API_URL = "http://localhost:3000"
+  const API_URL = "http://localhost:3000";
 
   useEffect(() => {
-    const fetchActiveService = async () => {
+    const fetchActiveServices = async () => {
       try {
-        const token = getJWT("token")
-        const decodedToken = jwtDecode(token)
-        const id = Number.parseInt(decodedToken.id)
-        const response = await axios.get(`${API_URL}/api/servicios/agenda/activo?userID=${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        const data = response.data
+        const token = getJWT("token");
+        const decodedToken = jwtDecode(token);
+        const id = Number.parseInt(decodedToken.id);
+        const response = await axios.get(
+          `${API_URL}/api/servicios/agenda/activo?userID=${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = response.data;
 
-        if (data.status_order) {
-          setServicioActivo({
+        if (data && typeof data === "object" && !Array.isArray(data)) {
+          const servicioFormateado = {
+            id: data.id,
             servicios: data.services,
-            fecha: data.scheduled_date.start,
-            hora: data.scheduled_date.start.split(", ")[2],
-            duracionTotal: data.scheduled_date.duration,
+            fecha: data.scheduled_date,
+            hora: data.start_appointment,
+            duracionTotal: data.end_appointment,
             ubicacion: data.address,
             formaPago: data.payment_method,
             monto: data.amount,
             estado: data.status_id,
             referenciaPago: data.reference_payment,
-            especialista: {
-              nombre: data.specialist_name,
-              foto: data.specialist_photo
-                ? `${API_URL}${data.specialist_photo}`
-                : "/placeholder.svg?height=50&width=50",
-              calificacion: data.specialist_rating,
-            },
-          })
+            especialistas: data.specialists || [],
+          };
+          setServiciosActivos([servicioFormateado]);
+        } else if (Array.isArray(data) && data.length > 0) {
+          const serviciosFormateados = data.map((servicio) => ({
+            id: servicio.id,
+            servicios: servicio.services,
+            fecha: servicio.scheduled_date,
+            hora: servicio.start_appointment,
+            duracionTotal: servicio.end_appointment,
+            ubicacion: servicio.address,
+            formaPago: servicio.payment_method,
+            monto: servicio.amount,
+            estado: servicio.status_id,
+            referenciaPago: servicio.reference_payment,
+            especialistas: servicio.specialists || [],
+          }));
+          setServiciosActivos(serviciosFormateados);
         } else {
-          setServicioActivo(null)
+          setServiciosActivos([]);
         }
       } catch (err) {
-        setError("Error al cargar el servicio activo")
-        console.error("Error detalles:", err)
+        setError("Error al cargar los servicios activos");
+        console.error("Error detalles:", err);
         if (err.response && err.response.status === 404) {
-          setServicioActivo(null)
+          setServiciosActivos([]);
         }
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchActiveService()
-  }, [])
+    fetchActiveServices();
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
       case "status":
-        return <Status data={servicioActivo} />
+        return <Status data={serviciosActivos} />;
       case "agenda":
-        return <InfoAgenda data={servicioActivo} />
+        return <InfoAgenda data={serviciosActivos} />;
       case "historial":
-        return <Historial setSelectedService={setSelectedHistorialService} />
+        return <Historial />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
-  if (loading) return <div className={styles.loadingContainer}>Cargando...</div>
-  if (error) return <div className={styles.errorContainer}>{error}</div>
-  if (!servicioActivo) return <div className={styles.noActiveServicesContainer}>No hay servicios activos</div>
+  if (loading)
+    return <div className={styles.loadingContainer}>Cargando...</div>;
+  if (error) return <div className={styles.errorContainer}>{error}</div>;
+  console.log(serviciosActivos);
+
+  const hasActiveServices =
+    serviciosActivos.length > 0 &&
+    serviciosActivos.every((servicio) => servicio.id !== undefined);
+
+  if (!hasActiveServices) {
+    return (
+      <div className={styles.noActiveServicesContainer}>
+        No hay servicios activos
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.tabButtons}>
         <button
-          className={`${styles.tabButton} ${activeTab === "status" ? styles.active : ""}`}
+          className={`${styles.tabButton} ${
+            activeTab === "status" ? styles.active : ""
+          }`}
           onClick={() => setActiveTab("status")}
         >
           Estatus
         </button>
         <button
-          className={`${styles.tabButton} ${activeTab === "agenda" ? styles.active : ""}`}
+          className={`${styles.tabButton} ${
+            activeTab === "agenda" ? styles.active : ""
+          }`}
           onClick={() => setActiveTab("agenda")}
         >
           Información de agenda
         </button>
         <button
-          className={`${styles.tabButton} ${activeTab === "historial" ? styles.active : ""}`}
+          className={`${styles.tabButton} ${
+            activeTab === "historial" ? styles.active : ""
+          }`}
           onClick={() => setActiveTab("historial")}
         >
           Historial
@@ -106,8 +138,7 @@ function Agenda() {
       </div>
       <div className={styles.contentContainer}>{renderContent()}</div>
     </div>
-  )
+  );
 }
 
-export default Agenda
-
+export default Agenda;

@@ -65,7 +65,7 @@ export const useCheckout = (
     return cartItems.reduce((total, item, index) => {
       if (selectedItems[index] && item.duration) {
         const duration = parseDuration(item.duration);
-        return total + duration * item.quantity;
+        return total + duration;
       }
       return total;
     }, 0);

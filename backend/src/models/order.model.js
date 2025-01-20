@@ -1,13 +1,12 @@
 import { pool } from "../db.js";
 export const InsertCard = async ({
   user_id,
-  specialist_id = null,
   services,
   scheduled_date,
-  start_appointment = null,
-  end_appointment = null,
-  status_order = true,
-  paid = true,
+  start_appointment,
+  end_appointment,
+  status_order,
+  paid,
   address,
   amount,
   referencePayment,
@@ -18,7 +17,6 @@ export const InsertCard = async ({
       text: `
         INSERT INTO public."appointment" (
           user_id, 
-          specialist_id, 
           services, 
           status_id, 
           scheduled_date, 
@@ -30,18 +28,15 @@ export const InsertCard = async ({
           payment_method, 
           amount,
           reference_payment
-        ) VALUES (
-          $1, $2, $3, 
+        ) VALUES ($1, $2, 
           (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
-          $4, $5, $6, $7, $8, $9, 
+          $3::json, $4, $5, $6, $7, $8, 
           (SELECT id FROM public.classification WHERE classification_type = 'tarjeta'),
-          $10,$11
-        )
+          $9, $10)
         RETURNING *;
       `,
       values: [
         user_id,
-        specialist_id,
         services,
         scheduled_date,
         start_appointment,
@@ -66,7 +61,6 @@ export const InsertCard = async ({
 
 export const InsertCash = async ({
   user_id,
-  specialist_id = null,
   services,
   scheduled_date,
   start_appointment = null,
@@ -83,7 +77,6 @@ export const InsertCash = async ({
       text: `
         INSERT INTO public."appointment" (
           user_id, 
-          specialist_id, 
           services, 
           status_id, 
           scheduled_date, 
@@ -96,17 +89,16 @@ export const InsertCash = async ({
           amount,
           reference_payment
         ) VALUES (
-          $1, $2, $3, 
+          $1, $2,
           (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
-          $4, $5, $6, $7, $8, $9, 
+          $3, $4, $5, $6, $7, $8, 
           (SELECT id FROM public.classification WHERE classification_type = 'efectivo'),
-          $10, $11
+          $9, $10
         )
         RETURNING *;
       `,
       values: [
         user_id,
-        specialist_id,
         services,
         scheduled_date,
         start_appointment,
@@ -131,7 +123,6 @@ export const InsertCash = async ({
 
 export const InsertMobilePayment = async ({
   user_id,
-  specialist_id = null,
   services,
   scheduled_date,
   start_appointment = null,
@@ -148,7 +139,6 @@ export const InsertMobilePayment = async ({
       text: `
         INSERT INTO public."appointment" (
           user_id, 
-          specialist_id, 
           services, 
           status_id, 
           scheduled_date, 
@@ -161,17 +151,16 @@ export const InsertMobilePayment = async ({
           amount,
           reference_payment
         ) VALUES (
-          $1, $2, $3, 
-          (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'),
-          $4, $5, $6, $7, $8, $9, 
+          $1, $2,
+          (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
+          $3, $4, $5, $6, $7, $8, 
           (SELECT id FROM public.classification WHERE classification_type = 'pago móvil'),
-          $10,$11
+          $9, $10
         )
         RETURNING *;
       `,
       values: [
         user_id,
-        specialist_id,
         services,
         scheduled_date,
         start_appointment,

@@ -1,64 +1,106 @@
-import React from "react"
-import styles from "./historial.module.css"
-
-const serviceHistory = [
-  {
-    id: 1,
-    nombre: "Tratamiento facial rejuvenecedor",
-    fecha: "15 de abril de 2023",
-    duracion: "60 minutos",
-    descripcion:
-      "Tratamiento intensivo que combina limpieza profunda, exfoliación, mascarilla nutritiva y masaje facial para revitalizar y rejuvenecer la piel.",
-    ubicacion: "Calle Principal 123, Local 4, Ciudad",
-    formaPago: "Tarjeta de Crédito",
-    especialista: {
-      nombre: "María González",
-      foto: "/placeholder.svg?height=50&width=50",
-      calificacion: 4.8,
-    },
-  },
-  {
-    id: 2,
-    nombre: "Masaje relajante",
-    fecha: "10 de abril de 2023",
-    duracion: "45 minutos",
-    descripcion: "Masaje corporal completo diseñado para aliviar la tensión y promover la relajación.",
-    ubicacion: "Calle Principal 123, Local 4, Ciudad",
-    formaPago: "Efectivo",
-    especialista: {
-      nombre: "Carlos Rodríguez",
-      foto: "/placeholder.svg?height=50&width=50",
-      calificacion: 4.9,
-    },
-  },
-  {
-    id: 3,
-    nombre: "Manicura y pedicura",
-    fecha: "5 de abril de 2023",
-    duracion: "90 minutos",
-    descripcion: "Tratamiento completo para manos y pies, incluyendo exfoliación, masaje y aplicación de esmalte.",
-    ubicacion: "Calle Principal 123, Local 4, Ciudad",
-    formaPago: "Tarjeta de Débito",
-    especialista: {
-      nombre: "Ana Martínez",
-      foto: "/placeholder.svg?height=50&width=50",
-      calificacion: 4.7,
-    },
-  },
-]
+import React, { useState, useEffect } from "react";
+import styles from "./historial.module.css";
+import { getJWT } from "../middlewares/getToken.jsx";
+import { jwtDecode } from "jwt-decode";
 
 function Historial({ setSelectedService }) {
+  const API_URL = "http://localhost:3000";
+  const [servicioNoActivo, setServicioNoActivo] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNoActiveService = async () => {
+      try {
+        const token = getJWT("token");
+        const decoded = jwtDecode(token);
+        const id = Number.parseInt(decoded.id);
+        const response = await fetch(
+          `${API_URL}/api/servicios/agenda/noactivo?userID=${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (data) {
+          setServicioNoActivo(data);
+        }
+      } catch (error) {
+        setError("Error al cargar el servicio activo");
+        console.error("Error detalles:", error);
+        if (error.response && error.response.status === 404) {
+          setServicioNoActivo(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNoActiveService();
+  }, []);
+
+  if (loading) return <div className={styles.loading}>Cargando...</div>;
+  if (error) return <div className={styles.error}>{error}</div>;
+  if (!servicioNoActivo || servicioNoActivo.length === 0)
+    return <div className={styles.noHistory}>No hay historial de servicios</div>;
+
   return (
     <div className={styles.historyList}>
-      {serviceHistory.map((service) => (
-        <div key={service.id} className={styles.historyItem} onClick={() => setSelectedService(service)}>
-          <p className={styles.serviceName}>{service.nombre}</p>
-          <p className={styles.serviceDate}>{service.fecha}</p>
-        </div>
-      ))}
+      {servicioNoActivo.map((service, index) => {
+        const services = JSON.parse(service.services);
+        const scheduledDate = JSON.parse(service.scheduled_date);
+        return (
+          <div
+            key={index}
+            className={styles.historyItem}
+            onClick={() => setSelectedService(service)}
+          >
+            <div className={styles.serviceName}>{services[0]?.title}</div>
+            <div className={styles.serviceDate}>
+              {scheduledDate.start} - {scheduledDate.end}
+            </div>
+            <div className={styles.serviceDuration}>
+              {scheduledDate.duration}
+            </div>
+            <div className={styles.paymentMethod}>
+              <strong>Método de pago:</strong> {service.payment_method_name}
+            </div>
+            <div className={styles.serviceAddress}>
+              <strong>Dirección:</strong> {service.address}
+            </div>
+            <div className={styles.serviceAmount}>
+              <strong>Costo:</strong> {service.amount}
+            </div>
+
+            <div className={styles.specialists}>
+              <strong>Especialistas:</strong>
+              <div className={styles.specialistList}>
+                {service.specialists.map((specialist, idx) => (
+                  <div key={idx} className={styles.specialistItem}>
+                    <img
+                      src={
+                        specialist.picture_profile
+                          ? `http://localhost:3000${specialist.picture_profile}`
+                          : "/placeholder.svg"
+                      }
+                      alt={`${specialist.name} ${specialist.lastname}`}
+                      className={styles.specialistImage}
+                    />
+                    <div className={styles.specialistName}>
+                      {specialist.name} {specialist.lastname}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
-  )
+  );
 }
 
-export default Historial
-
+export default Historial;

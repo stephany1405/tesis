@@ -2,6 +2,9 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .mainTitle {
@@ -12,22 +15,13 @@
   padding: 1rem;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .contentLayout {
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
-}
-
-.leftColumn {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.rightColumn {
-  flex: 1;
 }
 
 .section {
@@ -35,28 +29,46 @@
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease-in-out;
+  width: 100%;
 }
+
 .section:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
+
 .sectionTitle {
   background-color: #fff;
   color: #ff69b4;
-  padding: 1rem;
+  padding: 1.25rem;
   margin: 0;
   font-size: 1.25rem;
   border-bottom: 2px solid #e5e7eb;
+  cursor: pointer;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.sectionTitle:hover {
+  color: #ff1493;
+  background-color: #f8f9fa;
 }
 
 .sectionContent {
   padding: 1.5rem;
-  background-color: #f8f9fa;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+}
+
+.sectionContent.open {
+  max-height: 2000px; 
+  opacity: 1;
 }
 
 .infoGroup {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .infoLabel {
@@ -76,6 +88,107 @@
   margin-top: 0.5rem;
 }
 
+.servicesSection {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-top: 1rem;
+}
+
+.serviceItem {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out, transform 0.3s ease;
+}
+
+.serviceItem:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);
+}
+
+.serviceDetails {
+  margin-left: 1.5rem;
+  font-size: 0.95rem;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.serviceItem p {
+  margin: 0.25rem 0;
+}
+
+.specialistSection {
+  margin-top: 2rem;
+}
+
+.specialistInfo {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.specialistPhoto {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.specialistDetails {
+  flex: 1;
+}
+
+.specialistName {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.specialistRating {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.subsectionTitle {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .contentLayout {
+    flex-direction: column;
+  }
+
+  .sectionTitle {
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+
+  .serviceItem {
+    margin-bottom: 1rem;
+  }
+
+  .serviceDetails {
+    margin-left: 1rem;
+  }
+
+  .specialistInfo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Estilo para el modal */
 .modal {
   position: fixed;
   top: 0;
@@ -125,85 +238,6 @@
 
 .closeButton:hover {
   background-color: #ff1493;
-}
-
-.servicesSection {
-  margin-bottom: 2rem;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 1rem;
-  padding-top: 1rem;
-}
-
-.serviceItem {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease-in-out;
-}
-
-.serviceItem:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.serviceDetails {
-  margin-left: 1.5rem;
-  font-size: 0.9rem;
-  color: #666;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.serviceItem p {
-  margin: 0.25rem 0;
-}
-f .specialistSection {
-  margin-top: 2rem;
-}
-
-.specialistInfo {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.specialistPhoto {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.specialistDetails {
-  flex: 1;
-}
-.specialistName {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.specialistRating {
-  color: #666;
-  font-size: 0.9rem;
-}
-.subsectionTitle {
-  font-size: 1.1rem;
-  color: #333;
-  margin-bottom: 1rem;
-  font-weight: 500;
-}
-@media (max-width: 768px) {
-  .contentLayout {
-    flex-direction: column;
-  }
-
-  .leftColumn,
-  .rightColumn {
-    flex: none;
-  }
 }
 
 .noActiveServicesContainer {

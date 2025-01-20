@@ -3,7 +3,8 @@ import {
   getProfileController,
   uploadProfilePic,
   uploadUserData,
-  changePassword
+  changePassword,
+  uploadSecurityQuestions
 } from "../controllers/profile.controller.js";
 import upload from "../middlewares/uploadMiddleware.js";
 
@@ -16,6 +17,7 @@ router.post(
   uploadProfilePic
 );
 router.put("/profile/:userID", uploadUserData);
+router.put("/profile/:userID/securityQuestion", uploadSecurityQuestions);
 router.put("/profile/:userID/password", changePassword);
 
 export default router;

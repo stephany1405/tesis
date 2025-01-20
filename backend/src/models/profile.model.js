@@ -5,7 +5,7 @@ export const getProfile = async (userID) => {
 
   try {
     const query = {
-      text: `SELECT picture_profile, name, lastname, identification, email, telephone_number FROM PUBLIC.USER WHERE ID = $1`,
+      text: `SELECT picture_profile, name, lastname, identification, email, telephone_number, security_question, answer FROM PUBLIC.USER WHERE ID = $1`,
       values: [userID],
     };
     const { rows } = await client.query(query);

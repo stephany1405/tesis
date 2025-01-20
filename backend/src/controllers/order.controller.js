@@ -1,5 +1,8 @@
-import { pool } from "../db.js";
-import { InsertCard, InsertCash, InsertMobilePayment } from "../models/order.model.js";
+import {
+  InsertCard,
+  InsertCash,
+  InsertMobilePayment,
+} from "../models/order.model.js";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -35,19 +38,20 @@ export const orderPaymentController = async (req, res) => {
         note: noteOfServices[index] || "",
       }));
 
-      const newAppointment = await InsertCard({
+      const appointmentData = {
         user_id: userId,
-        specialist_id: null,
         services: JSON.stringify(productsWithNotes),
-        scheduled_date: cita || null,
+        scheduled_date: cita ? JSON.stringify(cita) : null,
         start_appointment: null,
         end_appointment: null,
         status_order: true,
         paid: true,
         address: dirección,
         amount: `${PrecioTotal} $`,
-        referencePayment: payment.id
-      });
+        referencePayment: payment.id,
+      };
+
+      const newAppointment = await InsertCard(appointmentData);
 
       res.status(200).json({
         success: true,
@@ -77,7 +81,7 @@ export const cashPaymentController = async (req, res) => {
     cita,
     dirección,
     PrecioTotal,
-    referencePayment
+    referencePayment,
   } = req.body;
 
   try {
@@ -88,7 +92,6 @@ export const cashPaymentController = async (req, res) => {
 
     const newAppointment = await InsertCash({
       user_id: userId,
-      specialist_id: null,
       services: JSON.stringify(productsWithNotes),
       scheduled_date: cita || null,
       start_appointment: null,
@@ -97,7 +100,7 @@ export const cashPaymentController = async (req, res) => {
       paid: false,
       address: dirección,
       amount: `${PrecioTotal} $`,
-      referencePayment
+      referencePayment,
     });
 
     res.status(200).json({
@@ -123,7 +126,7 @@ export const mobilePaymentController = async (req, res) => {
     cita,
     dirección,
     PrecioTotal,
-    referencePayment
+    referencePayment,
   } = req.body;
 
   try {
@@ -134,7 +137,6 @@ export const mobilePaymentController = async (req, res) => {
 
     const newAppointment = await InsertMobilePayment({
       user_id: userId,
-      specialist_id: null,
       services: JSON.stringify(productsWithNotes),
       scheduled_date: cita || null,
       start_appointment: null,

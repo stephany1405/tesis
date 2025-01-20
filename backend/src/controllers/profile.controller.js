@@ -1,4 +1,4 @@
-import { getProfile} from "../models/profile.model.js";
+import { getProfile } from "../models/profile.model.js";
 import bcrypt from "bcryptjs";
 import { pool } from "../db.js";
 
@@ -41,11 +41,11 @@ export const uploadProfilePic = async (req, res) => {
 export const uploadUserData = async (req, res) => {
   try {
     const { userID } = req.params;
-    const { telephone_number, email } = req.body;
+    const { telephone_number } = req.body;
 
     const query = {
-      text: "UPDATE public.user SET telephone_number = $1, email = $2 WHERE id = $3 RETURNING *",
-      values: [telephone_number, email, userID],
+      text: "UPDATE public.user SET telephone_number = $1 WHERE id = $2 RETURNING *",
+      values: [telephone_number, userID],
     };
 
     const result = await pool.query(query);
@@ -100,5 +100,40 @@ export const changePassword = async (req, res) => {
   } catch (error) {
     console.error("Error al actualizar la contraseña:", error);
     res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+export const uploadSecurityQuestions = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { userID } = req.params;
+    const { securityQuestion, securityAnswer } = req.body;
+
+    if (!securityQuestion || !securityAnswer) {
+      return res
+        .status(400)
+        .json({ message: "Todos los campos son obligatorios" });
+    }
+    const query = {
+      text: `UPDATE PUBLIC.USER SET security_question = $1, answer = $2 WHERE ID = $3`,
+      values: [securityQuestion, securityAnswer, userID],
+    };
+
+    const result = await client.query(query);
+
+    if (result.rowCount === 1) {
+      return res
+        .status(200)
+        .json({ message: "Preguntas de seguridad actualizado correctamente." });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Error al actualizar preguntas de seguridad." });
+    }
+  } catch (error) {
+    console.error("Error al actualizar las preguntas de seguridad:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  } finally {
+    client.release();
   }
 };
