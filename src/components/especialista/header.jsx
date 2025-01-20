@@ -11,7 +11,7 @@ export default function Header({ setActiveTab, activeTab }) {
   return (
     <header className={styles.header}>
       <div className={styles.container}>
-        <div className={styles.logo}>UNIMAS Especialista</div>
+        <div className={styles.logo}>Uñimas Especialista</div>
         <nav className={styles.nav}>
           <button
             onClick={() => setActiveTab("notifications")}
