@@ -1,31 +1,31 @@
-import React from "react";
+import React, { useState } from "react"
+import Header from "./header"
+import Notificaciones from "./notificaciones"
+import Perfil from "./perfil"
+import Status from "./serviceStatus.jsx"
+import styles from "./dashboard.module.css"
 
-const Bienvenida = () => {
-  const styles = {
-    container: {
-      backgroundColor: "#e6f7ff", // Azul muy claro
-      padding: "20px",
-      borderRadius: "8px",
-      textAlign: "center",
-      fontFamily: "Verdana, sans-serif",
-      boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.2)",
-    },
-    title: {
-      color: "#0056b3", // Azul oscuro
-      marginBottom: "10px",
-      fontSize: "2em",
-    },
-    subtitle: {
-      color: "#007bff",
-    },
-  };
+export default function SpecialistDashboard() {
+  const [activeTab, setActiveTab] = useState("notifications")
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "notifications":
+        return <Notificaciones />
+      case "profile":
+        return <Perfil />
+      case "status":
+        return <Status />
+      default:
+        return <Notificaciones />
+    }
+  }
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Bienvenido Especialista</h1>
-      <p style={styles.subtitle}>Listo para gestionar tus citas.</p>
+    <div className={styles.dashboard}>
+      <Header setActiveTab={setActiveTab} activeTab={activeTab} />
+      <main className={styles.content}>{renderContent()}</main>
     </div>
-  );
-};
+  )
+}
 
-export default Bienvenida;
