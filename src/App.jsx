@@ -1,33 +1,34 @@
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
-//rutas para cliente
-import { CartProvider } from "./components/inicio/useContext";
-import Layout from "./components/layouts/layout.jsx";
-import Inicio from "./components/inicio/inicio.jsx";
-import Bolsa from "./components/inicio/bolsa.jsx";
-import Manicura from "./components/categorias/Page/Manicura.jsx";
-import Corporal from "./components/categorias/Page/Corporal.jsx";
-import Pedicura from "./components/categorias/Page/Pedicura.jsx";
-import Extension from "./components/categorias/Page/Extension.jsx";
-import Epilacion from "./components/categorias/Page/Epilacion.jsx";
-import Facial from "./components/categorias/Page/Facial.jsx";
-import Quiropodia from "./components/categorias/Page/Quiropodia.jsx";
-import ProtectedRoute from "./components/middlewares/protectedRoute.jsx";
-import CheckOutSuccess from "./components/inicio/CheckSuccess.jsx";
-import Agenda from "./components/agenda/agenda.jsx";
-import Perfil from "./components/Perfil/perfil.jsx";
-import { useRoles } from "./components/inicio/hooks/useRoles.js";
-import { PublicRoutes } from "./components/routes/PublicRoutes.jsx";
+import React from "react"
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom"
+import { CartProvider } from "./components/inicio/useContext"
+import Layout from "./components/layouts/layout.jsx"
+import Inicio from "./components/inicio/inicio.jsx"
+import Bolsa from "./components/inicio/bolsa.jsx"
+import Manicura from "./components/categorias/Page/Manicura.jsx"
+import Corporal from "./components/categorias/Page/Corporal.jsx"
+import Pedicura from "./components/categorias/Page/Pedicura.jsx"
+import Extension from "./components/categorias/Page/Extension.jsx"
+import Epilacion from "./components/categorias/Page/Epilacion.jsx"
+import Facial from "./components/categorias/Page/Facial.jsx"
+import Quiropodia from "./components/categorias/Page/Quiropodia.jsx"
+import ProtectedRoute from "./components/middlewares/protectedRoute.jsx"
+import CheckOutSuccess from "./components/inicio/CheckSuccess.jsx"
+import Agenda from "./components/agenda/agenda.jsx"
+import Perfil from "./components/Perfil/perfil.jsx"
+import { useRoles } from "./components/inicio/hooks/useRoles.js"
+import { PublicRoutes } from "./components/routes/PublicRoutes.jsx"
 //rutas para especialista
 
-import Bienvenida from "./components/especialista/dashboard.jsx";
+import Bienvenida from "./components/especialista/dashboard.jsx"
+
+//rutas para admin
+
+import Sidebar from "./components/administrador/sidebar.jsx"
+import Home from "./components/administrador/home.jsx"
+import Perfiles from "./components/administrador/clientes/perfiles.jsx"
+import PerfilesE from "./components/administrador/especialista/perfilesE.jsx"
 const App = () => {
-  const roles = useRoles();
+  const roles = useRoles()
   return (
     <CartProvider>
       <Router>
@@ -170,10 +171,23 @@ const App = () => {
           {/* termina ruta especialista */}
           {/* Inicia Ruta Administrador */}
           <Route
-            path="/administrador"
+            path="/administrador/*"
             element={
               <ProtectedRoute requiredRole={roles.administrador}>
-                <Bienvenida /> {/* aquí va el componente de administrador */}
+                <div style={{ display: "flex" }}>
+                  <Sidebar />
+                  <div style={{ flexGrow: 1, padding: "20px" }}>
+                    <Routes>
+                      <Route index element={<Home />} />
+                      <Route path="clientes" element={<div><Perfiles/></div>} />
+                      <Route path="especialistas" element={<div><PerfilesE/></div>} />
+                      <Route path="servicios" element={<div>Página de Servicios</div>} />
+                      <Route path="citas" element={<div>Página de Citas</div>} />
+                      <Route path="finanzas" element={<div>Página de Finanzas</div>} />
+                      <Route path="estadisticas" element={<div>Página de Estadísticas</div>} />
+                    </Routes>
+                  </div>
+                </div>
               </ProtectedRoute>
             }
           />
@@ -181,7 +195,8 @@ const App = () => {
         </Routes>
       </Router>
     </CartProvider>
-  );
-};
+  )
+}
 
-export default App;
+export default App
+
