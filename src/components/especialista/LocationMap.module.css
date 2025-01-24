@@ -1,0 +1,22 @@
+.mapContainer {
+  margin-top: 1rem;
+}
+
+.mapContainer h4 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.address {
+  color: #666;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.mapWrapper {
+  height: 250px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}

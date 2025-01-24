@@ -17,6 +17,7 @@ export const orderPaymentController = async (req, res) => {
     cita,
     dirección,
     PrecioTotal,
+    coordenadas,
   } = req.body;
 
   try {
@@ -49,6 +50,7 @@ export const orderPaymentController = async (req, res) => {
         address: dirección,
         amount: `${PrecioTotal} $`,
         referencePayment: payment.id,
+        coordenadas: coordenadas,
       };
 
       const newAppointment = await InsertCard(appointmentData);
@@ -82,6 +84,7 @@ export const cashPaymentController = async (req, res) => {
     dirección,
     PrecioTotal,
     referencePayment,
+    coordenadas,
   } = req.body;
 
   try {
@@ -101,6 +104,7 @@ export const cashPaymentController = async (req, res) => {
       address: dirección,
       amount: `${PrecioTotal} $`,
       referencePayment,
+      coordenadas: coordenadas,
     });
 
     res.status(200).json({
@@ -127,6 +131,7 @@ export const mobilePaymentController = async (req, res) => {
     dirección,
     PrecioTotal,
     referencePayment,
+    coordenadas,
   } = req.body;
 
   try {
@@ -146,6 +151,7 @@ export const mobilePaymentController = async (req, res) => {
       address: dirección,
       amount: `${PrecioTotal} $`,
       referencePayment: referencePayment,
+      coordenadas: coordenadas,
     });
 
     res.status(200).json({

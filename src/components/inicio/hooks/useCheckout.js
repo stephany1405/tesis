@@ -11,7 +11,8 @@ export const useCheckout = (
   selectedItems,
   resetCart,
   selectedAppointment,
-  deliveryAddress
+  addressAppointment,
+  appointmentCoordinates
 ) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -119,12 +120,16 @@ export const useCheckout = (
           products: cartItems.filter((_, index) => selectedItems[index]),
           noteOfServices: note,
           cita: appointmentData,
-          dirección: deliveryAddress || 'Presencial en el Salón de Belleza',
-          referencePayment: ''
-        },{
+          dirección: addressAppointment || "Presencial en el Salón de Belleza",
+          referencePayment: "",
+          coordenadas:
+            appointmentCoordinates ||
+            "{'latitud':10.493435, 'longitud': -66.878370}",
+        },
+        {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 

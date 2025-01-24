@@ -16,12 +16,14 @@ export const getServiceActiveClient = async (userID) => {
     a.status_order,
     a.paid,
     a.address,
+    a.point,
     a.amount,
     a.scheduled_date,
     a.reference_payment,
     COALESCE(
         json_agg(
             json_build_object(
+                'id', u.id,
                 'name', u.name,
                 'lastname', u.lastname,
                 'telephone_number', u.telephone_number,
@@ -38,6 +40,7 @@ LEFT JOIN public.appointment_specialists as_link ON a.id = as_link.appointment_i
 LEFT JOIN public."user" u ON as_link.specialist_id = u.id
 WHERE a.user_id = $1 
 AND a.status_order = true
+AND a.address != 'Presencial en el Salón de Belleza'
 GROUP BY 
     a.id,
     a.services,
@@ -48,6 +51,7 @@ GROUP BY
     a.status_order,
     a.paid,
     a.address,
+    a.point,
     a.amount,
     a.scheduled_date,
     a.reference_payment
@@ -81,6 +85,7 @@ export const ObtainNonActiveCustomerService = async (userID) => {
     a.status_order,
     a.paid,
     a.address,
+    a.point,
     a.amount,
     a.scheduled_date,
     a.reference_payment,
@@ -113,6 +118,7 @@ GROUP BY
     a.status_order,
     a.paid,
     a.address,
+    a.point,
     a.amount,
     a.scheduled_date,
     a.reference_payment
@@ -125,6 +131,380 @@ LIMIT 10`,
     return rows.length > 0 ? rows : null;
   } catch (error) {
     console.log({ error: error.message });
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const getServices = async () => {
+  const client = await pool.connect();
+
+  try {
+    const query = {
+      text: `
+        WITH service_details AS (
+  SELECT 
+    a.id AS appointment_id,
+    CAST(service->>'id' AS BIGINT) AS service_id,
+    CAST(service->>'quantity' AS INTEGER) AS total_quantity
+  FROM public.appointment a,
+  jsonb_array_elements(a.services::jsonb) AS service
+),
+service_assignments AS (
+  SELECT 
+    appointment_id, 
+    service_id, 
+    SUM(sessions_assigned) AS total_assigned
+  FROM appointment_specialists
+  GROUP BY appointment_id, service_id
+),
+order_status AS (
+  SELECT
+    sd.appointment_id,
+    SUM(sd.total_quantity) AS total_required_sessions,
+    COALESCE(SUM(sa.total_assigned), 0) AS total_assigned_sessions
+  FROM service_details sd
+  LEFT JOIN service_assignments sa
+    ON sd.appointment_id = sa.appointment_id
+    AND sd.service_id = sa.service_id
+  GROUP BY sd.appointment_id
+)
+SELECT 
+  a.id,
+  a.services,
+  a.status_id,
+  status_class.classification_type AS status_name,
+  payment_class.classification_type AS payment_method_name,
+  a.status_order,
+  a.paid,
+  a.address,
+  a.point,
+  a.amount,
+  a.scheduled_date,
+  a.reference_payment,
+  a.start_appointment,
+  a.end_appointment,
+  u.name AS client_name,
+  u.lastname AS client_lastname,
+  u.telephone_number AS client_phone
+FROM public.appointment a
+LEFT JOIN public.classification status_class 
+  ON a.status_id = status_class.id
+LEFT JOIN public.classification payment_class 
+  ON a.payment_method = payment_class.id
+LEFT JOIN public.user u
+  ON a.user_id = u.id
+JOIN order_status os
+  ON a.id = os.appointment_id
+WHERE a.status_order = true
+  AND a.address != 'Presencial en el Salón de Belleza'
+  AND os.total_assigned_sessions < os.total_required_sessions -- Solo muestra si faltan sesiones
+ORDER BY a.scheduled_date DESC;
+      `,
+    };
+    const { rows } = await client.query(query);
+    return rows.length > 0 ? rows : null;
+  } catch (error) {
+    console.log({ error: error.message });
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const getSpecialistAssignedServices = async (specialistId) => {
+  const client = await pool.connect();
+
+  try {
+    const query = {
+      text: `
+        SELECT 
+            a.id AS appointment_id,
+            a.services,
+            a.status_id,
+            a.start_appointment,
+            a.end_appointment,
+            a.address,
+            a.point,
+            a.scheduled_date,
+            status_class.classification_type AS status_name,
+            u.name AS client_name,
+            u.lastname AS client_lastname,
+            u.telephone_number AS client_phone,
+            JSON_AGG(
+                JSON_BUILD_OBJECT(
+                    'service_id', as_spec.service_id,
+                    'sessions_assigned', as_spec.sessions_assigned,
+                    'service_title', (
+                        SELECT classification_type 
+                        FROM public.classification 
+                        WHERE id = as_spec.service_id
+                    )
+                )
+            ) AS assigned_services
+        FROM 
+            appointment_specialists as_spec
+        JOIN 
+            appointment a ON a.id = as_spec.appointment_id
+        JOIN 
+            "user" u ON u.id = a.user_id
+        JOIN 
+            classification status_class ON status_class.id = a.status_id
+        WHERE 
+            as_spec.specialist_id = $1
+            AND a.status_order = true
+            AND a.status_id NOT IN (
+                SELECT id 
+                FROM classification 
+                WHERE classification_type = 'Final del servicio'
+            )
+        GROUP BY 
+            a.id,
+            a.services,
+            a.status_id,
+            status_class.classification_type,
+            u.name,
+            u.lastname,
+            u.telephone_number
+        ORDER BY 
+            CAST(
+                JSON_BUILD_OBJECT('start', SPLIT_PART(a.scheduled_date::json->>'start', ',', 1)) AS json
+            )->>'start' DESC;
+      `,
+      values: [specialistId],
+    };
+
+    const { rows } = await client.query(query);
+
+    // Procesar los servicios para cada cita
+    const processedRows = rows.map((row) => {
+      const services = JSON.parse(row.services);
+      const assignedServices = row.assigned_services.map((as) => {
+        const serviceDetails = services.find((s) => s.id === as.service_id);
+        return {
+          ...serviceDetails,
+          sessions_assigned: as.sessions_assigned,
+          service_title: as.service_title,
+        };
+      });
+
+      return {
+        ...row,
+        services: assignedServices,
+      };
+    });
+
+    return processedRows;
+  } catch (error) {
+    console.log("Error en getSpecialistAssignedServices:", error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const updateAppointmentStatus = async (
+  appointmentId,
+  status,
+  specialistId
+) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // Obtener el ID del estado desde classification
+    const statusQuery = `
+      SELECT id
+      FROM classification
+      WHERE classification_type = $1
+    `;
+    const {
+      rows: [statusRow],
+    } = await client.query(statusQuery, [status]);
+
+    if (!statusRow) {
+      throw new Error("Estado no válido");
+    }
+
+    // Actualizar el estado en appointment_specialists
+    const updateQuery = `
+      UPDATE appointment_specialists
+      SET status_id = $1
+      WHERE appointment_id = $2 AND specialist_id = $3
+      RETURNING *
+    `;
+    const {
+      rows: [updatedRow],
+    } = await client.query(updateQuery, [
+      statusRow.id,
+      appointmentId,
+      specialistId,
+    ]);
+
+    if (!updatedRow) {
+      throw new Error(
+        "No se pudo actualizar el estado en appointment_specialists"
+      );
+    }
+
+    // Si es "Inicio del servicio", actualizamos el timestamp de inicio en appointment
+    if (status === "Inicio del servicio") {
+      await client.query(
+        `
+          UPDATE appointment
+          SET start_appointment = CURRENT_TIMESTAMP
+          WHERE id = $1
+        `,
+        [appointmentId]
+      );
+    } else if (status === "Final del servicio") {
+      await client.query(
+        `
+          UPDATE appointment
+          SET end_appointment = CURRENT_TIMESTAMP
+          WHERE id = $1
+        `,
+        [appointmentId]
+      );
+    }
+
+    await client.query("COMMIT");
+    return updatedRow;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const createRating = async (userId, appointmentId, rating, ratedBy) => {
+  const client = await pool.connect();
+
+  try {
+    const query = `
+      INSERT INTO ratings (
+        user_id, 
+        appointment_id, 
+        rating, 
+        rated_by
+      ) VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `;
+
+    const { rows } = await client.query(query, [
+      userId,
+      appointmentId,
+      rating,
+      ratedBy,
+    ]);
+
+    // Update user's score if needed
+    await updateUserScore(userId);
+
+    return rows[0];
+  } catch (error) {
+    console.error("Error creating rating:", error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const updateUserScore = async (userId) => {
+  const client = await pool.connect();
+
+  try {
+    const query = `
+      UPDATE "user" u
+      SET score = (
+        SELECT AVG(rating) 
+        FROM ratings 
+        WHERE user_id = $1
+      )
+      WHERE id = $1
+    `;
+
+    await client.query(query, [userId]);
+  } catch (error) {
+    console.error("Error updating user score:", error);
+  } finally {
+    client.release();
+  }
+};
+
+export const checkAppointmentStatus = async (appointmentId) => {
+  const client = await pool.connect();
+
+  try {
+    const query = `
+      SELECT 1 
+      FROM appointment_specialists 
+      WHERE appointment_id = $1 AND status_id = 73
+    `;
+
+    const { rows } = await client.query(query, [appointmentId]);
+    return rows.length > 0;
+  } catch (error) {
+    console.error("Error checking appointment status:", error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const createRatingAndUpdateAppointment = async (
+  userId,
+  appointmentId,
+  rating,
+  ratedBy
+) => {
+  const client = await pool.connect();
+
+  try {
+    // Start transaction
+    await client.query("BEGIN");
+
+    // Insert rating
+    const ratingQuery = `
+      INSERT INTO ratings (
+        user_id, 
+        appointment_id, 
+        rating, 
+        rated_by
+      ) VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `;
+
+    const { rows: ratingRows } = await client.query(ratingQuery, [
+      userId,
+      appointmentId,
+      rating,
+      ratedBy,
+    ]);
+
+    // Update appointment status_order to false
+    const updateAppointmentQuery = `
+      UPDATE appointment 
+      SET status_order = false 
+      WHERE id = $1
+    `;
+
+    await client.query(updateAppointmentQuery, [appointmentId]);
+
+    // Update user score
+    await updateUserScore(userId);
+
+    // Commit transaction
+    await client.query("COMMIT");
+
+    return ratingRows[0];
+  } catch (error) {
+    // Rollback transaction in case of error
+    await client.query("ROLLBACK");
+    console.error("Error creating rating and updating appointment:", error);
     throw error;
   } finally {
     client.release();

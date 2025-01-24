@@ -10,6 +10,7 @@ export const InsertCard = async ({
   address,
   amount,
   referencePayment,
+  coordenadas,
 }) => {
   const client = await pool.connect();
   try {
@@ -27,12 +28,13 @@ export const InsertCard = async ({
           address, 
           payment_method, 
           amount,
-          reference_payment
+          reference_payment,
+          point
         ) VALUES ($1, $2, 
           (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
           $3::json, $4, $5, $6, $7, $8, 
           (SELECT id FROM public.classification WHERE classification_type = 'tarjeta'),
-          $9, $10)
+          $9, $10, $11)
         RETURNING *;
       `,
       values: [
@@ -46,6 +48,7 @@ export const InsertCard = async ({
         address,
         amount,
         referencePayment,
+        coordenadas,
       ],
     };
 
@@ -70,6 +73,7 @@ export const InsertCash = async ({
   address,
   amount,
   referencePayment,
+  coordenadas,
 }) => {
   const client = await pool.connect();
   try {
@@ -87,13 +91,14 @@ export const InsertCash = async ({
           address, 
           payment_method, 
           amount,
-          reference_payment
+          reference_payment,
+          point
         ) VALUES (
           $1, $2,
           (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
           $3, $4, $5, $6, $7, $8, 
           (SELECT id FROM public.classification WHERE classification_type = 'efectivo'),
-          $9, $10
+          $9, $10,$11
         )
         RETURNING *;
       `,
@@ -108,6 +113,7 @@ export const InsertCash = async ({
         address,
         amount,
         referencePayment,
+        coordenadas,
       ],
     };
 
@@ -132,6 +138,7 @@ export const InsertMobilePayment = async ({
   address,
   amount,
   referencePayment,
+  coordenadas,
 }) => {
   const client = await pool.connect();
   try {
@@ -149,13 +156,14 @@ export const InsertMobilePayment = async ({
           address, 
           payment_method, 
           amount,
-          reference_payment
+          reference_payment,
+          point
         ) VALUES (
           $1, $2,
           (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
           $3, $4, $5, $6, $7, $8, 
           (SELECT id FROM public.classification WHERE classification_type = 'pago móvil'),
-          $9, $10
+          $9, $10,$11
         )
         RETURNING *;
       `,
@@ -170,6 +178,7 @@ export const InsertMobilePayment = async ({
         address,
         amount,
         referencePayment,
+        coordenadas,
       ],
     };
 

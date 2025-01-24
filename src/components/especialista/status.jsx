@@ -1,45 +1,134 @@
-import React, { useState } from "react"
-import styles from "./status.module.css"
-import { Check, Star } from "lucide-react"
+import React, { useState, useEffect } from "react";
+import styles from "./status.module.css";
+import { Check, Star } from "lucide-react";
+import axios from "axios";
+import { getJWT } from "../middlewares/getToken.jsx";
+import { jwtDecode } from "jwt-decode";
 
-function Status({ data }) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [specialist, setSpecialist] = useState(null)
-  const [showRating, setShowRating] = useState(false)
-  const [rating, setRating] = useState(0)
+function Status({ data, onStatusUpdate }) {
+  const [currentStep, setCurrentStep] = useState(() => {
+    const storedStep = localStorage.getItem(
+      `currentStep_${data.appointment_id}`
+    );
+    return 0; // Always start at 0 for each new appointment
+  });
+  const [showRating, setShowRating] = useState(false);
+  const [rating, setRating] = useState(0);
 
   const steps = [
-    { label: "Aceptaste el servicio", time: "12:34 p.m." },
-    { label: "En camino", time: "12:56 p.m." },
-    { label: "Inicio del servicio", time: "01:13 p.m." },
-    { label: "Final del servicio", time: "02:15 p.m." },
-  ]
+    { label: "Aceptaste el servicio", status: "Especialista asignado" },
+    { label: "En camino", status: "En camino" },
+    { label: "Inicio del servicio", status: "Inicio del servicio" },
+    { label: "Final del servicio", status: "Final del servicio" },
+  ];
+  useEffect(() => {
+    // Reset current step when appointment_id changes
+    setCurrentStep(0);
+    localStorage.removeItem(`currentStep_${data.appointment_id}`);
+  }, [data.appointment_id]);
 
-  const handleStepClick = (index) => {
+  useEffect(() => {
+    if (currentStep === steps.length - 1) {
+      setShowRating(true);
+    }
+  }, [currentStep]);
+
+  const handleRatingSubmit = async () => {
+    if (!rating) {
+      return alert("Por favor, ingrese una calificación");
+    }
+    if (!data.appointment_id) {
+      return alert("ID de cita inválido");
+    }
+
+    try {
+      const token = getJWT("token");
+      const decodedToken = jwtDecode(token);
+      console.log("Decoded Token:", decodedToken); // Ver el decodedToken
+      const payload = {
+        appointmentId: data.appointment_id,
+        rating: rating,
+        role: decodedToken.role_id,
+        userId: decodedToken.id,
+      };
+      console.log(payload);
+
+      await axios.post(
+        "http://localhost:3000/api/servicios/calificaciones/crear",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Send final status update after rating
+      await axios.post(
+        "http://localhost:3000/api/servicios/actualizar-estado",
+        {
+          appointmentId: data.appointment_id,
+          status: "Final del servicio",
+          specialistId: decodedToken.id,
+        }
+      );
+
+      setCurrentStep(steps.length - 1);
+      setShowRating(false);
+      alert("Calificación enviada exitosamente");
+    } catch (error) {
+      console.error("Full error details:", error.response?.data || error);
+      alert(
+        `Error al enviar la calificación: ${
+          error.response?.data?.error || error.message
+        }`
+      );
+    }
+  };
+
+  const handleStepClick = async (index) => {
     if (index <= currentStep + 1) {
-      setCurrentStep(index)
+      try {
+        const token = getJWT("token");
+        const decodedToken = jwtDecode(token);
 
-      if (index === 1 && !specialist) {
-        setSpecialist({
-          name: data.especialista.nombre,
-          apellido: data.especialista.apellido,
-          rating: data.especialista.calificacion,
-          photo: data.especialista.foto,
-        })
-      }
+        await axios.post(
+          "http://localhost:3000/api/servicios/actualizar-estado",
+          {
+            appointmentId: data.appointment_id,
+            status: steps[index].status,
+            specialistId: decodedToken.id,
+          }
+        );
 
-      if (index === steps.length - 1) {
-        setShowRating(true)
+        setCurrentStep(index);
+
+        // Si es el último paso, mostramos la calificación
+        if (index === steps.length - 1) {
+          setShowRating(true);
+        }
+
+        if (onStatusUpdate) {
+          onStatusUpdate(steps[index].status);
+        }
+      } catch (error) {
+        console.error(
+          "Error al actualizar el estado:",
+          error.response?.data || error
+        );
+        alert("Error al actualizar el estado del servicio");
       }
     }
-  }
+  };
 
   return (
     <div className={styles.statusContainer}>
       {steps.map((step, index) => (
         <div
           key={index}
-          className={`${styles.statusItem} ${index <= currentStep ? styles.completed : ""}`}
+          className={`${styles.statusItem} ${
+            index <= currentStep ? styles.completed : ""
+          }`}
           onClick={() => handleStepClick(index)}
         >
           <div className={styles.checkContainer}>
@@ -47,22 +136,6 @@ function Status({ data }) {
           </div>
           <div className={styles.statusContent}>
             <p className={styles.statusLabel}>{step.label}</p>
-            {index === 1 && specialist && currentStep >= 1 && (
-              <div className={styles.specialistInfo}>
-                <img
-                  src={specialist.photo || "/placeholder.svg"}
-                  alt="Especialista"
-                  className={styles.specialistPhoto}
-                />
-                <div>
-                  <p className={styles.specialistName}>
-                    {specialist.name} {specialist.apellido}
-                  </p>
-                  <p className={styles.specialistRating}>★ {specialist.rating}</p>
-                </div>
-              </div>
-            )}
-            <p className={styles.statusTime}>{step.time}</p>
           </div>
         </div>
       ))}
@@ -74,17 +147,24 @@ function Status({ data }) {
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`${styles.star} ${star <= rating ? styles.active : ""}`}
+                className={`${styles.star} ${
+                  star <= rating ? styles.active : ""
+                }`}
                 onClick={() => setRating(star)}
               />
             ))}
           </div>
-          <button className={styles.button}>Enviar</button>
+          <button
+            className={styles.button}
+            onClick={handleRatingSubmit}
+            disabled={rating === 0}
+          >
+            Enviar
+          </button>
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default Status
-
+export default Status;

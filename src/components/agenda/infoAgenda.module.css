@@ -63,7 +63,7 @@
 }
 
 .sectionContent.open {
-  max-height: 2000px; 
+  max-height: 2000px;
   opacity: 1;
 }
 
@@ -279,4 +279,41 @@
 
 .redirectButton:hover {
   background-color: #ff1493;
+}
+
+/* Add to your existing CSS file */
+.ratingStar {
+  cursor: pointer;
+  color: #e0e0e0;
+  font-size: 1.5rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.ratingStar.selected {
+  color: #ffd700;
+}
+
+.ratingStar:hover {
+  color: #ffd700;
+  transform: scale(1.2) rotate(5deg);
+}
+
+.ratingStar:active {
+  transform: scale(0.9);
+}
+.ratingSuccessMessage {
+  color: #4caf50;
+  font-weight: bold;
+  margin-top: 0.5rem;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
