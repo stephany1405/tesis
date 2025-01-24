@@ -169,7 +169,6 @@ export const assignSpecialist = async (req, res, next) => {
       );
     }
 
-    // Permitir múltiples especialistas si no se han cubierto todas las sesiones
     const insertQuery = `
       INSERT INTO appointment_specialists 
         (appointment_id, specialist_id, service_id, sessions_assigned)
@@ -183,7 +182,6 @@ export const assignSpecialist = async (req, res, next) => {
       sessions,
     ]);
 
-    // Actualizar el estado solo la primera vez que se asigna un especialista
     if (specialistsCount === 0) {
       const statusQuery = `
         SELECT id FROM classification 
@@ -246,13 +244,11 @@ export const createRatingController = async (req, res) => {
   try {
     const { appointmentId, rating, role, userId } = req.body;
 
-    // Verificaciones
     if (!appointmentId)
       return res.status(400).json({ error: "appointmentId es requerido" });
     if (!rating) return res.status(400).json({ error: "rating es requerido" });
     if (!role) return res.status(400).json({ error: "role es requerido" });
     if (!userId) return res.status(400).json({ erro: "userId es requerido" });
-    // Verificar token
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
       return res
@@ -260,7 +256,6 @@ export const createRatingController = async (req, res) => {
         .json({ error: "Token no proporcionado o inválido" });
     }
 
-    // Verificar el rol
     let ratedBy;
     if (role === "57") ratedBy = "cliente";
     else if (role === "58") ratedBy = "especialista";
@@ -268,7 +263,6 @@ export const createRatingController = async (req, res) => {
 
     console.log(`Rol del usuario: ${ratedBy}`);
 
-    // Crear la calificación
     const newRating = await createRating(
       userId,
       appointmentId,
@@ -301,7 +295,6 @@ export const getStatusService = async (req, res) => {
   const { appointmentId, specialistId } = req.params;
 
   try {
-    // Consulta SQL directa
     const query = `
       SELECT status_id
       FROM appointment_specialists
@@ -344,12 +337,10 @@ export const createRatingController2 = async (req, res) => {
   try {
     const { appointmentId, rating, role, userId } = req.body;
 
-    // Validate required fields
     if (!appointmentId || !rating || !role || !userId) {
       return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
 
-    // Verify authorization token
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
       return res
@@ -357,13 +348,11 @@ export const createRatingController2 = async (req, res) => {
         .json({ error: "Token no proporcionado o inválido" });
     }
 
-    // Determine rated by role
     let ratedBy;
     if (role === "57") ratedBy = "cliente";
     else if (role === "58") ratedBy = "especialista";
     else return res.status(400).json({ error: "Rol inválido" });
 
-    // Check appointment status before rating
     const appointmentStatus = await checkAppointmentStatus(appointmentId);
     if (!appointmentStatus) {
       return res
@@ -371,7 +360,6 @@ export const createRatingController2 = async (req, res) => {
         .json({ error: "No se puede calificar este servicio" });
     }
 
-    // Create rating and update appointment status
     const result = await createRatingAndUpdateAppointment(
       userId,
       appointmentId,

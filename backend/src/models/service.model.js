@@ -277,7 +277,7 @@ export const getSpecialistAssignedServices = async (specialistId) => {
 
     const { rows } = await client.query(query);
 
-    // Procesar los servicios para cada cita
+
     const processedRows = rows.map((row) => {
       const services = JSON.parse(row.services);
       const assignedServices = row.assigned_services.map((as) => {
@@ -314,7 +314,7 @@ export const updateAppointmentStatus = async (
   try {
     await client.query("BEGIN");
 
-    // Obtener el ID del estado desde classification
+   
     const statusQuery = `
       SELECT id
       FROM classification
@@ -328,7 +328,7 @@ export const updateAppointmentStatus = async (
       throw new Error("Estado no válido");
     }
 
-    // Actualizar el estado en appointment_specialists
+
     const updateQuery = `
       UPDATE appointment_specialists
       SET status_id = $1
@@ -349,7 +349,7 @@ export const updateAppointmentStatus = async (
       );
     }
 
-    // Si es "Inicio del servicio", actualizamos el timestamp de inicio en appointment
+   
     if (status === "Inicio del servicio") {
       await client.query(
         `
@@ -401,7 +401,6 @@ export const createRating = async (userId, appointmentId, rating, ratedBy) => {
       ratedBy,
     ]);
 
-    // Update user's score if needed
     await updateUserScore(userId);
 
     return rows[0];
@@ -464,10 +463,10 @@ export const createRatingAndUpdateAppointment = async (
   const client = await pool.connect();
 
   try {
-    // Start transaction
+
     await client.query("BEGIN");
 
-    // Insert rating
+
     const ratingQuery = `
       INSERT INTO ratings (
         user_id, 
@@ -485,7 +484,6 @@ export const createRatingAndUpdateAppointment = async (
       ratedBy,
     ]);
 
-    // Update appointment status_order to false
     const updateAppointmentQuery = `
       UPDATE appointment 
       SET status_order = false 
@@ -494,15 +492,12 @@ export const createRatingAndUpdateAppointment = async (
 
     await client.query(updateAppointmentQuery, [appointmentId]);
 
-    // Update user score
     await updateUserScore(userId);
 
-    // Commit transaction
     await client.query("COMMIT");
 
     return ratingRows[0];
   } catch (error) {
-    // Rollback transaction in case of error
     await client.query("ROLLBACK");
     console.error("Error creating rating and updating appointment:", error);
     throw error;

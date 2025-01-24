@@ -10,7 +10,7 @@ function Status({ data, onStatusUpdate }) {
     const storedStep = localStorage.getItem(
       `currentStep_${data.appointment_id}`
     );
-    return 0; // Always start at 0 for each new appointment
+    return 0;
   });
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
@@ -103,7 +103,6 @@ function Status({ data, onStatusUpdate }) {
 
         setCurrentStep(index);
 
-        // Si es el último paso, mostramos la calificación
         if (index === steps.length - 1) {
           setShowRating(true);
         }
