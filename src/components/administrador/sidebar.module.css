@@ -1,0 +1,142 @@
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background: #ffffff;
+  color: #000;
+  transition: all 0.3s ease;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.collapsed {
+  width: 80px;
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebarTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  color: rgb(253, 148, 222);
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  color: #000;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.toggleButton:hover {
+  transform: scale(1.2);
+}
+
+.sidebarNav {
+  flex-grow: 1;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.sidebarMenu {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebarMenuItem {
+  margin-bottom: 10px;
+}
+
+.sidebarMenuLink {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #000000;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin: 0 10px;
+}
+
+
+.sidebarMenuLink.active {
+  background-color: rgb(252, 11, 192);
+  color: #fff;
+  transform: translateX(5px);
+}
+
+.sidebarMenuLink svg {
+  margin-right: 15px;
+  width: 20px;
+  height: 20px;
+}
+
+.sidebarMenuLink span {
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.sidebarFooter {
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarFooterLink {
+  display: flex;
+  align-items: center;
+  color: #000;
+  text-decoration: none;
+  padding: 10px 0;
+  transition: all 0.3s ease;
+}
+
+.sidebarFooterLink:hover {
+  transform: translateX(5px);
+}
+
+.sidebarFooterLink svg {
+  margin-right: 15px;
+  width: 20px;
+  height: 20px;
+}
+
+.sidebarFooterLink span {
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* Scrollbar styles */
+.sidebarNav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebarNav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
