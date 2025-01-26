@@ -336,14 +336,37 @@ export const updateAppointmentStatus = async (
   try {
     await client.query("BEGIN");
 
+    const appointmentQuery = `
+      SELECT amount, services
+      FROM appointment
+      WHERE id = $1
+    `;
+    const { rows: [appointmentDetails] } = await client.query(appointmentQuery, [appointmentId]);
+
+    const totalAmount = parseFloat(appointmentDetails.amount.replace('$', '').trim());
+
+    const systemShare = totalAmount * 0.2;
+    const specialistShare = totalAmount * 0.8;
+
+
+    const specialistsQuery = `
+      SELECT DISTINCT specialist_id
+      FROM appointment_specialists
+      WHERE appointment_id = $1
+    `;
+    const { rows: specialistsRows } = await client.query(specialistsQuery, [appointmentId]);
+    const totalSpecialists = specialistsRows.length;
+
+    const individualSpecialistEarnings = totalSpecialists > 0
+      ? (specialistShare / totalSpecialists).toFixed(2)
+      : 0;
+
     const statusQuery = `
       SELECT id
       FROM classification
       WHERE classification_type = $1
     `;
-    const {
-      rows: [statusRow],
-    } = await client.query(statusQuery, [status]);
+    const { rows: [statusRow] } = await client.query(statusQuery, [status]);
 
     if (!statusRow) {
       throw new Error("Estado no válido");
@@ -351,16 +374,17 @@ export const updateAppointmentStatus = async (
 
     const updateQuery = `
       UPDATE appointment_specialists
-      SET status_id = $1
-      WHERE appointment_id = $2 AND specialist_id = $3
+      SET 
+        status_id = $1,
+        earnings = $2
+      WHERE appointment_id = $3 AND specialist_id = $4
       RETURNING *
     `;
-    const {
-      rows: [updatedRow],
-    } = await client.query(updateQuery, [
+    const { rows: [updatedRow] } = await client.query(updateQuery, [
       statusRow.id,
+      individualSpecialistEarnings,
       appointmentId,
-      specialistId,
+      specialistId
     ]);
 
     if (!updatedRow) {
@@ -369,23 +393,16 @@ export const updateAppointmentStatus = async (
       );
     }
 
-    if (status === "Inicio del servicio") {
+    if (status === "Final del servicio") {
       await client.query(
         `
           UPDATE appointment_specialists
-          SET start_appointment = CURRENT_TIMESTAMP
-          WHERE appointment_id = $1
+          SET 
+            end_appointment = CURRENT_TIMESTAMP,
+            earnings = $1
+          WHERE appointment_id = $2
         `,
-        [appointmentId]
-      );
-    } else if (status === "Final del servicio") {
-      await client.query(
-        `
-          UPDATE appointment_specialists
-          SET end_appointment = CURRENT_TIMESTAMP
-          WHERE appointment_id = $1
-        `,
-        [appointmentId]
+        [individualSpecialistEarnings, appointmentId]
       );
     }
 

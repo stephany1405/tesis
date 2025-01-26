@@ -5,51 +5,66 @@ import { Star, Lock, Unlock, Trash2 } from "lucide-react"
 const ClientModal = ({ client, onClose }) => {
   const [isBlocked, setIsBlocked] = useState(false)
 
-  // This is mock data. In a real application, you would fetch this data based on the client.id
-  const clientDetails = {
-    ...client,
-    identification: "1234567890",
-    phone: "+1 234 567 8900",
-    email: "cliente@example.com",
-    rating: 4, // Add a rating property
-    serviceHistory: [
-      {
-        date: "14-05-2024",
-        service: "Manicura",
-        price: "$30",
-        especialista: "tu mama",
-        startTime: "10:00",
-        endTime: "11:30",
-        address: "123 Main St, Anytown, AT 12345",
+  const handleLocationClick = (service) => {
+    try {
+      const point = service.point ? JSON.parse(service.point) : null;
+      if (point && point.lat && point.lng) {
+        const url = `https://www.google.com/maps/search/?api=1&query=${point.lat},${point.lng}`;
+        window.open(url, "_blank");
+      } else {
+        console.error("Invalid location coordinates");
+      }
+    } catch (error) {
+      console.error("Error parsing location", error);
+    }
+  };
 
-      },
-      {
-        date: "19-06-2004",
-        service: "Pedicura",
-        price: "$35",
-        especialista: "tu abuela",
-        startTime: "14:00",
-        endTime: "15:30",
-        address: "123 Main St, Anytown, AT 12345",
-
-      },
-      {
-        date: "01-01-2025",
-        service: "Diseño de uñas",
-        price: "$40",
-        especialista: "tu tia",
-        startTime: "16:00",
-        endTime: "17:30",
-        address: "123 Main St, Anytown, AT 12345",
-      },
-    ],
+  const blockClient = async () => {
+    try {
+      await axios.put("http://localhost:3000/api/bloqueo-usuario", {
+        id: client.id
+      });
+      setIsBlocked(true);
+    } catch (error) {
+      console.error("Error bloqueando cliente", error)
+    }
   }
 
-  const handleBlock = () => setIsBlocked(true)
-  const handleUnblock = () => setIsBlocked(false)
+  const unblockClient = async () => {
+    try {
+      await axios.put("http://localhost:3000/api/desbloqueo-usuario", {
+        id: client.id
+      });
+      setIsBlocked(false);
+    } catch (error) {
+      console.error("Error desbloqueando cliente", error)
+    }
+  }
+
+  const parseAppointmentServices = (servicesString) => {
+    try {
+      return JSON.parse(servicesString || '[]')
+    } catch (error) {
+      return []
+    }
+  }
+
+  const serviceHistory = client.appointment_services
+    ? parseAppointmentServices(client.appointment_services).map(service => ({
+      date: client.service_date ? JSON.parse(client.service_date).start : 'N/A',
+      service: service.title,
+      price: `$${service.price}`,
+      especialista: `${client.specialist_name} ${client.specialist_lastname}`,
+      startTime: client.service_date ? JSON.parse(client.service_date).start.split(', ')[2] : 'N/A',
+      endTime: client.service_date ? JSON.parse(client.service_date).end : 'N/A',
+      address: client.service_address || 'N/A',
+      point: client.service_point || 'N/A',
+      rating: client.service_rating || 'N/A'
+    }))
+    : []
+
   const handleDelete = () => {
-    // Implement delete functionality here
-    console.log("Delete client:", client.id)
+    console.log("Delete client:", client.specialist_id)
     onClose()
   }
 
@@ -60,13 +75,29 @@ const ClientModal = ({ client, onClose }) => {
           &times;
         </button>
         <div className={styles.clientHeader}>
-          <img src={client.image || "/placeholder.svg"} alt={client.name} className={styles.clientImage} />
+          <img
+            src={
+              client.specialist_image
+                ? `http://localhost:3000${client.specialist_image}`
+                : `https://i.pravatar.cc/300?img=${client.id}`
+            }
+            alt={`${client.name} ${client.lastname}`}
+            className={styles.clientImage}
+          />
           <div>
             <h2>
-              {clientDetails.name} {clientDetails.lastName}
+              {client.specialist_name} {client.specialist_lastname}
               <span className={styles.rating}>
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={i < clientDetails.rating ? styles.starFilled : styles.starEmpty} size={20} />
+                  <Star
+                    key={i}
+                    className={
+                      i < (parseFloat(client.specialist_rating) || 0)
+                        ? styles.starFilled
+                        : styles.starEmpty
+                    }
+                    size={16}
+                  />
                 ))}
               </span>
             </h2>
@@ -75,25 +106,25 @@ const ClientModal = ({ client, onClose }) => {
         </div>
         <div className={styles.clientInfo}>
           <p>
-            <strong>Identificación:</strong> {clientDetails.identification}
+            <strong>Identificación:</strong> {client.specialist_identification}
           </p>
           <p>
-            <strong>Teléfono:</strong> {clientDetails.phone}
+            <strong>Teléfono:</strong> {client.specialist_phone}
           </p>
           <p>
-            <strong>Correo:</strong> {clientDetails.email}
+            <strong>Correo:</strong> {client.specialist_email}
           </p>
           <p>
-            <strong>Especialidad:</strong> {clientDetails.specialty}
+            <strong>Especialidad:</strong> {client.specialist_specialty || 'N/A'}
           </p>
         </div>
         <div className={styles.actionButtons}>
           {!isBlocked ? (
-            <button onClick={handleBlock} className={styles.blockButton}>
+            <button onClick={blockClient} className={styles.blockButton}>
               <Lock size={16} /> Bloquear
             </button>
           ) : (
-            <button onClick={handleUnblock} className={styles.unblockButton}>
+            <button onClick={unblockClient} className={styles.unblockButton}>
               <Unlock size={16} /> Desbloquear
             </button>
           )}
@@ -106,14 +137,14 @@ const ClientModal = ({ client, onClose }) => {
                 <th>Fecha</th>
                 <th>Servicio</th>
                 <th>Ganancia</th>
-                <th>Cliente</th>
+                <th>Especialista</th>
                 <th>Hora Inicio</th>
                 <th>Hora Fin</th>
                 <th>Dirección</th>
               </tr>
             </thead>
             <tbody>
-              {clientDetails.serviceHistory.map((service, index) => (
+              {serviceHistory.map((service, index) => (
                 <tr key={index}>
                   <td>{service.date}</td>
                   <td>{service.service}</td>
@@ -121,7 +152,14 @@ const ClientModal = ({ client, onClose }) => {
                   <td>{service.especialista}</td>
                   <td>{service.startTime}</td>
                   <td>{service.endTime}</td>
-                  <td>{service.address}</td>
+                  <td>
+                    <button
+                      onClick={() => handleLocationClick(service)}
+                      disabled={!service.point}
+                    >
+                      Ubicación
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -133,4 +171,3 @@ const ClientModal = ({ client, onClose }) => {
 }
 
 export default ClientModal
-

@@ -136,7 +136,11 @@ const Bolsa = () => {
   );
 
   const iva = subtotal * 0.16;
-  const total = subtotal + iva;
+
+
+  const domicilio = isHomeService ? 5 : 0;
+
+  const total = subtotal + iva + domicilio;
 
   const handleMobilePayment = async () => {
     alert(
@@ -356,9 +360,8 @@ const Bolsa = () => {
                     Seleccionar Todo
                   </button>
                   <button
-                    className={`${styles.homeServiceButton} ${
-                      isHomeService ? styles.active : ""
-                    }`}
+                    className={`${styles.homeServiceButton} ${isHomeService ? styles.active : ""
+                      }`}
                     onClick={toggleHomeService}
                   >
                     {isHomeService ? "Desactivar" : "Activar"} Servicio a
@@ -387,6 +390,12 @@ const Bolsa = () => {
                   <span>IVA:</span>
                   <span>${iva.toFixed(2)}</span>
                 </div>
+                {isHomeService && (
+                  <div className={styles.summaryRow}>
+                    <span>Domicilio:</span>
+                    <span>${domicilio.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className={`${styles.summaryRow} ${styles.total}`}>
                   <span>Total USD:</span>
                   <span>${total.toFixed(2)}</span>
@@ -487,6 +496,12 @@ const Bolsa = () => {
                   <span>IVA:</span>
                   <span>${iva.toFixed(2)}</span>
                 </div>
+                {isHomeService && (
+                  <div className={styles.summaryRow}>
+                    <span>Domicilio:</span>
+                    <span>${domicilio.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className={`${styles.summaryRow} ${styles.total}`}>
                   <span>Total USD:</span>
                   <span>${total.toFixed(2)}</span>
@@ -590,9 +605,8 @@ const Bolsa = () => {
         </div>
         {isHomeService && (
           <div
-            className={`${styles.step} ${
-              checkoutStep >= 3 ? styles.active : ""
-            }`}
+            className={`${styles.step} ${checkoutStep >= 3 ? styles.active : ""
+              }`}
           >
             Ubicación
           </div>

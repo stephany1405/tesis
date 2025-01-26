@@ -2,6 +2,8 @@ import React, { useState, forwardRef } from "react"
 import { IMaskInput } from "react-imask"
 import styles from "./registro.module.css"
 import { X } from "lucide-react"
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const TextMaskCustom2 = forwardRef(function TextMaskCustom2(props, ref) {
   const { onChange, ...other } = props
@@ -37,7 +39,8 @@ const Registro = ({ onClose, onSubmit }) => {
     specialties: [],
   })
   const [error, setError] = useState("")
-
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -58,8 +61,11 @@ const Registro = ({ onClose, onSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      // Aquí puedes agregar la lógica de validación si es necesario
-      onSubmit(formData)
+      const response = axios.post("http://localhost:3000/api/registro-especialista", formData)
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/administrador");
+      }, 2000);
     } catch (error) {
       console.error("Error al registrar:", error)
       setError("Error al registrar. Por favor, inténtelo de nuevo.")
@@ -75,6 +81,9 @@ const Registro = ({ onClose, onSubmit }) => {
         <form className={styles.form} onSubmit={handleSubmit}>
           <h2 className={styles.formTitle}>Registrar Nuevo Especialista</h2>
           {error && <p className={styles.error}>{error}</p>}
+          {success && (
+            <p className={styles.success}>Registrado exitosamente.</p>
+          )}
           <div className={styles.formGroup}>
             <label htmlFor="name" className={styles.label}>
               Nombre

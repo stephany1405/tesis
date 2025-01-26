@@ -79,8 +79,7 @@ function Status({ data, onStatusUpdate }) {
     } catch (error) {
       console.error("Full error details:", error.response?.data || error);
       alert(
-        `Error al enviar la calificación: ${
-          error.response?.data?.error || error.message
+        `Error al enviar la calificación: ${error.response?.data?.error || error.message
         }`
       );
     }
@@ -125,9 +124,8 @@ function Status({ data, onStatusUpdate }) {
       {steps.map((step, index) => (
         <div
           key={index}
-          className={`${styles.statusItem} ${
-            index <= currentStep ? styles.completed : ""
-          }`}
+          className={`${styles.statusItem} ${index <= currentStep ? styles.completed : ""
+            }`}
           onClick={() => handleStepClick(index)}
         >
           <div className={styles.checkContainer}>
@@ -146,9 +144,8 @@ function Status({ data, onStatusUpdate }) {
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`${styles.star} ${
-                  star <= rating ? styles.active : ""
-                }`}
+                className={`${styles.star} ${star <= rating ? styles.active : ""
+                  }`}
                 onClick={() => setRating(star)}
               />
             ))}
