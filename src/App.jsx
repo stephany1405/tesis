@@ -27,6 +27,11 @@ import Sidebar from "./components/administrador/sidebar.jsx"
 import Home from "./components/administrador/home.jsx"
 import Perfiles from "./components/administrador/clientes/perfiles.jsx"
 import PerfilesE from "./components/administrador/especialista/perfilesE.jsx"
+import Servicios from "./components/administrador/servicios/servicios.jsx"
+import Cita from "./components/administrador/citas/cita.jsx"
+import Finanzas from "./components/administrador/finanzas/finananzas.jsx"
+import Estadisticas from "./components/administrador/estadisticas/estadisticas.jsx"
+
 const App = () => {
   const roles = useRoles()
   return (
@@ -181,10 +186,10 @@ const App = () => {
                       <Route index element={<Home />} />
                       <Route path="clientes" element={<div><Perfiles/></div>} />
                       <Route path="especialistas" element={<div><PerfilesE/></div>} />
-                      <Route path="servicios" element={<div>Página de Servicios</div>} />
-                      <Route path="citas" element={<div>Página de Citas</div>} />
-                      <Route path="finanzas" element={<div>Página de Finanzas</div>} />
-                      <Route path="estadisticas" element={<div>Página de Estadísticas</div>} />
+                      <Route path="servicios" element={<div><Servicios/></div>} />
+                      <Route path="citas" element={<div><Cita/></div>} />
+                      <Route path="finanzas" element={<div><Finanzas/></div>} />
+                      <Route path="estadisticas" element={<div><Estadisticas/></div>} />
                     </Routes>
                   </div>
                 </div>

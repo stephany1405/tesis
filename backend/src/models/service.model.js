@@ -6,13 +6,13 @@ export const getServiceActiveClient = async (userID) => {
   try {
     const query = {
       text: `
-        SELECT 
+       SELECT 
     a.id,
     a.services,
     status_class.classification_type as status_name,
     payment_class.classification_type as payment_method_name,
-    a.start_appointment,
-    a.end_appointment,
+    as_link.start_appointment,
+    as_link.end_appointment,
     a.status_order,
     a.paid,
     a.address,
@@ -32,29 +32,29 @@ export const getServiceActiveClient = async (userID) => {
             )
         ) FILTER (WHERE u.id IS NOT NULL),
         '[]'
-    ) as specialists
-FROM public.appointment a
-LEFT JOIN public.classification status_class ON a.status_id = status_class.id
-LEFT JOIN public.classification payment_class ON a.payment_method = payment_class.id
-LEFT JOIN public.appointment_specialists as_link ON a.id = as_link.appointment_id
-LEFT JOIN public."user" u ON as_link.specialist_id = u.id
+    ) as specialists 
+FROM public.appointment a 
+LEFT JOIN public.classification status_class ON a.status_id = status_class.id 
+LEFT JOIN public.classification payment_class ON a.payment_method = payment_class.id 
+LEFT JOIN public.appointment_specialists as_link ON a.id = as_link.appointment_id 
+LEFT JOIN public."user" u ON as_link.specialist_id = u.id 
 WHERE a.user_id = $1 
-AND a.status_order = true
-AND a.address != 'Presencial en el Salón de Belleza'
+AND a.status_order = true 
+AND a.address != 'Presencial en el Salón de Belleza' 
 GROUP BY 
     a.id,
     a.services,
     status_class.classification_type,
     payment_class.classification_type,
-    a.start_appointment,
-    a.end_appointment,
+    as_link.start_appointment,
+    as_link.end_appointment,
     a.status_order,
     a.paid,
     a.address,
     a.point,
     a.amount,
     a.scheduled_date,
-    a.reference_payment
+    a.reference_payment 
 ORDER BY a.scheduled_date DESC
       `,
       values: [parseInt(userID, 10)],
@@ -80,8 +80,8 @@ export const ObtainNonActiveCustomerService = async (userID) => {
     a.services,
     status_class.classification_type as status_name,
     payment_class.classification_type as payment_method_name,
-    a.start_appointment,
-    a.end_appointment,
+    as_link.start_appointment,
+    as_link.end_appointment,
     a.status_order,
     a.paid,
     a.address,
@@ -92,6 +92,7 @@ export const ObtainNonActiveCustomerService = async (userID) => {
     COALESCE(
         json_agg(
             json_build_object(
+                'id', u.id,
                 'name', u.name,
                 'lastname', u.lastname,
                 'telephone_number', u.telephone_number,
@@ -100,28 +101,28 @@ export const ObtainNonActiveCustomerService = async (userID) => {
             )
         ) FILTER (WHERE u.id IS NOT NULL),
         '[]'
-    ) as specialists
-FROM public.appointment a
-LEFT JOIN public.classification status_class ON a.status_id = status_class.id
-LEFT JOIN public.classification payment_class ON a.payment_method = payment_class.id
-LEFT JOIN public.appointment_specialists as_link ON a.id = as_link.appointment_id
-LEFT JOIN public."user" u ON as_link.specialist_id = u.id
+    ) as specialists 
+FROM public.appointment a 
+LEFT JOIN public.classification status_class ON a.status_id = status_class.id 
+LEFT JOIN public.classification payment_class ON a.payment_method = payment_class.id 
+LEFT JOIN public.appointment_specialists as_link ON a.id = as_link.appointment_id 
+LEFT JOIN public."user" u ON as_link.specialist_id = u.id 
 WHERE a.user_id = $1 
-AND a.status_order = false
+AND a.status_order = false 
 GROUP BY 
     a.id,
     a.services,
     status_class.classification_type,
     payment_class.classification_type,
-    a.start_appointment,
-    a.end_appointment,
+    as_link.start_appointment,
+    as_link.end_appointment,
     a.status_order,
     a.paid,
     a.address,
     a.point,
     a.amount,
     a.scheduled_date,
-    a.reference_payment
+    a.reference_payment 
 ORDER BY a.scheduled_date DESC
 LIMIT 10`,
       values: [parseInt(userID, 10)],
@@ -183,8 +184,8 @@ SELECT
   a.amount,
   a.scheduled_date,
   a.reference_payment,
-  a.start_appointment,
-  a.end_appointment,
+  aspec.start_appointment, -- Directamente desde appointment_specialists
+  aspec.end_appointment,   -- Directamente desde appointment_specialists
   u.name AS client_name,
   u.lastname AS client_lastname,
   u.telephone_number AS client_phone
@@ -195,11 +196,31 @@ LEFT JOIN public.classification payment_class
   ON a.payment_method = payment_class.id
 LEFT JOIN public.user u
   ON a.user_id = u.id
+LEFT JOIN public.appointment_specialists aspec
+  ON a.id = aspec.appointment_id -- Unir con appointment_specialists
 JOIN order_status os
   ON a.id = os.appointment_id
 WHERE a.status_order = true
   AND a.address != 'Presencial en el Salón de Belleza'
   AND os.total_assigned_sessions < os.total_required_sessions -- Solo muestra si faltan sesiones
+GROUP BY 
+  a.id,
+  a.services,
+  a.status_id,
+  status_class.classification_type,
+  payment_class.classification_type,
+  a.status_order,
+  a.paid,
+  a.address,
+  a.point,
+  a.amount,
+  a.scheduled_date,
+  a.reference_payment,
+  aspec.start_appointment, -- Incluir en el GROUP BY
+  aspec.end_appointment,   -- Incluir en el GROUP BY
+  u.name,
+  u.lastname,
+  u.telephone_number
 ORDER BY a.scheduled_date DESC;
       `,
     };
@@ -220,63 +241,64 @@ export const getSpecialistAssignedServices = async (specialistId) => {
     const query = {
       text: `
         SELECT 
-            a.id AS appointment_id,
-            a.services,
-            a.status_id,
-            a.start_appointment,
-            a.end_appointment,
-            a.address,
-            a.point,
-            a.scheduled_date,
-            status_class.classification_type AS status_name,
-            u.name AS client_name,
-            u.lastname AS client_lastname,
-            u.telephone_number AS client_phone,
-            JSON_AGG(
-                JSON_BUILD_OBJECT(
-                    'service_id', as_spec.service_id,
-                    'sessions_assigned', as_spec.sessions_assigned,
-                    'service_title', (
-                        SELECT classification_type 
-                        FROM public.classification 
-                        WHERE id = as_spec.service_id
-                    )
-                )
-            ) AS assigned_services
-        FROM 
-            appointment_specialists as_spec
-        JOIN 
-            appointment a ON a.id = as_spec.appointment_id
-        JOIN 
-            "user" u ON u.id = a.user_id
-        JOIN 
-            classification status_class ON status_class.id = a.status_id
-        WHERE 
-            as_spec.specialist_id = $1
-            AND a.status_order = true
-            AND a.status_id NOT IN (
-                SELECT id 
-                FROM classification 
-                WHERE classification_type = 'Final del servicio'
+    a.id AS appointment_id,
+    a.services,
+    a.status_id,
+    as_spec.start_appointment, -- Desde appointment_specialists
+    as_spec.end_appointment,   -- Desde appointment_specialists
+    a.address,
+    a.point,
+    a.scheduled_date,
+    status_class.classification_type AS status_name,
+    u.name AS client_name,
+    u.lastname AS client_lastname,
+    u.telephone_number AS client_phone,
+    JSON_AGG(
+        JSON_BUILD_OBJECT(
+            'service_id', as_spec.service_id,
+            'sessions_assigned', as_spec.sessions_assigned,
+            'service_title', (
+                SELECT classification_type 
+                FROM public.classification 
+                WHERE id = as_spec.service_id
             )
-        GROUP BY 
-            a.id,
-            a.services,
-            a.status_id,
-            status_class.classification_type,
-            u.name,
-            u.lastname,
-            u.telephone_number
-        ORDER BY 
-            CAST(
-                JSON_BUILD_OBJECT('start', SPLIT_PART(a.scheduled_date::json->>'start', ',', 1)) AS json
-            )->>'start' DESC;
+        )
+    ) AS assigned_services
+FROM 
+    appointment_specialists as_spec
+JOIN 
+    appointment a ON a.id = as_spec.appointment_id
+JOIN 
+    "user" u ON u.id = a.user_id
+JOIN 
+    classification status_class ON status_class.id = a.status_id
+WHERE 
+    as_spec.specialist_id = $1
+    AND a.status_order = true
+    AND a.status_id NOT IN (
+        SELECT id 
+        FROM classification 
+        WHERE classification_type = 'Final del servicio'
+    )
+GROUP BY 
+    a.id,
+    a.services,
+    a.status_id,
+    status_class.classification_type,
+    u.name,
+    u.lastname,
+    u.telephone_number,
+    as_spec.start_appointment, -- Incluir en el GROUP BY
+    as_spec.end_appointment    -- Incluir en el GROUP BY
+ORDER BY 
+    CAST(
+        JSON_BUILD_OBJECT('start', SPLIT_PART(a.scheduled_date::json->>'start', ',', 1)) AS json
+    )->>'start' DESC;
       `,
       values: [specialistId],
     };
 
     const { rows } = await client.query(query);
-
 
     const processedRows = rows.map((row) => {
       const services = JSON.parse(row.services);
@@ -314,7 +336,6 @@ export const updateAppointmentStatus = async (
   try {
     await client.query("BEGIN");
 
-   
     const statusQuery = `
       SELECT id
       FROM classification
@@ -327,7 +348,6 @@ export const updateAppointmentStatus = async (
     if (!statusRow) {
       throw new Error("Estado no válido");
     }
-
 
     const updateQuery = `
       UPDATE appointment_specialists
@@ -349,22 +369,21 @@ export const updateAppointmentStatus = async (
       );
     }
 
-   
     if (status === "Inicio del servicio") {
       await client.query(
         `
-          UPDATE appointment
+          UPDATE appointment_specialists
           SET start_appointment = CURRENT_TIMESTAMP
-          WHERE id = $1
+          WHERE appointment_id = $1
         `,
         [appointmentId]
       );
     } else if (status === "Final del servicio") {
       await client.query(
         `
-          UPDATE appointment
+          UPDATE appointment_specialists
           SET end_appointment = CURRENT_TIMESTAMP
-          WHERE id = $1
+          WHERE appointment_id = $1
         `,
         [appointmentId]
       );
@@ -463,9 +482,7 @@ export const createRatingAndUpdateAppointment = async (
   const client = await pool.connect();
 
   try {
-
     await client.query("BEGIN");
-
 
     const ratingQuery = `
       INSERT INTO ratings (

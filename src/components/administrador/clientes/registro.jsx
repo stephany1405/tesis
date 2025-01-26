@@ -1,23 +1,24 @@
-import React, { useState, forwardRef } from "react"
-import { IMaskInput } from "react-imask"
-import styles from "./registro.module.css"
-import { X } from "lucide-react"
-
+import React, { useState, forwardRef } from "react";
+import { IMaskInput } from "react-imask";
+import styles from "./registro.module.css";
+import { X } from "lucide-react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const TextMaskCustom2 = forwardRef(function TextMaskCustom2(props, ref) {
-  const { onChange, ...other } = props
+  const { onChange, ...other } = props;
   return (
     <IMaskInput
       {...other}
       mask="00000000"
       inputRef={ref}
       onAccept={(value, mask) => {
-        onChange({ target: { name: props.name, value: mask._unmaskedValue } })
+        onChange({ target: { name: props.name, value: mask._unmaskedValue } });
       }}
       overwrite
       className={styles.input}
     />
-  )
-})
+  );
+});
 
 const Registro = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -28,26 +29,33 @@ const Registro = ({ onClose, onSubmit }) => {
     telephone_number: "",
     password: "",
     date_of_birth: "",
-  })
-  const [error, setError] = useState("")
-
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      // Aquí puedes agregar la lógica de validación si es necesario
-      onSubmit(formData)
+      const response = axios.post(
+        "http://localhost:3000/api/registro-cliente",
+        formData
+      );
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/administrador");
+      }, 2000);
     } catch (error) {
-      console.error("Error al registrar:", error)
-      setError("Error al registrar. Por favor, inténtelo de nuevo.")
+      console.error("Error al registrar:", error);
+      setError("Error al registrar. Por favor, inténtelo de nuevo.");
     }
-  }
+  };
 
   return (
     <div className={styles.formOverlay}>
@@ -58,6 +66,9 @@ const Registro = ({ onClose, onSubmit }) => {
         <form className={styles.form} onSubmit={handleSubmit}>
           <h2 className={styles.formTitle}>Registrar Nuevo Cliente</h2>
           {error && <p className={styles.error}>{error}</p>}
+          {success && (
+            <p className={styles.success}>Registrado exitosamente.</p>
+          )}
           <div className={styles.formGroup}>
             <label htmlFor="name" className={styles.label}>
               Nombre
@@ -160,8 +171,7 @@ const Registro = ({ onClose, onSubmit }) => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Registro
-
+export default Registro;

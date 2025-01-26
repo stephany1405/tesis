@@ -228,12 +228,10 @@ export const updateStatus = async (req, res, next) => {
       specialistId
     );
 
-    res
-      .status(200)
-      .json({
-        status: updatedStatus,
-        message: "Estado actualizado correctamente",
-      });
+    res.status(200).json({
+      status: updatedStatus,
+      message: "Estado actualizado correctamente",
+    });
   } catch (error) {
     console.error("Error al actualizar estado:", error);
     res.status(500).json({ error: error.message });

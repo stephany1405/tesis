@@ -102,6 +102,7 @@ function Agenda() {
     return (
       <div className={styles.noActiveServicesContainer}>
         No hay servicios activos
+        <Historial />
       </div>
     );
   }

@@ -19,7 +19,6 @@ export default function Notificaciones() {
         "http://localhost:3000/api/servicios/clientes"
       );
       const { data } = response;
-      console.log(data);
       if (!data || data.length === 0) {
         setNotifications([]);
         return;

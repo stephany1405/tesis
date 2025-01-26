@@ -50,7 +50,6 @@ function ServicesStatus() {
   };
 
   if (loading) return <div>Cargando servicios...</div>;
-  console.log(services);
   if (!services.length) {
     return (
       <div className={styles.container}>
