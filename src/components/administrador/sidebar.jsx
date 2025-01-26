@@ -15,14 +15,40 @@ import {
   LogOut,
 } from "lucide-react"
 import styles from "./Sidebar.module.css"
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed)
   }
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/usuario/logout"
+      );
+
+      if (response.status === 200) {
+        localStorage.clear();
+        Cookies.remove("token", { path: "/" });
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+        console.log("Sesión cerrada correctamente.");
+        navigate("/login");
+      } else {
+        console.error("Error al cerrar sesión:", response.data);
+      }
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+    console.log("Cerrando sesión...");
+  };
 
   const menuItems = [
     { icon: <Home size={20} />, label: "Inicio", path: "/administrador" },
@@ -59,7 +85,7 @@ const Sidebar = () => {
         </ul>
       </nav>
       <div className={styles.sidebarFooter}>
-        <Link to="/logout" className={styles.sidebarFooterLink}>
+        <Link className={styles.sidebarFooterLink} onClick={handleLogout}>
           <LogOut size={20} />
           {!isCollapsed && <span>Cerrar Sesión</span>}
         </Link>
