@@ -124,7 +124,7 @@ const Bolsa = () => {
     return cartItems.reduce((total, item, index) => {
       if (selectedItems[index] && item.duration) {
         const duration = parseDuration(item.duration);
-        return total + duration ;
+        return total + duration;
       }
       return total;
     }, 0);
@@ -201,6 +201,9 @@ const Bolsa = () => {
             dirección:
               selectedLocation?.address || "Presencial en el Salón de Belleza",
             referencePayment: paymentReference,
+            coordenadas:
+              selectedLocation?.coordinates ||
+              "{'latitud':10.493435, 'longitud': -66.878370}",
           },
           {
             headers: {
@@ -286,7 +289,10 @@ const Bolsa = () => {
             cita: appointmentData,
             dirección:
               selectedLocation?.address || "Presencial en el Salón de Belleza",
-            referencePayment: 'efectivo'
+            referencePayment: "efectivo",
+            coordenadas:
+              selectedLocation?.coordinates ||
+              "{'latitud':10.493435, 'longitud': -66.878370}",
           },
           {
             headers: {
@@ -312,8 +318,11 @@ const Bolsa = () => {
     setSelectedDate(dateInfo);
   };
 
-  const handleLocationSelect = (location) => {
-    setSelectedLocation(location);
+  const handleLocationSelect = (locationData) => {
+    setSelectedLocation({
+      address: locationData.address,
+      coordinates: locationData.coordinates,
+    });
   };
 
   const nextStep = () => {
@@ -417,7 +426,10 @@ const Bolsa = () => {
               />
             ) : (
               <div className={styles.noLocationRequired}>
-                <p>No se requiere ubicación para este servicio.</p>
+                <p>
+                  No se requiere ubicación para este servicio por que
+                  seleccionaste ir al salón de belleza.
+                </p>
                 <button className={styles.nextButton} onClick={nextStep}>
                   Siguiente
                 </button>
@@ -541,7 +553,10 @@ const Bolsa = () => {
                     selectedItems={selectedItems}
                     resetCart={resetCart}
                     selectedAppointment={selectedAppointmentData}
-                    deliveryAddress={selectedLocation?.address || null}
+                    addressAppointment={selectedLocation?.address || null}
+                    appointmentCoordinates={
+                      selectedLocation?.coordinates || null
+                    }
                   />
                 </Elements>
               )}

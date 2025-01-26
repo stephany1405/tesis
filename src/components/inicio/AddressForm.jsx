@@ -1,251 +1,242 @@
-import React, { useState, useMemo,useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import axios from "axios";
+import debounce from "lodash/debounce";
 import styles from "./bolsa.module.css";
+import "leaflet/dist/leaflet.css";
+import "../inicio/hooks/mapIcon.js";
 
-export const AddressForm = ({ onLocationSelect, onFormValidityChange }) => {
-  const [formData, setFormData] = useState({
-    estado: "Distrito Capital",
-    municipio: "Libertador",
-    parroquia: "",
-    tipoVia: "",
-    nombreVia: "",
-    tipoInmueble: "",
-    nombreInmueble: "",
-    numeroHabitacion: "",
-    tipoZona: "",
-    nombreZona: "",
-    referencia: "",
-  });
-  const parroquias = [
-    "Santa Rosalía",
-    "El Valle",
-    "Coche",
-    "Caricuao",
-    "Macarao",
-    "Antímano",
-    "La Vega",
-    "El Paraíso",
-    "El Junquito",
-    "Sucre (Catia)",
-    "San Juan",
-    "Santa Teresa",
-    "23 de enero",
-    "La Pastora",
-    "Altagracia",
-    "San José",
-    "San Bernardino",
-    "Catedral",
-    "Candelaria",
-    "San Agustín",
-    "El Recreo",
-    "San Pedro",
-  ];
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const isFormValid = () => {
-    return Object.values(formData).every((value) => value.trim() !== "");
-  };
-
-  const isFormFilled = useMemo(() => {
-    return Object.values(formData).some((val) => val.trim() !== "");
-  }, [formData]);
+function MapController({ center, zoom }) {
+  const map = useMap();
 
   useEffect(() => {
-    onFormValidityChange(isFormValid());
-  }, [formData, onFormValidityChange]);
+    if (center) {
+      map.setView(center, zoom || 13);
+      map.invalidateSize();
+    }
+  }, [center, zoom, map]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!isFormValid()) return;
-    const direccionCompleta =
-      `${formData.estado}, ${formData.municipio}, ${formData.parroquia}, 
-      ${formData.tipoVia} ${formData.nombreVia}, 
-      ${formData.tipoInmueble} ${formData.nombreInmueble} #${formData.numeroHabitacion}, 
-      ${formData.tipoZona} ${formData.nombreZona}, Referencia ${formData.referencia}`
-        .replace(/\s+/g, " ")
-        .trim();
+  return null;
+}
 
-    onLocationSelect({ address: direccionCompleta });
+export const AddressForm = ({
+  onLocationSelect,
+  onFormValidityChange = () => {},
+}) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("");
+  const [mapKey, setMapKey] = useState(0);
+
+  const defaultCenter = [10.4806, -66.9036]; // Caracas
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMapKey((prev) => prev + 1);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Efecto para validar el formulario cuando cambia la ubicación seleccionada
+  useEffect(() => {
+    onFormValidityChange(!!selectedLocation);
+  }, [selectedLocation, onFormValidityChange]);
+
+  const getAddressSuggestions = debounce(async (query) => {
+    if (!query) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/geocode/search",
+        {
+          params: { q: query },
+        }
+      );
+      setSuggestions(Array.isArray(response.data) ? response.data : []);
+    } catch (err) {
+      console.error("Error buscando direcciones:", err);
+      setError("Error al buscar direcciones");
+      setSuggestions([]);
+    }
+  }, 300);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setError("");
+    getAddressSuggestions(e.target.value);
+  };
+
+  const handleSelectLocation = (location) => {
+    const coords = {
+      lat: parseFloat(location.lat),
+      lng: parseFloat(location.lon),
+    };
+
+    setSelectedLocation({
+      ...coords,
+      address: location.display_name,
+    });
+
+    setSuggestions([]);
+    setSearchQuery(location.display_name);
+    setMapKey((prev) => prev + 1);
+
+    onLocationSelect({
+      address: location.display_name,
+      coordinates: coords,
+    });
+  };
+
+  const handleGetCurrentLocation = async () => {
+    setIsLoading(true);
+    setError("");
+    setLoadingText("Obteniendo tu ubicación...");
+
+    try {
+      if (!navigator.geolocation) {
+        throw new Error("Tu navegador no soporta geolocalización");
+      }
+
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        });
+      });
+
+      setLoadingText("Buscando dirección...");
+
+      const response = await axios.get(
+        "http://localhost:3000/api/geocode/reverse",
+        {
+          params: {
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          },
+        }
+      );
+
+      if (!response.data || !response.data.display_name) {
+        throw new Error("No se pudo obtener la dirección de la ubicación");
+      }
+
+      const locationData = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        address: response.data.display_name,
+      };
+
+      setSelectedLocation(locationData);
+      setSearchQuery(response.data.display_name);
+      setMapKey((prev) => prev + 1);
+
+      onLocationSelect({
+        address: response.data.display_name,
+        coordinates: {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        },
+      });
+    } catch (err) {
+      console.error("Error detallado:", err);
+      if (err.code === 1) {
+        setError(
+          "Permiso de ubicación denegado. Por favor habilita el acceso a tu ubicación."
+        );
+      } else if (err.code === 2) {
+        setError(
+          "No se pudo obtener la ubicación. Asegúrate de tener el GPS activado y estar conectado a internet."
+        );
+      } else if (err.code === 3) {
+        setError("Tiempo de espera agotado. Por favor intenta de nuevo.");
+      } else {
+        setError(err.message || "Error al obtener la ubicación");
+      }
+    } finally {
+      setIsLoading(false);
+      setLoadingText("");
+    }
   };
 
   return (
     <div className={styles.addressFormContainer}>
-      <form onSubmit={handleSubmit} className={styles.addressForm}>
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <label htmlFor="estado">Estado:</label>
-            <input
-              type="text"
-              id="estado"
-              name="estado"
-              value={formData.estado}
-              readOnly
-              className={styles.inputReadOnly}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="municipio">Municipio:</label>
-            <input
-              type="text"
-              id="municipio"
-              name="municipio"
-              value={formData.municipio}
-              readOnly
-              className={styles.inputReadOnly}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="parroquia">Parroquia:</label>
-            <select
-              id="parroquia"
-              name="parroquia"
-              value={formData.parroquia}
-              onChange={handleInputChange}
-              required
-              className={styles.inputText}
-            >
-              <option value="">Seleccione una parroquia</option>
-              {parroquias.map((parroquia) => (
-                <option key={parroquia} value={parroquia}>
-                  {parroquia}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>Tipo de Vía:</label>
-          <div className={styles.radioGroup}>
-            {["Calle", "Avenida", "Vereda", "Carretera", "Esquina"].map(
-              (tipo) => (
-                <label key={tipo} className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    name="tipoVia"
-                    value={tipo}
-                    checked={formData.tipoVia === tipo}
-                    onChange={handleInputChange}
-                    required
-                  />
-                  {tipo}
-                </label>
-              )
-            )}
-          </div>
+      <div className={styles.searchContainer}>
+        <div className={styles.inputWrapper}>
           <input
             type="text"
-            name="nombreVia"
-            value={formData.nombreVia}
-            onChange={handleInputChange}
-            placeholder={`Nombre de ${formData.tipoVia || "la vía"}`}
-            className={styles.inputText}
-            required
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Buscar dirección..."
+            className={styles.searchInput}
+            disabled={isLoading}
           />
+          <button
+            onClick={handleGetCurrentLocation}
+            disabled={isLoading}
+            className={styles.locationButton}
+          >
+            {isLoading ? loadingText : "Mi Ubicación"}
+          </button>
         </div>
 
-        <div className={styles.formGroup}>
-          <label>Tipo de Inmueble:</label>
-          <div className={styles.radioGroup}>
-            {["Edificio", "Centro Comercial", "Quinta", "Casa", "Local"].map(
-              (tipo) => (
-                <label key={tipo} className={styles.radioLabel}>
-                  <input
-                    type="radio"
-                    name="tipoInmueble"
-                    value={tipo}
-                    checked={formData.tipoInmueble === tipo}
-                    onChange={handleInputChange}
-                    required
-                  />
-                  {tipo}
-                </label>
-              )
-            )}
-          </div>
-          <div className={styles.formRow}>
-            <input
-              type="text"
-              name="nombreInmueble"
-              value={formData.nombreInmueble}
-              onChange={handleInputChange}
-              placeholder={`Nombre del ${formData.tipoInmueble || "inmueble"}`}
-              className={styles.inputText}
-              required
-            />
-            <input
-              type="text"
-              name="numeroHabitacion"
-              value={formData.numeroHabitacion}
-              onChange={handleInputChange}
-              placeholder="Número/Letra de habitación"
-              className={styles.inputText}
-              required
-            />
-          </div>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>Tipo de Zona:</label>
-          <div className={styles.radioGroup}>
-            {[
-              "Urbanización",
-              "Zona",
-              "Sector",
-              "Conjunto Residencial",
-              "Barrio",
-            ].map((tipo) => (
-              <label key={tipo} className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="tipoZona"
-                  value={tipo}
-                  checked={formData.tipoZona === tipo}
-                  onChange={handleInputChange}
-                  required
-                />
-                {tipo}
-              </label>
+        {suggestions.length > 0 && (
+          <div className={styles.suggestionsContainer}>
+            {suggestions.map((suggestion) => (
+              <div
+                key={suggestion.place_id}
+                onClick={() => handleSelectLocation(suggestion)}
+                className={styles.suggestionItem}
+              >
+                {suggestion.display_name}
+              </div>
             ))}
           </div>
-          <input
-            type="text"
-            name="nombreZona"
-            value={formData.nombreZona}
-            onChange={handleInputChange}
-            placeholder={`Nombre de ${formData.tipoZona || "la zona"}`}
-            className={styles.inputText}
-            required
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="referencia">Referencia:</label>
-          <textarea
-            name="referencia"
-            id="referencia"
-            value={formData.referencia}
-            onChange={handleInputChange}
-            placeholder={`Introducir una ${
-              formData.referencia || "referencia"
-            } de la zona donde se ubica.`}
-            className={styles.textareabag}
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className={styles.submitButton}
-          disabled={!isFormValid() || !isFormFilled}
+        )}
+
+        {error && <div className={styles.errorMessage}>{error}</div>}
+      </div>
+
+      <div className={styles.mapContainer}>
+        <MapContainer
+          key={mapKey}
+          center={
+            selectedLocation
+              ? [selectedLocation.lat, selectedLocation.lng]
+              : defaultCenter
+          }
+          zoom={13}
+          style={{ height: "500px", width: "100%" }}
+          whenCreated={(map) => {
+            setTimeout(() => {
+              map.invalidateSize();
+            }, 100);
+          }}
         >
-          Confirmar Dirección
-        </button>
-      </form>
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          />
+
+          {selectedLocation && (
+            <Marker position={[selectedLocation.lat, selectedLocation.lng]} />
+          )}
+          <MapController
+            center={
+              selectedLocation
+                ? [selectedLocation.lat, selectedLocation.lng]
+                : null
+            }
+            zoom={13}
+          />
+        </MapContainer>
+      </div>
     </div>
   );
 };

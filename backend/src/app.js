@@ -11,6 +11,8 @@ import orderRouter from "./routes/order.router.js";
 import dolarBCV from "./routes/bcv.router.js";
 import rolesRouter from "./routes/roles.router.js";
 import profileRouter from "./routes/profile.router.js";
+import geoRouter from "./routes/geocode.router.js";
+import userRouter from "./routes/users.router.js";
 
 import { errorHandler } from "./middlewares/catch.middleware.js";
 
@@ -60,6 +62,8 @@ app.use("/api/orden", orderRouter);
 app.use("/api", dolarBCV);
 app.use("/api", rolesRouter);
 app.use("/api", profileRouter);
+app.use("/api", geoRouter);
+app.use("/api", userRouter);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.get("/", (req, res) => {
   res.send(`Hello !`);

@@ -1,0 +1,94 @@
+/* ServiceSelection.module.css */
+.selectionContainer {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.selectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.totalSessions {
+  color: #666;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.serviceCard {
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.serviceCard:hover {
+  border-color: #0066cc;
+}
+
+.serviceCard.selected {
+  border-color: #0066cc;
+  background-color: #f0f7ff;
+}
+
+.serviceCard h4 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.serviceCard p {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.sessionSelector {
+  margin: 1rem 0;
+}
+
+.sessionSelector label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.sessionSelector input {
+  width: 100%;
+  max-width: 200px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.acceptButton {
+  padding: 0.5rem 1rem;
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.acceptButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.acceptButton:hover:not(:disabled) {
+  background-color: #0052a3;
+}

@@ -9,7 +9,8 @@ export const CheckOutForm = ({
   selectedItems,
   resetCart,
   selectedAppointment,
-  deliveryAddress
+  addressAppointment,
+  appointmentCoordinates
 }) => {
   const { handleSubmit, loading, error } = useCheckout(
     total,
@@ -17,7 +18,8 @@ export const CheckOutForm = ({
     selectedItems,
     resetCart,
     selectedAppointment,
-    deliveryAddress 
+    addressAppointment,
+    appointmentCoordinates 
   );
 
   return (

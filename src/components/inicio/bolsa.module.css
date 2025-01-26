@@ -466,9 +466,8 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Añade o actualiza estas clases en tu archivo CSS */
 .fc .fc-timegrid-slot {
-  height: 40px !important; /* Altura fija para todos los slots */
+  height: 40px !important;
   min-height: 40px !important;
   border-bottom: 1px solid #ddd !important;
 }
@@ -579,111 +578,116 @@
   border-radius: 4px;
 }
 
+/* css de mapa */
 .addressFormContainer {
-  max-width: 800px;
+  width: 100%;
+  max-width: 64rem;
   margin: 0 auto;
-  padding: 20px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
-.addressFormContainerr {
+
+.searchContainer {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  word-wrap: break-word;
-  white-space: pre-wrap;
-}
-@media (max-width: 768px) {
-  .addressContainerr {
-    font-size: 14px;
-    padding: 8px;
-  }
-}
-.addressForm {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  position: relative;
 }
 
-.formGroup {
+.inputWrapper {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
+  width: 100%;
 }
 
-.formRow {
-  display: flex;
-  gap: 16px;
-}
-
-.formRow > * {
+.searchInput {
   flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  font-size: 1rem;
 }
 
-.radioGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.radioLabel {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-}
-
-.inputText,
-.inputReadOnly {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ff4fa7;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.inputReadOnly {
-  background-color: #f5f5f5;
+.searchInput:disabled {
+  background-color: #f3f4f6;
   cursor: not-allowed;
 }
 
-.submitButton {
-  padding: 12px 24px;
-  background-color: #4f46e5;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+.locationButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
-.submitButton:disabled {
-  background-color: #9ca3af;
+.locationButton:not(:disabled) {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.locationButton:not(:disabled):hover {
+  background-color: #2563eb;
+}
+
+.locationButton:disabled {
+  background-color: #d1d5db;
   cursor: not-allowed;
 }
 
-.submitButton:hover:not(:disabled) {
-  background-color: #4338ca;
-}
-
-.radioGroup input[type="radio"] {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-}
-
-.textareabag {
+.suggestionsContainer {
+  position: absolute;
+  z-index: 1000; /* Aumentado para asegurar que esté por encima del mapa */
   width: 100%;
-  height: 100px;
-  resize: none;
-  padding: 8px 12px;
-  border: 1px solid #ff4fa7;
-  border-radius: 4px;
-  font-size: 16px;
+  margin-top: 0.25rem;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
+
+.suggestionItem {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.suggestionItem:hover {
+  background-color: #f3f4f6;
+}
+
+.errorMessage {
+  margin-top: 0.5rem;
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+.mapContainer {
+  position: relative;
+  width: 100%;
+  height: 500px; /* Altura fija */
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+/* Estilos específicos para el mapa de Leaflet */
+.mapContainer :global(.leaflet-container) {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Asegurarse de que los controles del mapa estén por encima */
+.mapContainer :global(.leaflet-control) {
+  z-index: 2;
+}
+
+/* Asegurarse de que los popups estén por encima */
+.mapContainer :global(.leaflet-popup) {
+  z-index: 3;
+}
+/* termina */
+
 .orderSummaryContainer {
   display: flex;
   justify-content: space-between;
@@ -692,7 +696,7 @@
 }
 
 .orderSummary {
-  flex: 2; /* Más espacio para el resumen */
+  flex: 2;
   background-color: #f5f5f5;
   padding: 15px;
   border-radius: 8px;
@@ -798,7 +802,7 @@
 }
 
 .appointmentDetails {
-  background-color: #f9f9f9; 
+  background-color: #f9f9f9;
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -824,7 +828,7 @@
 }
 
 .appointmentDetails p:nth-child(3) {
-  color: #27ae60; 
+  color: #27ae60;
   font-weight: bold;
 }
 

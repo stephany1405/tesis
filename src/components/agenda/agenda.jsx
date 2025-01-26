@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Agenda.module.css";
-import Status from "./Status";
 import InfoAgenda from "./infoAgenda";
 import Historial from "./Historial";
 import { getJWT } from "../middlewares/getToken.jsx";
@@ -30,7 +29,7 @@ function Agenda() {
           }
         );
         const data = response.data;
-
+        console.log(data);
         if (data && typeof data === "object" && !Array.isArray(data)) {
           const servicioFormateado = {
             id: data.id,
@@ -39,9 +38,10 @@ function Agenda() {
             hora: data.start_appointment,
             duracionTotal: data.end_appointment,
             ubicacion: data.address,
-            formaPago: data.payment_method,
+            coordenadas: data.coordenadas,
+            formaPago: data.payment_method_name,
             monto: data.amount,
-            estado: data.status_id,
+            estado: data.status_name,
             referenciaPago: data.reference_payment,
             especialistas: data.specialists || [],
           };
@@ -54,9 +54,10 @@ function Agenda() {
             hora: servicio.start_appointment,
             duracionTotal: servicio.end_appointment,
             ubicacion: servicio.address,
-            formaPago: servicio.payment_method,
+            coordenadas: servicio.coordenadas,
+            formaPago: servicio.payment_method_name,
             monto: servicio.amount,
-            estado: servicio.status_id,
+            estado: servicio.status_name,
             referenciaPago: servicio.reference_payment,
             especialistas: servicio.specialists || [],
           }));
@@ -80,8 +81,6 @@ function Agenda() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "status":
-        return <Status data={serviciosActivos} />;
       case "agenda":
         return <InfoAgenda data={serviciosActivos} />;
       case "historial":
@@ -94,7 +93,6 @@ function Agenda() {
   if (loading)
     return <div className={styles.loadingContainer}>Cargando...</div>;
   if (error) return <div className={styles.errorContainer}>{error}</div>;
-  console.log(serviciosActivos);
 
   const hasActiveServices =
     serviciosActivos.length > 0 &&
@@ -104,6 +102,7 @@ function Agenda() {
     return (
       <div className={styles.noActiveServicesContainer}>
         No hay servicios activos
+        <Historial />
       </div>
     );
   }
@@ -111,14 +110,6 @@ function Agenda() {
   return (
     <div className={styles.container}>
       <div className={styles.tabButtons}>
-        <button
-          className={`${styles.tabButton} ${
-            activeTab === "status" ? styles.active : ""
-          }`}
-          onClick={() => setActiveTab("status")}
-        >
-          Estatus
-        </button>
         <button
           className={`${styles.tabButton} ${
             activeTab === "agenda" ? styles.active : ""

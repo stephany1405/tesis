@@ -3,7 +3,7 @@ import styles from "./perfil.module.css";
 import axios from "axios";
 import { getJWT } from "../middlewares/getToken";
 import { jwtDecode } from "jwt-decode";
-import { FaUser, FaEnvelope, FaPhone, FaIdCard, FaLock } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaIdCard, FaLock } from "react-icons/fa";
 import Telefono from "../Mascaras/telefono";
 
 const Profile = () => {
@@ -70,7 +70,11 @@ const Profile = () => {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setUserData({ ...userData, [name]: value.replace(/\D/g, '') });
+    if (name === "telephone_number") {
+      setUserData({ ...userData, [name]: value.replace(/\D/g, "") });
+    } else {
+      setUserData({ ...userData, [name]: value });
+    }
   };
 
   const handleImageChange = async (event) => {
@@ -139,8 +143,52 @@ const Profile = () => {
 
   const handleSecurityQuestionChange = async (event) => {
     event.preventDefault();
-    // Implement the logic to change the security question
-    alert("Funcionalidad de cambio de pregunta de seguridad aún no implementada");
+
+    if (
+      !userData.securityQuestion ||
+      !userData.securityAnswer ||
+      !userData.confirmSecurityAnswer
+    ) {
+      alert("Por favor, complete todos los campos.");
+      return;
+    }
+
+    if (userData.securityAnswer !== userData.confirmSecurityAnswer) {
+      alert("La respuesta a la pregunta de seguridad no coincide.");
+      return;
+    }
+
+    try {
+      const token = getJWT("token");
+
+      const response = await axios.put(
+        `http://localhost:3000/api/profile/${decodedUserId}/securityQuestion`,
+        {
+          securityQuestion: userData.securityQuestion,
+          securityAnswer: userData.securityAnswer,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert(response.data.message);
+      await getUserData(decodedUserId);
+      setUserData({
+        ...userData,
+        securityQuestion: "",
+        securityAnswer: "",
+        confirmSecurityAnswer: "",
+      });
+    } catch (error) {
+      console.error("Error al cambiar la pregunta de seguridad:", error);
+      alert(
+        error.response?.data?.message ||
+          "Error al cambiar la pregunta de seguridad."
+      );
+    }
   };
 
   return (
@@ -148,7 +196,9 @@ const Profile = () => {
       <h1 className={styles.title}>Perfil de Usuario</h1>
 
       <div className={styles.section}>
-        <h2><FaUser /> Información Personal</h2>
+        <h2>
+          <FaUser /> Información Personal
+        </h2>
         <img
           src={
             userData.picture_profile
@@ -185,7 +235,9 @@ const Profile = () => {
       </div>
 
       <div className={styles.section}>
-        <h2><FaEnvelope /> Datos de Contacto</h2>
+        <h2>
+          <FaEnvelope /> Datos de Contacto
+        </h2>
         <div className={styles.infoItem}>
           <span className={styles.infoLabel}>Teléfono:</span>
           {isEditing ? (
@@ -196,7 +248,9 @@ const Profile = () => {
               className={styles.input}
             />
           ) : (
-            <span className={styles.infoValue}>{userData.telephone_number}</span>
+            <span className={styles.infoValue}>
+              {userData.telephone_number}
+            </span>
           )}
         </div>
         <div className={styles.infoItem}>
@@ -207,7 +261,9 @@ const Profile = () => {
 
       {isEditing && (
         <div className={styles.section}>
-          <h2><FaLock /> Cambiar Contraseña</h2>
+          <h2>
+            <FaLock /> Cambiar Contraseña
+          </h2>
           <form onSubmit={handlePasswordChange}>
             <input
               type="password"
@@ -245,26 +301,34 @@ const Profile = () => {
 
       {isEditing && (
         <div className={styles.section}>
-          <h2><FaIdCard /> Cambiar pregunta de seguridad</h2>
+          <h2>
+            <FaIdCard /> Cambiar pregunta de seguridad
+          </h2>
           <form onSubmit={handleSecurityQuestionChange}>
             <input
               type="text"
               placeholder="Nueva pregunta de seguridad"
               name="securityQuestion"
+              value={userData.securityQuestion}
+              onChange={handleChange}
               className={styles.input}
               required
             />
             <input
               type="text"
               placeholder="Respuesta"
+              value={userData.securityAnswer}
               name="securityAnswer"
+              onChange={handleChange}
               className={styles.input}
               required
             />
             <input
               type="text"
               placeholder="Confirmar nueva respuesta"
+              value={userData.confirmSecurityAnswer}
               name="confirmSecurityAnswer"
+              onChange={handleChange}
               className={styles.input}
               required
             />
@@ -276,11 +340,12 @@ const Profile = () => {
       )}
 
       <button onClick={handleEdit} className={styles.editButton}>
-        {isEditing ? "Guardar Cambios" : "Modificar Información y gestionar contraseñas"}
+        {isEditing
+          ? "Guardar Cambios"
+          : "Modificar Información y gestionar contraseñas"}
       </button>
     </div>
   );
 };
 
 export default Profile;
-

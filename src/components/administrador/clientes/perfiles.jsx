@@ -1,49 +1,67 @@
-import React, { useState, useMemo } from "react"
-import styles from "./Perfiles.module.css"
-import ClientModal from "./clientModal"
-import Registro from "./registro"
-import { Search, UserPlus } from "lucide-react"
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import styles from "./Perfiles.module.css";
+import ClientModal from "./clientModal";
+import Registro from "./registro";
+import { Search, UserPlus } from "lucide-react";
 
 const ClientProfiles = () => {
-  const [selectedClient, setSelectedClient] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false)
-  const [clients, setClients] = useState([
-    { id: 1, name: "Ana García", image: "https://i.pravatar.cc/300?img=1" },
-    { id: 2, name: "Carlos Rodríguez", image: "https://i.pravatar.cc/300?img=2" },
-    { id: 3, name: "María López", image: "https://i.pravatar.cc/300?img=3" },
-    { id: 4, name: "Juan Pérez", image: "https://i.pravatar.cc/300?img=4" },
-    { id: 5, name: "Laura Martínez", image: "https://i.pravatar.cc/300?img=5" },
-    { id: 6, name: "Pedro Sánchez", image: "https://i.pravatar.cc/300?img=6" },
-    { id: 7, name: "Sofia Fernández", image: "https://i.pravatar.cc/300?img=7" },
-    { id: 8, name: "Diego Morales", image: "https://i.pravatar.cc/300?img=8" },
-  ])
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/consulta-cliente"
+        );
+        setClients(response.data);
+        setIsLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setIsLoading(false);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   const filteredClients = useMemo(() => {
-    return clients.filter((client) => client.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  }, [clients, searchTerm])
+    return clients.filter(
+      (client) =>
+        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.lastname.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [clients, searchTerm]);
 
-  const handleClientClick = (client) => {
-    setSelectedClient(client)
-  }
-
-  const closeModal = () => {
-    setSelectedClient(null)
-  }
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value)
-  }
-
-  const handleAddClient = () => {
-    setIsRegistrationModalOpen(true)
-  }
+  const handleClientClick = (client) => setSelectedClient(client);
+  const closeModal = () => setSelectedClient(null);
+  const handleSearchChange = (event) => setSearchTerm(event.target.value);
+  const handleAddClient = () => setIsRegistrationModalOpen(true);
 
   const handleSubmitRegistrationForm = (newClient) => {
-    const newId = Math.max(...clients.map((c) => c.id)) + 1
-    setClients([...clients, { ...newClient, id: newId, image: `https://i.pravatar.cc/300?img=${newId}` }])
-    setIsRegistrationModalOpen(false)
-  }
+    const newId =
+      clients.length > 0
+        ? Math.max(...clients.map((c) => parseInt(c.id))) + 1
+        : 1;
+    setClients([
+      ...clients,
+      {
+        ...newClient,
+        id: newId.toString(),
+        picture_profile: `https://i.pravatar.cc/300?img=${newId}`,
+      },
+    ]);
+    setIsRegistrationModalOpen(false);
+  };
+
+  if (isLoading)
+    return <div className={styles.loading}>Cargando clientes...</div>;
+  if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
     <div className={styles.clientProfilesContainer}>
@@ -64,19 +82,37 @@ const ClientProfiles = () => {
           <span>Agregar Cliente</span>
         </div>
         {filteredClients.map((client) => (
-          <div key={client.id} className={styles.clientProfile} onClick={() => handleClientClick(client)}>
-            <img src={client.image || "/placeholder.svg"} alt={client.name} className={styles.clientImage} />
-            <span className={styles.clientName}>{client.name}</span>
+          <div
+            key={client.id}
+            className={styles.clientProfile}
+            onClick={() => handleClientClick(client)}
+          >
+            <img
+              src={
+                client.picture_profile
+                  ? `http://localhost:3000${client.picture_profile}`
+                  : `https://i.pravatar.cc/300?img=${client.id}`
+              }
+              alt={`${client.name} ${client.lastname}`}
+              className={styles.clientImage}
+            />
+            <span className={styles.clientName}>
+              {client.name} {client.lastname}
+            </span>
           </div>
         ))}
       </div>
-      {selectedClient && <ClientModal client={selectedClient} onClose={closeModal} />}
+      {selectedClient && (
+        <ClientModal client={selectedClient} onClose={closeModal} />
+      )}
       {isRegistrationModalOpen && (
-        <Registro onClose={() => setIsRegistrationModalOpen(false)} onSubmit={handleSubmitRegistrationForm} />
+        <Registro
+          onClose={() => setIsRegistrationModalOpen(false)}
+          onSubmit={handleSubmitRegistrationForm}
+        />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ClientProfiles
-
+export default ClientProfiles;

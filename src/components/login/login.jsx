@@ -17,7 +17,6 @@ const Login = () => {
         { email, password },
         { withCredentials: true }
       );
-      console.log("Inicio de sesión exitoso:", response.data);
       localStorage.setItem("token", response.data.token);
       const role = response.data.role;
 

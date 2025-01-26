@@ -17,6 +17,7 @@ export const orderPaymentController = async (req, res) => {
     cita,
     dirección,
     PrecioTotal,
+    coordenadas,
   } = req.body;
 
   try {
@@ -42,13 +43,12 @@ export const orderPaymentController = async (req, res) => {
         user_id: userId,
         services: JSON.stringify(productsWithNotes),
         scheduled_date: cita ? JSON.stringify(cita) : null,
-        start_appointment: null,
-        end_appointment: null,
         status_order: true,
         paid: true,
         address: dirección,
         amount: `${PrecioTotal} $`,
         referencePayment: payment.id,
+        coordenadas: coordenadas,
       };
 
       const newAppointment = await InsertCard(appointmentData);
@@ -82,6 +82,7 @@ export const cashPaymentController = async (req, res) => {
     dirección,
     PrecioTotal,
     referencePayment,
+    coordenadas,
   } = req.body;
 
   try {
@@ -94,13 +95,12 @@ export const cashPaymentController = async (req, res) => {
       user_id: userId,
       services: JSON.stringify(productsWithNotes),
       scheduled_date: cita || null,
-      start_appointment: null,
-      end_appointment: null,
       status_order: true,
       paid: false,
       address: dirección,
       amount: `${PrecioTotal} $`,
       referencePayment,
+      coordenadas: coordenadas,
     });
 
     res.status(200).json({
@@ -127,6 +127,7 @@ export const mobilePaymentController = async (req, res) => {
     dirección,
     PrecioTotal,
     referencePayment,
+    coordenadas,
   } = req.body;
 
   try {
@@ -139,13 +140,12 @@ export const mobilePaymentController = async (req, res) => {
       user_id: userId,
       services: JSON.stringify(productsWithNotes),
       scheduled_date: cita || null,
-      start_appointment: null,
-      end_appointment: null,
       status_order: true,
       paid: true,
       address: dirección,
       amount: `${PrecioTotal} $`,
       referencePayment: referencePayment,
+      coordenadas: coordenadas,
     });
 
     res.status(200).json({

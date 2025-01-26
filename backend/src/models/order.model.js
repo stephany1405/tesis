@@ -3,13 +3,12 @@ export const InsertCard = async ({
   user_id,
   services,
   scheduled_date,
-  start_appointment,
-  end_appointment,
   status_order,
   paid,
   address,
   amount,
   referencePayment,
+  coordenadas,
 }) => {
   const client = await pool.connect();
   try {
@@ -20,32 +19,30 @@ export const InsertCard = async ({
           services, 
           status_id, 
           scheduled_date, 
-          start_appointment, 
-          end_appointment, 
           status_order, 
           paid, 
           address, 
           payment_method, 
           amount,
-          reference_payment
+          reference_payment,
+          point
         ) VALUES ($1, $2, 
           (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
-          $3::json, $4, $5, $6, $7, $8, 
+          $3::json, $4, $5, $6,
           (SELECT id FROM public.classification WHERE classification_type = 'tarjeta'),
-          $9, $10)
+          $7, $8, $9)
         RETURNING *;
       `,
       values: [
         user_id,
         services,
         scheduled_date,
-        start_appointment,
-        end_appointment,
         status_order,
         paid,
         address,
         amount,
         referencePayment,
+        coordenadas,
       ],
     };
 
@@ -63,13 +60,12 @@ export const InsertCash = async ({
   user_id,
   services,
   scheduled_date,
-  start_appointment = null,
-  end_appointment = null,
   status_order = true,
   paid = false,
   address,
   amount,
   referencePayment,
+  coordenadas,
 }) => {
   const client = await pool.connect();
   try {
@@ -79,21 +75,20 @@ export const InsertCash = async ({
           user_id, 
           services, 
           status_id, 
-          scheduled_date, 
-          start_appointment, 
-          end_appointment, 
+          scheduled_date,
           status_order, 
           paid, 
           address, 
           payment_method, 
           amount,
-          reference_payment
+          reference_payment,
+          point
         ) VALUES (
           $1, $2,
           (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
-          $3, $4, $5, $6, $7, $8, 
+          $3, $4, $5, $6, 
           (SELECT id FROM public.classification WHERE classification_type = 'efectivo'),
-          $9, $10
+          $7, $8, $9
         )
         RETURNING *;
       `,
@@ -101,13 +96,12 @@ export const InsertCash = async ({
         user_id,
         services,
         scheduled_date,
-        start_appointment,
-        end_appointment,
         status_order,
         paid,
         address,
         amount,
         referencePayment,
+        coordenadas,
       ],
     };
 
@@ -125,13 +119,12 @@ export const InsertMobilePayment = async ({
   user_id,
   services,
   scheduled_date,
-  start_appointment = null,
-  end_appointment = null,
   status_order = true,
   paid = true,
   address,
   amount,
   referencePayment,
+  coordenadas,
 }) => {
   const client = await pool.connect();
   try {
@@ -142,20 +135,19 @@ export const InsertMobilePayment = async ({
           services, 
           status_id, 
           scheduled_date, 
-          start_appointment, 
-          end_appointment, 
           status_order, 
           paid, 
           address, 
           payment_method, 
           amount,
-          reference_payment
+          reference_payment,
+          point
         ) VALUES (
           $1, $2,
           (SELECT id FROM public.classification WHERE classification_type = 'Asignando especialista'), 
-          $3, $4, $5, $6, $7, $8, 
+          $3, $4, $5, $6, 
           (SELECT id FROM public.classification WHERE classification_type = 'pago móvil'),
-          $9, $10
+          $7, $8,$9
         )
         RETURNING *;
       `,
@@ -163,13 +155,12 @@ export const InsertMobilePayment = async ({
         user_id,
         services,
         scheduled_date,
-        start_appointment,
-        end_appointment,
         status_order,
         paid,
         address,
         amount,
         referencePayment,
+        coordenadas,
       ],
     };
 
