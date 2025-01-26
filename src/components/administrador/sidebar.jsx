@@ -58,7 +58,12 @@ const Sidebar = () => {
           ))}
         </ul>
       </nav>
-      
+      <div className={styles.sidebarFooter}>
+        <Link to="/logout" className={styles.sidebarFooterLink}>
+          <LogOut size={20} />
+          {!isCollapsed && <span>Cerrar Sesión</span>}
+        </Link>
+      </div>
     </div>
   )
 }
