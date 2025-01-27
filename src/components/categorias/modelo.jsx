@@ -6,7 +6,6 @@ import ProductModal from "./product-modal";
 const ProductCard = ({ product }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-
   const getImageUrl = (imageUrl) => {
     if (imageUrl) {
       return imageUrl.startsWith("/uploads")
