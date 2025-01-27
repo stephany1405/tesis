@@ -1,50 +1,69 @@
-import React, { useState, useMemo } from "react"
-import styles from "./servicios.module.css"
-import { Search, Plus } from "lucide-react"
-import Modal from "./Modal"
-import NuevoServicio from "./nuevoServicio"
+import React, { useState, useMemo, useEffect } from "react";
+import styles from "./servicios.module.css";
+import { Search, Plus } from "lucide-react";
+import Modal from "./Modal";
+import NuevoServicio from "./nuevoServicio";
+import axios from "axios";
 
 const Servicios = () => {
-  const [selectedService, setSelectedService] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isNewServiceFormOpen, setIsNewServiceFormOpen] = useState(false)
-  const [services, setServices] = useState([
-    { id: 1, name: "Tratamientos faciales", image: "/imagenes/facial/tratamiento-facial.png" },
-    { id: 2, name: "Tratamientos Corporales", image: "/imagenes/categorias/tratamiento-corporal.png" },
-    { id: 3, name: "Manicura", image: "/imagenes/categorias/manicura.png" },
-    { id: 4, name: "Pedicura", image: "/imagenes/categorias/pedicura.jpeg" },
-    { id: 5, name: "Quiropodia", image: "/imagenes/categorias/quiropedia.jpg" },
-    { id: 6, name: "Epilacion", image: "/imagenes/categorias/epilacion.jpeg" },
-    { id: 7, name: "Extenciones", image: "/imagenes/categorias/extension.jpeg" },
-  ])
+  const [selectedService, setSelectedService] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isNewServiceFormOpen, setIsNewServiceFormOpen] = useState(false);
+  const [services, setServices] = useState([]);
+
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/servicios/categoria"
+        );
+        const transformedCategorias = response.data.map((category) => ({
+          id: category.id,
+          name: category.classification_type,
+          imageUrl: category.service_image
+            ? category.service_image.startsWith("/uploads")
+              ? `http://localhost:3000${category.service_image}`
+              : category.service_image
+            : "/placeholder.svg",
+        }));
+        setServices(transformedCategorias);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategorias();
+  }, []);
 
   const filteredServices = useMemo(() => {
-    return services.filter((service) => service.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  }, [services, searchTerm])
+    return services.filter((service) =>
+      service.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [services, searchTerm]);
 
   const handleServiceClick = (service) => {
-    setSelectedService(service)
-  }
+    setSelectedService(service);
+  };
 
   const closeModal = () => {
-    setSelectedService(null)
-  }
+    setSelectedService(null);
+  };
 
   const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value)
-  }
+    setSearchTerm(event.target.value);
+  };
 
   const handleAddService = () => {
-    setIsNewServiceFormOpen(true)
-  }
+    setIsNewServiceFormOpen(true);
+  };
 
   const handleSubmitNewService = (newService) => {
-    const newId = Math.max(...services.map((s) => s.id)) + 1
-    const serviceToAdd = { ...newService, id: newId }
-    setServices([...services, serviceToAdd])
-    setIsNewServiceFormOpen(false)
-    setSelectedService(serviceToAdd)
-  }
+    const newId = Math.max(...services.map((s) => s.id)) + 1;
+    const serviceToAdd = { ...newService, id: newId };
+    setServices([...services, serviceToAdd]);
+    setIsNewServiceFormOpen(false);
+    setSelectedService(serviceToAdd);
+  };
 
   return (
     <div className={styles.servicesContainer}>
@@ -65,19 +84,31 @@ const Servicios = () => {
           <span>Agregar un nuevo servicio</span>
         </div>
         {filteredServices.map((service) => (
-          <div key={service.id} className={styles.serviceCard} onClick={() => handleServiceClick(service)}>
-            <img src={service.image || "/placeholder.svg"} alt={service.name} className={styles.serviceImage} />
+          <div
+            key={service.id}
+            className={styles.serviceCard}
+            onClick={() => handleServiceClick(service)}
+          >
+            <img
+              src={service.imageUrl || "/placeholder.svg"}
+              alt={service.name}
+              className={styles.serviceImage}
+            />
             <span className={styles.serviceName}>{service.name}</span>
           </div>
         ))}
       </div>
-      {selectedService && <Modal service={selectedService} onClose={closeModal} />}
+      {selectedService && (
+        <Modal service={selectedService} onClose={closeModal} />
+      )}
       {isNewServiceFormOpen && (
-        <NuevoServicio onSubmit={handleSubmitNewService} onClose={() => setIsNewServiceFormOpen(false)} />
+        <NuevoServicio
+          onSubmit={handleSubmitNewService}
+          onClose={() => setIsNewServiceFormOpen(false)}
+        />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Servicios
-
+export default Servicios;

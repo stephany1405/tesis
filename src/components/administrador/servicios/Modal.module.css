@@ -167,3 +167,30 @@
   color: #333;
 }
 
+.headerActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.deleteCategoryButton {
+  background-color: #f87171; /* Rojo más intenso */
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.deleteCategoryButton:hover {
+  background-color: #ef4444;
+  transform: translateY(-2px);
+}
+
+.deleteCategoryButton:active {
+  background-color: #dc2626;
+  transform: translateY(0);
+}

@@ -24,6 +24,7 @@
     "consulta-dolar-venezuela": "^1.1.2",
     "date-fns": "^4.1.0",
     "esbuild": "^0.24.2",
+    "fs-extra": "^11.3.0",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
@@ -38,11 +39,8 @@
     "react-leaflet": "^5.0.0",
     "react-router": "^7.1.1",
     "react-router-dom": "^6.22.3",
-<<<<<<< HEAD
-    "socket.io-client": "^4.8.1",
-=======
+    "react-toastify": "^11.0.3",
     "recharts": "^2.15.0",
->>>>>>> 3f93f2754ea8835fe145989ea6c7f669cbd5e35c
     "stripe": "^17.5.0"
   },
   "devDependencies": {

@@ -2,6 +2,10 @@ import { Router } from "express";
 import {
   getCategory,
   getServicesByCategory,
+  createCategory,
+  createServiceOfCategory,
+  deleteServiceOfCategory,
+  updateServiceOfCategory
 } from "../controllers/category.controller.js";
 import {
   getActiveAppointment,
@@ -13,12 +17,19 @@ import {
   createRatingController,
   getStatusService,
   getClassification,
-  createRatingController2,
+  createRatingController2
 } from "../controllers/service.controller.js";
+import { upload2, upload3 } from "../middlewares/uploadMiddleware.js";
+
 const router = Router();
 
 router.get("/categoria", getCategory);
 router.get("/categoria/:categoryID", getServicesByCategory);
+router.post('/nuevaCategoria', upload2.single('image'), createCategory);
+router.post('/nuevoServicio', upload3.single('image'), createServiceOfCategory);
+router.delete('/eliminarServicio/:id', deleteServiceOfCategory);
+router.put('/actualizarServicio/:id', upload3.single('image'), updateServiceOfCategory);
+
 router.get("/agenda/activo", getActiveAppointment);
 router.get("/agenda/noactivo", getAnonActiveAppointment);
 

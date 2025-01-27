@@ -65,7 +65,7 @@ export const register = async (req, res) => {
       email: createdUser[0].email,
       role_id: createdUser[0].role_id,
     });
-    res.cookie("token", token,{
+    res.cookie("token", token, {
       path: '/',
       maxAge: 24 * 60 * 60 * 1000
     });
@@ -86,39 +86,40 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-
   try {
     const { email, password } = req.body;
+    const userData = await getUser(email);
 
-    const userData = await getUser(email); 
-    console.log(userData)
-    
     if (!userData) {
-      return res.status(400).json({ message: "Credenciales Incorrectas" });
-    }
-    const { email: userEmail, password: userPassword, role_id: userRole, id: userId } = userData;
-
-    const passwordIsValid  = await bcrypt.compare(password, userPassword);
-
-    if (!passwordIsValid ) {
-      return res.status(401).json({ message: "Credenciales Incorrectas" });
+      return res.status(400).json({ message: "Correo o contraseña incorrecta" });
     }
 
-    const token = await createAccessToken({ 
+    const { email: userEmail, password: userPassword, role_id: userRole, id: userId, status } = userData;
+    const passwordIsValid = await bcrypt.compare(password, userPassword);
+
+    if (!passwordIsValid) {
+      return res.status(400).json({ message: "Correo o contraseña incorrecta" });
+    }
+
+    if (!status) {
+      return res.status(403).json({ message: "Tu cuenta está bloqueada. Contacta al administrador." });
+    }
+
+    const token = await createAccessToken({
       email: userEmail,
       role_id: userRole,
       id: userId,
     });
 
-    res.cookie("token", token,{
+    res.cookie("token", token, {
       maxAge: 24 * 60 * 60 * 1000,
-      path: '/'
+      path: "/",
     });
 
     res.status(200).json({ message: "Inicio de sesión exitoso", token, role: userRole });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Error interno del servidor." });
+    console.error(error);
+    res.status(500).json({ message: "Error interno del servidor." });
   }
 };
 

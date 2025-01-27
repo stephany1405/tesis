@@ -5,7 +5,14 @@ import { useCart } from "../inicio/useContext";
 const ProductModal = ({ isOpen, onClose, product }) => {
   const { addToCart } = useCart();
   const [note, setNote] = useState("");
-
+  const getImageUrl = (imageUrl) => {
+    if (imageUrl) {
+      return imageUrl.startsWith("/uploads")
+        ? `http://localhost:3000${imageUrl}`
+        : imageUrl;
+    }
+    return "/placeholder.svg";
+  };
   useEffect(() => {
     const handleEsc = (event) => {
       if (event.keyCode === 27) onClose();
@@ -46,7 +53,7 @@ const ProductModal = ({ isOpen, onClose, product }) => {
         <div className={styles.modalBody}>
           <div className={styles.imageContainer}>
             <img
-              src={product.image}
+              src={getImageUrl(product.image)}
               alt={product.title}
               className={styles.productImage}
             />

@@ -37,27 +37,24 @@ export default function Header({ setActiveTab, activeTab }) {
         <nav className={styles.nav}>
           <button
             onClick={() => setActiveTab("notifications")}
-            className={`${styles.navButton} ${
-              activeTab === "notifications" ? styles.active : ""
-            }`}
+            className={`${styles.navButton} ${activeTab === "notifications" ? styles.active : ""
+              }`}
           >
             <Bell size={18} />
             <span>Notificaciones</span>
           </button>
           <button
             onClick={() => setActiveTab("status")}
-            className={`${styles.navButton} ${
-              activeTab === "status" ? styles.active : ""
-            }`}
+            className={`${styles.navButton} ${activeTab === "status" ? styles.active : ""
+              }`}
           >
             <Activity size={18} />
             <span>Estado</span>
           </button>
           <button
             onClick={() => setActiveTab("profile")}
-            className={`${styles.navButton} ${
-              activeTab === "profile" ? styles.active : ""
-            }`}
+            className={`${styles.navButton} ${activeTab === "profile" ? styles.active : ""
+              }`}
           >
             <User size={18} />
             <span>Perfil</span>

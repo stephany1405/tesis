@@ -62,7 +62,7 @@ const getUser = async (email) => {
   const client = await pool.connect();
   try {
     const query = {
-      text: `SELECT email, password, role_id, id FROM public.user WHERE email = $1 LIMIT 1`,
+      text: `SELECT email, password, role_id, id, status FROM public.user WHERE email = $1 LIMIT 1`,
       values: [email],
     };
     const { rows } = await client.query(query);

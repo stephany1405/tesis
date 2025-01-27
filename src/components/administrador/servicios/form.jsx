@@ -1,32 +1,54 @@
-import React, { useState } from "react"
-import { X } from "lucide-react"
-import styles from "./form.module.css"
+import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import styles from "./form.module.css";
 
-const SubServiceForm = ({ onSubmit, onClose, initialData = null }) => {
+const SubServiceForm = ({ categoryId, onSubmit, onClose, initialData = null }) => {
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
     duration: initialData?.duration || "",
     price: initialData?.price || "",
     image: null,
-  })
+  });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name,
+        description: initialData.description,
+        duration: initialData.duration,
+        price: initialData.price,
+        image: null,
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    const formDataToSubmit = new FormData()
+    e.preventDefault();
+    const formDataToSubmit = new FormData();
+
+    formDataToSubmit.append('id', categoryId);
+
     for (const key in formData) {
-      formDataToSubmit.append(key, formData[key])
+      if (key === 'image') {
+        if (formData[key] || !initialData) {
+          formDataToSubmit.append(key, formData[key]);
+        }
+      } else {
+        formDataToSubmit.append(key, formData[key]);
+      }
     }
-    onSubmit(formDataToSubmit)
-  }
+
+    onSubmit(formDataToSubmit);
+  };
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target
+    const { name, value, type, files } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === "file" ? files[0] : value,
-    }))
-  }
+    }));
+  };
 
   return (
     <div className={styles.formOverlay}>
@@ -57,11 +79,12 @@ const SubServiceForm = ({ onSubmit, onClose, initialData = null }) => {
           <div className={styles.formGroup}>
             <label htmlFor="duration">Duración</label>
             <input
-              type="time"
+              type="text"
               id="duration"
               name="duration"
               value={formData.duration}
               onChange={handleChange}
+              placeholder="ejemplo: 1 hora 30 minutos o 10 minutos o 2 hora"
               required
             />
           </div>
@@ -82,13 +105,18 @@ const SubServiceForm = ({ onSubmit, onClose, initialData = null }) => {
 
           <div className={styles.formGroup}>
             <label htmlFor="image">Imagen del Subservicio</label>
+            {initialData && initialData.service_image && (
+              <div>
+                <img src={initialData.service_image} alt="Imagen actual" style={{ width: '100px', height: 'auto' }} />
+                <p>Imagen actual</p>
+              </div>
+            )}
             <input
               type="file"
               id="image"
               name="image"
               onChange={handleChange}
               accept="image/*"
-              required={!initialData}
             />
           </div>
 
@@ -98,8 +126,7 @@ const SubServiceForm = ({ onSubmit, onClose, initialData = null }) => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SubServiceForm
-
+export default SubServiceForm;

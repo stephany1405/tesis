@@ -13,7 +13,9 @@ const CategoriasList = () => {
         const transformedCategorias = response.data.map((category) => ({
           id: category.id,
           name: category.classification_type,
-          imageUrl: category.service_image,   
+          imageUrl: category.service_image.startsWith('/uploads')
+            ? `http://localhost:3000${category.service_image}`
+            : category.service_image,
           link: `/servicios/${category.classification_type.toLowerCase()}/${category.id}`,
         }));
         setCategorias(transformedCategorias);
