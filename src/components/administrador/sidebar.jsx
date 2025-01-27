@@ -1,32 +1,29 @@
-import React, { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Users,
   UserCog,
   Sparkles,
   Calendar,
-  DollarSign,
   BarChart2,
   ChevronLeft,
   ChevronRight,
   Home,
-  Bell,
-  Settings,
   LogOut,
-} from "lucide-react"
-import styles from "./Sidebar.module.css"
+} from "lucide-react";
+import styles from "./Sidebar.module.css";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  const location = useLocation()
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed)
-  }
+    setIsCollapsed(!isCollapsed);
+  };
   const handleLogout = async () => {
     try {
       const response = await axios.post(
@@ -52,13 +49,32 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: <Home size={20} />, label: "Inicio", path: "/administrador" },
-    { icon: <Users size={20} />, label: "Clientes", path: "/administrador/clientes" },
-    { icon: <UserCog size={20} />, label: "Especialistas", path: "/administrador/especialistas" },
-    { icon: <Sparkles size={20} />, label: "Servicios", path: "/administrador/servicios" },
-    { icon: <Calendar size={20} />, label: "Citas", path: "/administrador/citas" },
-    { icon: <DollarSign size={20} />, label: "Financias", path: "/administrador/finanzas" },
-    { icon: <BarChart2 size={20} />, label: "Estadísticas", path: "/administrador/estadisticas" },
-  ]
+    {
+      icon: <Users size={20} />,
+      label: "Clientes",
+      path: "/administrador/clientes",
+    },
+    {
+      icon: <UserCog size={20} />,
+      label: "Especialistas",
+      path: "/administrador/especialistas",
+    },
+    {
+      icon: <Sparkles size={20} />,
+      label: "Servicios",
+      path: "/administrador/servicios",
+    },
+    {
+      icon: <Calendar size={20} />,
+      label: "Citas",
+      path: "/administrador/citas",
+    },
+    {
+      icon: <BarChart2 size={20} />,
+      label: "Estadísticas",
+      path: "/administrador/estadisticas",
+    },
+  ];
 
   return (
     <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
@@ -74,7 +90,9 @@ const Sidebar = () => {
             <li key={index} className={styles.sidebarMenuItem}>
               <Link
                 to={item.path}
-                className={`${styles.sidebarMenuLink} ${location.pathname === item.path ? styles.active : ""}`}
+                className={`${styles.sidebarMenuLink} ${
+                  location.pathname === item.path ? styles.active : ""
+                }`}
                 title={item.label}
               >
                 {item.icon}
@@ -91,8 +109,7 @@ const Sidebar = () => {
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
-
+export default Sidebar;

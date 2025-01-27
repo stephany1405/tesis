@@ -22,7 +22,6 @@ import Perfiles from "./components/administrador/clientes/perfiles.jsx";
 import PerfilesE from "./components/administrador/especialista/perfilesE.jsx";
 import Servicios from "./components/administrador/servicios/servicios.jsx";
 import Cita from "./components/administrador/citas/cita.jsx";
-import Finanzas from "./components/administrador/finanzas/finananzas.jsx";
 import Estadisticas from "./components/administrador/estadisticas/estadisticas.jsx";
 
 const App = () => {
@@ -126,7 +125,6 @@ const App = () => {
                       <Route path="especialistas" element={<PerfilesE />} />
                       <Route path="servicios" element={<Servicios />} />
                       <Route path="citas" element={<Cita />} />
-                      <Route path="finanzas" element={<Finanzas />} />
                       <Route path="estadisticas" element={<Estadisticas />} />
                     </Routes>
                   </div>

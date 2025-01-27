@@ -9,7 +9,7 @@ import {
   createRatingAndUpdateAppointment,
 } from "../models/service.model.js";
 import { pool } from "../db.js";
-
+import moment from "moment";
 export const getActiveAppointment = async (req, res) => {
   try {
     const { userID } = req.query;
@@ -70,6 +70,127 @@ export const getActiveAppointment = async (req, res) => {
     res.status(500).json({
       message: "Error al obtener la cita activa",
       error: error.message,
+    });
+  }
+};
+
+export const getInPersonAppointments = async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        a.id,
+        a.services,
+        a.scheduled_date,
+        status_class.classification_type as status_name,
+        payment_class.classification_type as payment_method_name,
+        a.status_order,
+        a.paid,
+        a.address,
+        a.point,
+        a.amount,
+        a.reference_payment,
+        client.name as client_name,
+        client.lastname as client_lastname,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', u.id,
+              'name', u.name,
+              'lastname', u.lastname,
+              'telephone_number', u.telephone_number,
+              'picture_profile', u.picture_profile,
+              'score', u.score
+            )
+          ) FILTER (WHERE u.id IS NOT NULL),
+          '[]'
+        ) as specialists
+      FROM public.appointment a
+      LEFT JOIN public.classification status_class ON a.status_id = status_class.id
+      LEFT JOIN public.classification payment_class ON a.payment_method = payment_class.id
+      LEFT JOIN public.appointment_specialists as_link ON a.id = as_link.appointment_id
+      LEFT JOIN public."user" u ON as_link.specialist_id = u.id
+      LEFT JOIN public."user" client ON a.user_id = client.id
+      WHERE a.address = 'Presencial en el Salón de Belleza'
+      AND a.status_order = true
+      GROUP BY
+        a.id,
+        a.services,
+        status_class.classification_type,
+        payment_class.classification_type,
+        as_link.start_appointment,
+        as_link.end_appointment,
+        a.status_order,
+        a.paid,
+        a.address,
+        a.point,
+        a.amount,
+        a.scheduled_date,
+        a.reference_payment,
+        client.name,
+        client.lastname
+      ORDER BY a.scheduled_date DESC`;
+
+    const result = await pool.query(query);
+    const appointments = result.rows
+      .map((appointment) => {
+        try {
+          const services = JSON.parse(appointment.services);
+          const serviceInfo = services[0];
+          const scheduledDate = JSON.parse(appointment.scheduled_date);
+
+          const startRaw = scheduledDate.start;
+          const endRaw = scheduledDate.end;
+
+          const [fullDate, startTime] = startRaw.split(", ").slice(1);
+          const [day, , month, year] = fullDate.split(" ");
+          const cleanDate = `${day} ${month} ${year}`;
+
+          const formattedDate = moment(cleanDate, "DD MMMM YYYY", "es").format(
+            "YYYY-MM-DD"
+          );
+          const start = moment(
+            `${formattedDate} ${startTime}`,
+            "YYYY-MM-DD h:mm A",
+            "es"
+          ).toISOString();
+          const end = moment(
+            `${formattedDate} ${endRaw}`,
+            "YYYY-MM-DD h:mm A",
+            "es"
+          ).toISOString();
+
+          return {
+            id: appointment.id,
+            title: serviceInfo.title,
+            start,
+            end,
+            client: `${appointment.client_name} ${appointment.client_lastname}`,
+            status: appointment.status_name,
+            service: serviceInfo.title,
+            color: "#FF69B4",
+            extendedProps: {
+              amount: appointment.amount,
+              paid: appointment.paid,
+              point: appointment.point,
+              serviceInfo: serviceInfo,
+              status: appointment.status_name,
+              paymentMethod: appointment.payment_method_name,
+              client: `${appointment.client_name} ${appointment.client_lastname}`,
+            },
+          };
+        } catch (error) {
+          console.error("Error procesando appointment:", error);
+          return null;
+        }
+      })
+      .filter(Boolean);
+
+    res.json(appointments);
+  } catch (error) {
+    console.error("Error completo:", error);
+    res.status(500).json({
+      error: "Error al obtener las citas",
+      details: error.message,
     });
   }
 };

@@ -296,7 +296,10 @@ export const getClientsWithHistory = async (req, res) => {
       const client = acc.find((c) => c.id === row.user_id);
       const serviceHistory = {
         date: row.scheduled_date,
-        service: JSON.parse(row.services)?.map((s) => s.title).join(", ") || "N/A",
+        service:
+          JSON.parse(row.services)
+            ?.map((s) => s.title)
+            .join(", ") || "N/A",
         price: row.service_amount,
         especialista: `${row.specialist_name} ${row.specialist_lastname}`,
         startTime: row.start_appointment,
@@ -328,31 +331,34 @@ export const getClientsWithHistory = async (req, res) => {
     res.status(200).json(clients);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error al obtener clientes con historial." });
+    res
+      .status(500)
+      .json({ message: "Error al obtener clientes con historial." });
   }
 };
-
 
 export const blockUser = async (req, res) => {
   try {
     const client = await pool.connect();
     const { id } = req.body;
-    const query = `UPDATE public.user SET status = false WHERE id = $1`, values = [id];
+    const query = `UPDATE public.user SET status = false WHERE id = $1`,
+      values = [id];
     const result = await client.query(query, values);
     res.status(200).json({ message: "Usuario bloqueado exitosamente." });
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 export const unlockUser = async (req, res) => {
   try {
     const client = await pool.connect();
     const { id } = req.body;
-    const query = `UPDATE public.user SET status = true WHERE id = $1`, values = [id];
+    const query = `UPDATE public.user SET status = true WHERE id = $1`,
+      values = [id];
     const result = await client.query(query, values);
     res.status(200).json({ message: "Usuario desbloqueado exitosamente." });
   } catch (error) {
     console.log(error);
   }
-}
+};
