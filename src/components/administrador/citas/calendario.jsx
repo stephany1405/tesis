@@ -15,6 +15,8 @@ moment.locale("es");
 const AdminAppointmentCalendar = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [specialists, setSpecialists] = useState([]);
+  const [selectedSpecialist, setSelectedSpecialist] = useState("");
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -37,7 +39,19 @@ const AdminAppointmentCalendar = () => {
       }
     };
 
+    const fetchSpecialists = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/especialistas"
+        );
+        setSpecialists(response.data);
+      } catch (error) {
+        console.error("Error al obtener los especialistas:", error);
+      }
+    };
+
     fetchAppointments();
+    fetchSpecialists();
   }, []);
 
   const handleEventClick = (clickInfo) => {
@@ -47,6 +61,38 @@ const AdminAppointmentCalendar = () => {
       end: clickInfo.event.end,
       ...clickInfo.event.extendedProps,
     });
+    setSelectedSpecialist("");
+  };
+
+  const handleAddSpecialist = async () => {
+    if (!selectedSpecialist || !selectedAppointment) return;
+
+    try {
+      await axios.post(
+        `http://localhost:3000/api/servicios/agenda/${selectedAppointment.id}/especialista`,
+        {
+          specialistId: selectedSpecialist,
+        }
+      );
+
+      // Actualizar la cita seleccionada con el nuevo especialista
+      const updatedAppointment = {
+        ...selectedAppointment,
+        specialist: specialists.find((s) => s.id === selectedSpecialist).name,
+      };
+      setSelectedAppointment(updatedAppointment);
+
+      // Actualizar la lista de citas
+      setAppointments(
+        appointments.map((app) =>
+          app.id === selectedAppointment.id ? updatedAppointment : app
+        )
+      );
+
+      setSelectedSpecialist("");
+    } catch (error) {
+      console.error("Error al agregar el especialista:", error);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -178,6 +224,31 @@ const AdminAppointmentCalendar = () => {
                 Estado de pago:{" "}
                 {selectedAppointment.paid ? "Pagado" : "Pendiente"}
               </span>
+            </div>
+            <div className={styles.detailItem}>
+              <span>
+                Especialista: {selectedAppointment.specialist || "No asignado"}
+              </span>
+            </div>
+            <div className={styles.addSpecialistContainer}>
+              <select
+                value={selectedSpecialist}
+                onChange={(e) => setSelectedSpecialist(e.target.value)}
+                className={styles.specialistSelect}
+              >
+                <option value="">Seleccionar especialista</option>
+                {specialists.map((specialist) => (
+                  <option key={specialist.id} value={specialist.id}>
+                    {specialist.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAddSpecialist}
+                className={styles.addSpecialistButton}
+              >
+                Agregar Especialista
+              </button>
             </div>
           </div>
         </div>

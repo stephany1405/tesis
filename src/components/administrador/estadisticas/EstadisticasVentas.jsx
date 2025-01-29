@@ -58,7 +58,6 @@ const EstadisticasCitas = () => {
 
     fetchStats();
   }, []);
-
   const processMonthlyData = (appointments) => {
     const monthlyData = {};
 
@@ -82,8 +81,6 @@ const EstadisticasCitas = () => {
 
       const deposit = parseFloat(appointment.deposit_amount || 0);
       monthlyData[monthKey].depositos += deposit;
-
-      console.log(`Mes: ${monthlyData[monthKey].name}`);
     });
 
     return Object.values(monthlyData).sort((a, b) => {
@@ -151,9 +148,38 @@ const EstadisticasCitas = () => {
     );
   }
 
+  const totalCitas = statsData.monthlyData.reduce(
+    (sum, month) => sum + month.citas,
+    0
+  );
+  const totalIngresos = statsData.monthlyData.reduce(
+    (sum, month) => sum + month.ingresos,
+    0
+  );
+  const totalDepositos = statsData.monthlyData.reduce(
+    (sum, month) => sum + month.depositos,
+    0
+  );
+
   return (
     <div className={styles.card}>
       <h2 className={styles.cardTitle}>Estadísticas de Citas</h2>
+
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <h3 className={styles.statTitle}>Total Citas</h3>
+          <p className={styles.statValue}>{totalCitas}</p>
+        </div>
+        <div className={styles.statCard}>
+          <h3 className={styles.statTitle}>Ingresos Totales</h3>
+          <p className={styles.statValue}>${totalIngresos.toFixed(2)}</p>
+        </div>
+        <div className={styles.statCard}>
+          <h3 className={styles.statTitle}>Depósitos Totales</h3>
+          <p className={styles.statValue}>${totalDepositos.toFixed(2)}</p>
+        </div>
+      </div>
+
       <div className={styles.chartContainer}>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={statsData.monthlyData}>
@@ -163,12 +189,14 @@ const EstadisticasCitas = () => {
             <YAxis yAxisId="right" orientation="right" />
             <Tooltip />
             <Legend />
-            <Bar
-              yAxisId="left"
-              dataKey="citas"
-              fill="#8884d8"
-              name="Número de Citas"
-            />
+            {
+              <Bar
+                yAxisId="left"
+                dataKey="citas"
+                fill="#8884d8"
+                name="Número de Citas"
+              />
+            }
             <Bar
               yAxisId="right"
               dataKey="ingresos"
@@ -184,13 +212,19 @@ const EstadisticasCitas = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
+
       <div className={styles.serviciosPopulares}>
         <h3>Servicios más solicitados</h3>
         <ul>
           {statsData.popularServices.map((servicio, index) => (
             <li key={index}>
-              {servicio.nombre}: {servicio.cantidad} solicitudes ($
-              {servicio.ingresos.toFixed(2)})
+              <span className={styles.servicioNombre}>{servicio.nombre}</span>
+              <span className={styles.servicioCantidad}>
+                {servicio.cantidad} solicitudes
+              </span>
+              <span className={styles.servicioIngresos}>
+                ${servicio.ingresos.toFixed(2)}
+              </span>
             </li>
           ))}
         </ul>
