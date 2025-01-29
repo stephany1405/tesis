@@ -91,8 +91,7 @@ export const updateServiceOfCategory = async (req, res, next) => {
     if (!name) {
       return res.status(400).json({ error: 'classification_type es obligatorio' });
     }
-
-    // Obtener la imagen existente de la base de datos
+    
     const existingServiceQuery = {
       text: 'SELECT service_image FROM public.classification WHERE id = $1',
       values: [id],
@@ -100,12 +99,11 @@ export const updateServiceOfCategory = async (req, res, next) => {
     const existingServiceResult = await pool.query(existingServiceQuery);
     const existingService = existingServiceResult.rows[0];
 
-    // Si no se proporciona una nueva imagen, usar la existente
     let service_image;
     if (req.file) {
       service_image = `/uploads/services/${req.file.filename}`;
     } else {
-      service_image = existingService.service_image; // Mantener la imagen existente
+      service_image = existingService.service_image;
     }
 
     const query = {

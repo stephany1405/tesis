@@ -137,3 +137,4 @@ export const uploadSecurityQuestions = async (req, res) => {
     client.release();
   }
 };
+
