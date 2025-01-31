@@ -14,7 +14,6 @@ import profileRouter from "./routes/profile.router.js";
 import geoRouter from "./routes/geocode.router.js";
 import userRouter from "./routes/users.router.js";
 import statisticRouter from "./routes/statistics.router.js";
-
 import { errorHandler } from "./middlewares/catch.middleware.js";
 
 const app = express();

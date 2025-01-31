@@ -1,8 +1,9 @@
 import { pool } from "../db.js";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { createAccessToken } from "../libs/jwt.lib.js";
 import { getRoleId, getUser } from "../models/user.model.js";
-
+import { transporter } from "../config.js";
 export const register = async (req, res) => {
   const client = await pool.connect();
   try {
@@ -66,8 +67,8 @@ export const register = async (req, res) => {
       role_id: createdUser[0].role_id,
     });
     res.cookie("token", token, {
-      path: '/',
-      maxAge: 24 * 60 * 60 * 1000
+      path: "/",
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     // eslint-disable-next-line no-unused-vars
@@ -91,18 +92,30 @@ export const login = async (req, res) => {
     const userData = await getUser(email);
 
     if (!userData) {
-      return res.status(400).json({ message: "Correo o contraseña incorrecta" });
+      return res
+        .status(400)
+        .json({ message: "Correo o contraseña incorrecta" });
     }
 
-    const { email: userEmail, password: userPassword, role_id: userRole, id: userId, status } = userData;
+    const {
+      email: userEmail,
+      password: userPassword,
+      role_id: userRole,
+      id: userId,
+      status,
+    } = userData;
     const passwordIsValid = await bcrypt.compare(password, userPassword);
 
     if (!passwordIsValid) {
-      return res.status(400).json({ message: "Correo o contraseña incorrecta" });
+      return res
+        .status(400)
+        .json({ message: "Correo o contraseña incorrecta" });
     }
 
     if (!status) {
-      return res.status(403).json({ message: "Tu cuenta está bloqueada. Contacta al administrador." });
+      return res.status(403).json({
+        message: "Tu cuenta está bloqueada. Contacta al administrador.",
+      });
     }
 
     const token = await createAccessToken({
@@ -116,7 +129,9 @@ export const login = async (req, res) => {
       path: "/",
     });
 
-    res.status(200).json({ message: "Inicio de sesión exitoso", token, role: userRole });
+    res
+      .status(200)
+      .json({ message: "Inicio de sesión exitoso", token, role: userRole });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error interno del servidor." });
@@ -128,4 +143,146 @@ export const logout = async (req, res) => {
     expires: new Date(0),
   });
   return res.sendStatus(200);
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await pool.query(
+      "SELECT name, lastname FROM PUBLIC.USER WHERE EMAIL = $1",
+      [email]
+    );
+
+    if (user.rows.length === 0) {
+      return res
+        .status(200)
+        .json({ valid: false, message: "Usuario no encontrado" });
+    }
+    const { name, lastname } = user.rows[0];
+
+    const code = crypto.randomBytes(3).toString("hex");
+
+    await pool.query(
+      "UPDATE public.user SET reset_code = $1 WHERE email = $2",
+      [code, email]
+    );
+
+    const mailOptions = {
+      from: '"Equipo de Soporte 👨‍💻 de Unimas" <unimas304@gmail.com',
+      to: email,
+      subject: "Código de recuperación de contraseña 👨‍💻",
+      text: `Hola! ${name} ${lastname} hemos recibido la notificación de que intentas recuperar tu contraseña, el código es el siguiente. ¡Recuerda no compartirlo con nadie!: ${code}`,
+    };
+
+    transporter.sendMail(mailOptions, (error) => {
+      if (error) {
+        return res
+          .status(500)
+          .json({ message: "Error al enviar el correo", error: error });
+      }
+      return res
+        .status(200)
+        .json({ valid: true, message: "Código enviado al correo" });
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ text: "Error en el servidor", message: error.message });
+  }
+};
+
+export const verifyCode = async (req, res) => {
+  const { email, code } = req.body;
+  try {
+    const query = await pool.query(
+      "SELECT reset_code, email FROM public.user WHERE email = $1 and reset_code = $2",
+      [email, code]
+    );
+    if (query.rowCount === 0) {
+      return res
+        .status(200)
+        .json({ valid: false, message: "Código incorrecto" });
+    } else {
+      return res.status(200).json({ valid: true, message: "Código correcto" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error en el servidor", error: error });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const query = await pool.query(
+      "UPDATE PUBLIC.USER SET PASSWORD = $1 WHERE email = $2",
+      [hashedPassword, email]
+    );
+    await pool.query(
+      "UPDATE PUBLIC.USER SET reset_code = null WHERE email = $1 ",
+      [email]
+    );
+    if (query.rowCount === 1) {
+      return res.status(200).json({
+        valid: true,
+        message: "Se ha cambiado la contraseña exitosamente.",
+      });
+    } else {
+      return res
+        .status(404)
+        .json({ valid: false, message: "No se pudo cambiar la contraseña." });
+    }
+  } catch (error) {
+    res.status(500).json({ Message: "Error interno en el servidor.", error });
+  }
+};
+
+export const getSecurityQuestion = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const query = await pool.query(
+      "SELECT security_question FROM public.user WHERE email = $1",
+      [email]
+    );
+
+    if (query.rowCount === 0) {
+      return res
+        .status(200)
+        .json({ valid: false, message: "Usuario no encontrado" });
+    } else {
+      return res.status(200).json({
+        valid: true,
+        security_question: query.rows[0].security_question,
+      });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "error interno en el servidor", error: error });
+  }
+};
+
+export const verifyAnswer = async (req, res) => {
+  const { email, securityAnswer } = req.body;
+  try {
+    const query = await pool.query(
+      "SELECT id FROM PUBLIC.USER WHERE email = $1 and answer = $2",
+      [email, securityAnswer]
+    );
+
+    if (query.rowCount === 1) {
+      return res
+        .status(200)
+        .json({ valid: true, message: "Respuesta Correcta." });
+    } else {
+      return res
+        .status(200)
+        .json({ valid: false, message: "Respuesta Incorrecta." });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error interno en el servidor.", error: error });
+  }
 };

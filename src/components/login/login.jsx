@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import styles from "../login/login.module.css";
+import { useNavigate, Link } from "react-router-dom";
+import styles from "./login.module.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,12 +16,12 @@ const Login = () => {
         const [clientRole, specialistRole, adminRole] = await Promise.all([
           axios.get("http://localhost:3000/api/getRoleClient"),
           axios.get("http://localhost:3000/api/getRoleSpecialist"),
-          axios.get("http://localhost:3000/api/getRoleAdministrator")
+          axios.get("http://localhost:3000/api/getRoleAdministrator"),
         ]);
         setRoles({
           client: clientRole.data.id,
           specialist: specialistRole.data.id,
-          admin: adminRole.data.id
+          admin: adminRole.data.id,
         });
       } catch (error) {
         console.error("Error fetching roles:", error);
@@ -47,7 +47,6 @@ const Login = () => {
       if (role === roles.client) navigate("/inicio");
       else if (role === roles.specialist) navigate("/especialista");
       else if (role === roles.admin) navigate("/administrador");
-
     } catch (error) {
       if (error.response) {
         setError(error.response.data.message);
@@ -91,6 +90,14 @@ const Login = () => {
         <button type="submit" className={styles.button}>
           Iniciar Sesión
         </button>
+        <div className={styles.links}>
+          <Link to="/olvide-contrasena" className={styles.link}>
+            ¿Olvidaste tu contraseña?
+          </Link>
+          <Link to="/registro" className={styles.link}>
+            ¿Quieres registrarte?
+          </Link>
+        </div>
       </form>
     </div>
   );
