@@ -145,3 +145,14 @@ CREATE INDEX IF NOT EXISTS idx_log_appointment_id ON public."log"(appointment_id
 CREATE INDEX Idx_specialist_verification ON specialist_details(verification_status) WHERE verification_status = TRUE;
 CREATE INDEX Idx_appointment_date_range ON appointment(scheduled_date, status_id);
 CREATE INDEX Idx_specialist_rating ON specialist_details(average_rating) WHERE average_rating IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS PUBLIC."specialist_cancelled_appointments" (
+  id                BIGINT NOT  NULL    GENERATED ALWAYS AS IDENTITY,
+  specialist_id     BIGINT NOT  NULL, 
+  appointment_id    BIGINT NOT  NULL, 
+  created_at        TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT pk_specialist_cancelled_appointments_id PRIMARY KEY(id) ,
+  CONSTRAINT fk_specialist_id FOREIGN KEY (specialist_id)  REFERENCES public."user"(id),
+  CONSTRAINT fk_appointment_id FOREIGN KEY (appointment_id)  REFERENCES public."appointment"(id)
+);

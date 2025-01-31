@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./Header.module.css";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingCart, X, ChevronRight } from "lucide-react";
 import { useCart } from "./useContext";
+import styles from "./DesplegableC.module.css";
 
 export function DesplegableC() {
   const { cartItems, removeFromCart } = useCart();
@@ -28,7 +30,7 @@ export function DesplegableC() {
   const handleMouseLeave = () => {
     hideTimeoutRef.current = setTimeout(() => {
       setIsDropdownVisible(false);
-    }, 1000); // Retraso de 300ms antes de ocultar el recuadro
+    }, 300);
   };
 
   return (
@@ -37,50 +39,60 @@ export function DesplegableC() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <button
-        className={`${styles.cartButton} ${styles.dropdownButton}`}
-      >
-        Carrito ({cartItems.length})
+      <button className={styles.cartButton}>
+        <ShoppingCart size={20} />
+        <span className={styles.cartCount}>{cartItems.length}</span>
       </button>
-      {isDropdownVisible && (
-        <div
-          className={styles.dropdownContent}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          {cartItems.length > 0 ? (
-            <>
-              <ul className={styles.cartItems}>
-                {cartItems.map((item) => (
-                  <li key={item.id} className={styles.cartItem}>
-                    <span>{item.title}</span>
-                    <span>
-                      {item.quantity} x ${item.price}
-                    </span>
-                    <button onClick={() => removeFromCart(item.id)}>
-                      Eliminar
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className={styles.cartTotal}>
-                <span>Total: ${total.toFixed(2)}</span>
-              </div>
-              <button
-                className={styles.viewCartButton}
-                onClick={handleVerBolsa}
-              >
-                Ver Bolsa
-              </button>
-            </>
-          ) : (
-            <p>El carrito está vacío</p>
-          )}
-        </div>
-      )}
+      <AnimatePresence>
+        {isDropdownVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className={styles.dropdownContent}
+          >
+            {cartItems.length > 0 ? (
+              <>
+                <h3 className={styles.cartTitle}>Carrito de Compras</h3>
+                <ul className={styles.cartItems}>
+                  {cartItems.map((item) => (
+                    <li key={item.id} className={styles.cartItem}>
+                      <div className={styles.itemInfo}>
+                        <span className={styles.itemTitle}>{item.title}</span>
+                        <span className={styles.itemQuantity}>
+                          {item.quantity} x ${item.price}
+                        </span>
+                      </div>
+                      <button
+                        className={styles.removeButton}
+                        onClick={() => removeFromCart(item.id)}
+                      >
+                        <X size={16} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <div className={styles.cartTotal}>
+                  <span>Total:</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+                <button
+                  className={styles.viewCartButton}
+                  onClick={handleVerBolsa}
+                >
+                  Ver Bolsa
+                  <ChevronRight size={16} />
+                </button>
+              </>
+            ) : (
+              <p className={styles.emptyCart}>El carrito está vacío</p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 export default DesplegableC;
-

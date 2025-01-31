@@ -15,37 +15,25 @@ export default function Notificaciones() {
 
   const cargarNotificaciones = async () => {
     try {
+      const token = getJWT("token");
+      const decodedToken = jwtDecode(token);
+      const specialistId = decodedToken.id;
+      console.log(specialistId);
       const response = await axios.get(
-        "http://localhost:3000/api/servicios/clientes"
+        "http://localhost:3000/api/servicios/clientes",
+        {
+          params: {
+            specialistID: specialistId,
+          },
+        }
       );
       const { data } = response;
+      console.log(data);
       if (!data || data.length === 0) {
         setNotifications([]);
         return;
       }
-
-      const today = new Date().toLocaleDateString("es-ES", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-
-      const pedidosHoy = data.filter((notif) => {
-        const scheduledDate = JSON.parse(notif.scheduled_date);
-        const fechaPedido = scheduledDate.start.split(",")[1]?.trim();
-
-        if (!fechaPedido) return false;
-
-        const fechaPedidoCorta = fechaPedido
-          .split("de")
-          .slice(0, 3)
-          .join("de")
-          .trim();
-
-        return fechaPedidoCorta === today;
-      });
-
-      setNotifications(pedidosHoy);
+      setNotifications(data);
     } catch (error) {
       console.error("Error al cargar notificaciones:", error);
     }
@@ -81,8 +69,27 @@ export default function Notificaciones() {
     }
   };
 
-  const handleCancelarServicio = (id) => {
-    console.log(`Servicio ${id} cancelado`);
+  const handleCancelarServicio = async (id) => {
+    try {
+      const token = getJWT("token");
+      const decodedToken = jwtDecode(token);
+      const specialistId = decodedToken.id;
+
+      await axios.post("http://localhost:3000/api/servicios/cancelar", {
+        specialistID: parseInt(specialistId),
+        appointmentID: parseInt(id),
+      });
+
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter((notif) => notif.id !== id)
+      );
+
+      alert("Cita cancelada correctamente");
+      await cargarNotificaciones();
+    } catch (error) {
+      console.error("Error al cancelar cita:", error);
+      alert("Ocurrió un error al cancelar la cita.");
+    }
   };
 
   if (!notifications || notifications.length === 0) {

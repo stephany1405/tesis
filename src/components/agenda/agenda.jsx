@@ -12,8 +12,6 @@ function Agenda() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_URL = "http://localhost:3000";
-
   useEffect(() => {
     const fetchActiveServices = async () => {
       try {
@@ -21,7 +19,7 @@ function Agenda() {
         const decodedToken = jwtDecode(token);
         const id = Number.parseInt(decodedToken.id);
         const response = await axios.get(
-          `${API_URL}/api/servicios/agenda/activo?userID=${id}`,
+          `http://localhost:3000/api/servicios/agenda/activo?userID=${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -29,7 +27,6 @@ function Agenda() {
           }
         );
         const data = response.data;
-        console.log(data);
         if (data && typeof data === "object" && !Array.isArray(data)) {
           const servicioFormateado = {
             id: data.id,

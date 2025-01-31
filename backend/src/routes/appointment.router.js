@@ -19,6 +19,7 @@ import {
   getClassification,
   createRatingController2,
   getInPersonAppointments,
+  cancelAppointment
 } from "../controllers/service.controller.js";
 import { upload2, upload3 } from "../middlewares/uploadMiddleware.js";
 
@@ -40,6 +41,7 @@ router.get("/agenda/noactivo", getAnonActiveAppointment);
 router.get("/agenda/presencial", getInPersonAppointments);
 
 router.get("/clientes", services);
+router.post("/cancelar", cancelAppointment);
 router.post("/asignar-servicio", assignSpecialist);
 router.post("/actualizar-estado", updateStatus);
 router.get("/servicios-asignados/:specialistId", getAssignedServices);

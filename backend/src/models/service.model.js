@@ -138,91 +138,100 @@ LIMIT 10`,
   }
 };
 
-export const getServices = async () => {
+export const getServices = async (specialistID) => {
   const client = await pool.connect();
 
   try {
     const query = {
       text: `
-        WITH service_details AS (
-  SELECT 
-    a.id AS appointment_id,
-    CAST(service->>'id' AS BIGINT) AS service_id,
-    CAST(service->>'quantity' AS INTEGER) AS total_quantity
-  FROM public.appointment a,
-  jsonb_array_elements(a.services::jsonb) AS service
+       WITH service_details AS (
+    SELECT 
+        a.id AS appointment_id,
+        CAST(service->>'id' AS BIGINT) AS service_id,
+        CAST(service->>'quantity' AS INTEGER) AS total_quantity
+    FROM public.appointment a,
+    jsonb_array_elements(a.services::jsonb) AS service
 ),
 service_assignments AS (
-  SELECT 
-    appointment_id, 
-    service_id, 
-    SUM(sessions_assigned) AS total_assigned
-  FROM appointment_specialists
-  GROUP BY appointment_id, service_id
+    SELECT 
+        appointment_id, 
+        service_id, 
+        SUM(sessions_assigned) AS total_assigned
+    FROM appointment_specialists
+    GROUP BY appointment_id, service_id
 ),
 order_status AS (
-  SELECT
-    sd.appointment_id,
-    SUM(sd.total_quantity) AS total_required_sessions,
-    COALESCE(SUM(sa.total_assigned), 0) AS total_assigned_sessions
-  FROM service_details sd
-  LEFT JOIN service_assignments sa
-    ON sd.appointment_id = sa.appointment_id
-    AND sd.service_id = sa.service_id
-  GROUP BY sd.appointment_id
+    SELECT
+        sd.appointment_id,
+        SUM(sd.total_quantity) AS total_required_sessions,
+        COALESCE(SUM(sa.total_assigned), 0) AS total_assigned_sessions
+    FROM service_details sd
+    LEFT JOIN service_assignments sa
+        ON sd.appointment_id = sa.appointment_id
+        AND sd.service_id = sa.service_id
+    GROUP BY sd.appointment_id
+),
+specialist_cancellations AS (
+    SELECT DISTINCT appointment_id
+    FROM specialist_cancelled_appointments
+    WHERE specialist_id = $1
 )
 SELECT 
-  a.id,
-  a.services,
-  a.status_id,
-  status_class.classification_type AS status_name,
-  payment_class.classification_type AS payment_method_name,
-  a.status_order,
-  a.paid,
-  a.address,
-  a.point,
-  a.amount,
-  a.scheduled_date,
-  a.reference_payment,
-  aspec.start_appointment, -- Directamente desde appointment_specialists
-  aspec.end_appointment,   -- Directamente desde appointment_specialists
-  u.name AS client_name,
-  u.lastname AS client_lastname,
-  u.telephone_number AS client_phone
+    a.id,
+    a.services,
+    a.status_id,
+    status_class.classification_type AS status_name,
+    payment_class.classification_type AS payment_method_name,
+    a.status_order,
+    a.paid,
+    a.address,
+    a.point,
+    a.amount,
+    a.scheduled_date,
+    a.reference_payment,
+    aspec.start_appointment,
+    aspec.end_appointment,
+    u.name AS client_name,
+    u.lastname AS client_lastname,
+    u.telephone_number AS client_phone
 FROM public.appointment a
 LEFT JOIN public.classification status_class 
-  ON a.status_id = status_class.id
+    ON a.status_id = status_class.id
 LEFT JOIN public.classification payment_class 
-  ON a.payment_method = payment_class.id
+    ON a.payment_method = payment_class.id
 LEFT JOIN public.user u
-  ON a.user_id = u.id
+    ON a.user_id = u.id
 LEFT JOIN public.appointment_specialists aspec
-  ON a.id = aspec.appointment_id -- Unir con appointment_specialists
+    ON a.id = aspec.appointment_id
 JOIN order_status os
-  ON a.id = os.appointment_id
+    ON a.id = os.appointment_id
+LEFT JOIN specialist_cancellations sc
+    ON a.id = sc.appointment_id
 WHERE a.status_order = true
-  AND a.address != 'Presencial en el Salón de Belleza'
-  AND os.total_assigned_sessions < os.total_required_sessions -- Solo muestra si faltan sesiones
+    AND a.address != 'Presencial en el Salón de Belleza'
+    AND os.total_assigned_sessions < os.total_required_sessions
+    AND sc.appointment_id IS NULL
 GROUP BY 
-  a.id,
-  a.services,
-  a.status_id,
-  status_class.classification_type,
-  payment_class.classification_type,
-  a.status_order,
-  a.paid,
-  a.address,
-  a.point,
-  a.amount,
-  a.scheduled_date,
-  a.reference_payment,
-  aspec.start_appointment, -- Incluir en el GROUP BY
-  aspec.end_appointment,   -- Incluir en el GROUP BY
-  u.name,
-  u.lastname,
-  u.telephone_number
+    a.id,
+    a.services,
+    a.status_id,
+    status_class.classification_type,
+    payment_class.classification_type,
+    a.status_order,
+    a.paid,
+    a.address,
+    a.point,
+    a.amount,
+    a.scheduled_date,
+    a.reference_payment,
+    aspec.start_appointment,
+    aspec.end_appointment,
+    u.name,
+    u.lastname,
+    u.telephone_number
 ORDER BY a.scheduled_date DESC;
       `,
+      values: [specialistID],
     };
     const { rows } = await client.query(query);
     return rows.length > 0 ? rows : null;
@@ -341,32 +350,40 @@ export const updateAppointmentStatus = async (
       FROM appointment
       WHERE id = $1
     `;
-    const { rows: [appointmentDetails] } = await client.query(appointmentQuery, [appointmentId]);
+    const {
+      rows: [appointmentDetails],
+    } = await client.query(appointmentQuery, [appointmentId]);
 
-    const totalAmount = parseFloat(appointmentDetails.amount.replace('$', '').trim());
+    const totalAmount = parseFloat(
+      appointmentDetails.amount.replace("$", "").trim()
+    );
 
     const systemShare = totalAmount * 0.2;
     const specialistShare = totalAmount * 0.8;
-
 
     const specialistsQuery = `
       SELECT DISTINCT specialist_id
       FROM appointment_specialists
       WHERE appointment_id = $1
     `;
-    const { rows: specialistsRows } = await client.query(specialistsQuery, [appointmentId]);
+    const { rows: specialistsRows } = await client.query(specialistsQuery, [
+      appointmentId,
+    ]);
     const totalSpecialists = specialistsRows.length;
 
-    const individualSpecialistEarnings = totalSpecialists > 0
-      ? (specialistShare / totalSpecialists).toFixed(2)
-      : 0;
+    const individualSpecialistEarnings =
+      totalSpecialists > 0
+        ? (specialistShare / totalSpecialists).toFixed(2)
+        : 0;
 
     const statusQuery = `
       SELECT id
       FROM classification
       WHERE classification_type = $1
     `;
-    const { rows: [statusRow] } = await client.query(statusQuery, [status]);
+    const {
+      rows: [statusRow],
+    } = await client.query(statusQuery, [status]);
 
     if (!statusRow) {
       throw new Error("Estado no válido");
@@ -380,11 +397,13 @@ export const updateAppointmentStatus = async (
       WHERE appointment_id = $3 AND specialist_id = $4
       RETURNING *
     `;
-    const { rows: [updatedRow] } = await client.query(updateQuery, [
+    const {
+      rows: [updatedRow],
+    } = await client.query(updateQuery, [
       statusRow.id,
       individualSpecialistEarnings,
       appointmentId,
-      specialistId
+      specialistId,
     ]);
 
     if (!updatedRow) {
@@ -533,9 +552,25 @@ export const createRatingAndUpdateAppointment = async (
     return ratingRows[0];
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Error creating rating and updating appointment:", error);
+    console.error("Error creando la evaluación.:", error);
     throw error;
   } finally {
     client.release();
+  }
+};
+
+export const cancelAppointmentForSpecialist = async (
+  specialistID,
+  appointmentID
+) => {
+  try {
+    const query = {
+      text: `INSERT INTO public.specialist_cancelled_appointments (specialist_id, appointment_id) VALUES ($1, $2)`,
+      values: [specialistID, appointmentID],
+    };
+    await pool.query(query);
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 };

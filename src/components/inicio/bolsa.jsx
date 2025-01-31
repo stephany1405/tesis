@@ -33,7 +33,7 @@ const Bolsa = () => {
   const [loadingMobile, setLoadingMobile] = useState(false);
   const [dolarPrice, setDolarPrice] = useState(null);
   const [decodedUserId, setDecodedUserId] = useState(null);
-
+  const [calendarKey, setCalendarKey] = useState(0);
   const selectedAppointmentData = useSelectedAppointment(selectedDate);
   const navigate = useNavigate();
 
@@ -42,6 +42,7 @@ const Bolsa = () => {
       navigate("/checkout/success", { replace: true });
     }
   }, [redirect, navigate]);
+
   useEffect(() => {
     if (loadingCash) {
       setTimeout(() => {
@@ -54,6 +55,7 @@ const Bolsa = () => {
   useEffect(() => {
     setSelectedItems(cartItems.map(() => true));
   }, [cartItems]);
+
   useEffect(() => {
     if (loadingMobile) {
       setTimeout(() => {
@@ -62,6 +64,7 @@ const Bolsa = () => {
       }, 2000);
     }
   }, [loadingMobile]);
+
   useEffect(() => {
     const fetchDolar = async () => {
       try {
@@ -96,7 +99,13 @@ const Bolsa = () => {
     handleToken();
   }, []);
 
+  const handleCalendarReset = () => {
+    setSelectedDate(null);
+    setCalendarKey((prevKey) => prevKey + 1);
+  };
+
   const conversion = dolarPrice;
+
   const parseDuration = (durationString) => {
     if (!durationString) return 0;
 
@@ -129,6 +138,7 @@ const Bolsa = () => {
       return total;
     }, 0);
   };
+
   const subtotal = cartItems.reduce(
     (sum, item, index) =>
       sum + (selectedItems[index] ? item.price * item.quantity : 0),
@@ -136,7 +146,6 @@ const Bolsa = () => {
   );
 
   const iva = subtotal * 0.16;
-
 
   const domicilio = isHomeService ? 5 : 0;
 
@@ -232,12 +241,15 @@ const Bolsa = () => {
   const handleFormValidityChange = (isValid) => {
     setIsAddressFormValid(isValid);
   };
+
   const toggleForm = () => {
     setShowForm(!showForm);
   };
+
   const hasSelectedItems = () => {
     return selectedItems.some((selected) => selected === true);
   };
+
   const handleQuantityChange = (index, newQuantity) => {
     updateQuantity(cartItems[index].id, parseInt(newQuantity));
   };
@@ -247,12 +259,14 @@ const Bolsa = () => {
     updatedSelectedItems[index] = !updatedSelectedItems[index];
     setSelectedItems(updatedSelectedItems);
   };
+
   const toggleHomeService = () => {
     setIsHomeService(!isHomeService);
     if (isHomeService) {
       setSelectedLocation(null);
     }
   };
+
   const handleSelectAll = () => {
     setSelectedItems(selectedItems.map(() => true));
   };
@@ -331,15 +345,32 @@ const Bolsa = () => {
 
   const nextStep = () => {
     if (checkoutStep < 4) {
-      setCheckoutStep(checkoutStep + 1);
+      if (!isHomeService && checkoutStep === 2) {
+        setCheckoutStep(4);
+      } else {
+        setCheckoutStep(checkoutStep + 1);
+      }
     }
   };
 
   const prevStep = () => {
     if (checkoutStep > 1) {
-      setCheckoutStep(checkoutStep - 1);
+      if (!isHomeService && checkoutStep === 4) {
+        setCheckoutStep(2);
+      } else {
+        setCheckoutStep(checkoutStep - 1);
+      }
+
+      if (checkoutStep === 3 || checkoutStep === 2) {
+        handleCalendarReset();
+      }
+
+      if (checkoutStep === 2) {
+        setSelectedDate(null);
+      }
     }
   };
+
   const formattedAddress = selectedLocation?.address
     ? selectedLocation.address.replace(/, /g, ",\n")
     : "No se ha especificado la dirección";
@@ -360,8 +391,9 @@ const Bolsa = () => {
                     Seleccionar Todo
                   </button>
                   <button
-                    className={`${styles.homeServiceButton} ${isHomeService ? styles.active : ""
-                      }`}
+                    className={`${styles.homeServiceButton} ${
+                      isHomeService ? styles.active : ""
+                    }`}
                     onClick={toggleHomeService}
                   >
                     {isHomeService ? "Desactivar" : "Activar"} Servicio a
@@ -418,6 +450,7 @@ const Bolsa = () => {
           <div className={styles.stepContainer}>
             <h2>Selección de Fecha y Hora</h2>
             <AppointmentCalendar
+              key={calendarKey}
               onDateSelect={handleDateSelect}
               totalDuration={calculateTotalDuration()}
             />
@@ -425,6 +458,9 @@ const Bolsa = () => {
         );
 
       case 3:
+        if (!isHomeService) {
+          return null;
+        }
         return (
           <div className={styles.stepContainer}>
             <h2>Ubicación del Servicio</h2>
@@ -605,8 +641,9 @@ const Bolsa = () => {
         </div>
         {isHomeService && (
           <div
-            className={`${styles.step} ${checkoutStep >= 3 ? styles.active : ""
-              }`}
+            className={`${styles.step} ${
+              checkoutStep >= 3 ? styles.active : ""
+            }`}
           >
             Ubicación
           </div>

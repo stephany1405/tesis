@@ -45,7 +45,9 @@ function Historial({ setSelectedService }) {
   if (loading) return <div className={styles.loading}>Cargando...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
   if (!servicioNoActivo || servicioNoActivo.length === 0)
-    return <div className={styles.noHistory}>No hay historial de servicios</div>;
+    return (
+      <div className={styles.noHistory}>No hay historial de servicios</div>
+    );
 
   return (
     <div className={styles.historyList}>
@@ -73,6 +75,9 @@ function Historial({ setSelectedService }) {
             </div>
             <div className={styles.serviceAmount}>
               <strong>Costo:</strong> {service.amount}
+            </div>
+            <div className={styles.serviceAmount}>
+              <strong>Referencia de Pago:</strong> {service.payment_method_name}
             </div>
 
             <div className={styles.specialists}>

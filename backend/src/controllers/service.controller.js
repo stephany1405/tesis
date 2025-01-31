@@ -7,6 +7,7 @@ import {
   createRating,
   checkAppointmentStatus,
   createRatingAndUpdateAppointment,
+  cancelAppointmentForSpecialist,
 } from "../models/service.model.js";
 import { pool } from "../db.js";
 import moment from "moment";
@@ -237,8 +238,9 @@ export const getAnonActiveAppointment = async (req, res) => {
 };
 
 export const services = async (req, res, next) => {
+  const { specialistID } = req.query;
   try {
-    const service = await getServices();
+    const service = await getServices(specialistID);
     res.status(200).json(service);
   } catch (error) {
     console.log(error);
@@ -493,5 +495,21 @@ export const createRatingController2 = async (req, res) => {
   } catch (error) {
     console.error("Error en createRatingController:", error);
     res.status(500).json({ error: "Error al guardar calificación" });
+  }
+};
+
+export const cancelAppointment = async (req, res) => {
+  const { specialistID, appointmentID } = req.body;
+  try {
+    if (!specialistID || !appointmentID) {
+      res.status(400).json({ message: "Falta parámetros requeridos." });
+    }
+    await cancelAppointmentForSpecialist(specialistID, appointmentID);
+    res.status(200).json({ message: "cita cancelada para el especialista." });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error interno en el servidor, controlador CancelAppointment",
+      error: error,
+    });
   }
 };

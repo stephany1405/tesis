@@ -1,14 +1,13 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { DesplegableC } from "./desplegableC";
 import axios from "axios";
 import styles from "./Header.module.css";
 import Cookies from "js-cookie";
 
 const Header = () => {
-  const [showCart, setShowCart] = useState(false);
   const [showServices, setShowServices] = useState(false);
-  const location = useLocation();
+  const [categorias, setCategorias] = useState([]);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -16,7 +15,6 @@ const Header = () => {
       const response = await axios.post(
         "http://localhost:3000/api/usuario/logout"
       );
-
       if (response.status === 200) {
         localStorage.clear();
         Cookies.remove("token", { path: "/" });
@@ -31,71 +29,66 @@ const Header = () => {
     }
   };
 
-  const toggleServices = () => {
-    setShowServices(!showServices);
+  const fetchCategorias = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/servicios/categoria"
+      );
+      const transformedCategorias = response.data.map((category) => ({
+        id: category.id,
+        name: category.classification_type,
+        link: `/servicios/${category.classification_type.toLowerCase()}/${
+          category.id
+        }`,
+      }));
+      setCategorias(transformedCategorias);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
   };
 
-  const toggleCart = () => {
-    setShowCart(!showCart);
-  };
-
-  const services = [
-    { name: "Facial", path: "/servicios/facial/1" },
-    { name: "Corporales", path: "/servicios/corporales/2" },
-    { name: "Manicuras", path: "/servicios/manicuras/3" },
-    { name: "Pedicura", path: "/servicios/pedicura/4" },
-    { name: "Quiropodia", path: "/servicios/quiropodia/5" },
-    { name: "Epilación", path: "/servicios/epilacion/6" },
-    { name: "Extensiones", path: "/servicios/extension/7" },
-  ];
+  useEffect(() => {
+    fetchCategorias();
+  }, []);
 
   return (
     <header className={styles.header}>
-      <div className={styles.logoContainer}>
+      <div className={styles.headerContent}>
         <Link to="/inicio" className={styles.logo}>
           uñimass
         </Link>
+        <nav className={styles.nav}>
+          <Link to="/inicio" className={styles.navLink}>
+            Inicio
+          </Link>
+          <Link to="/agenda" className={styles.navLink}>
+            Agenda
+          </Link>
+          <div
+            className={styles.servicesDropdown}
+            onMouseEnter={() => setShowServices(true)}
+            onMouseLeave={() => setShowServices(false)}
+          >
+            <button className={styles.navLink}>Servicios</button>
+            {showServices && (
+              <ul className={styles.dropdownMenu}>
+                {categorias.map((categoria) => (
+                  <li key={categoria.id}>
+                    <Link to={categoria.link}>{categoria.name}</Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <DesplegableC />
+          <Link to="/perfil" className={styles.navLink}>
+            Perfil
+          </Link>
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            Cerrar Sesión
+          </button>
+        </nav>
       </div>
-      <nav className={styles.nav}>
-        <Link
-          to="/inicio"
-          className={location.pathname === "/" ? styles.active : ""}
-        >
-          Inicio
-        </Link>
-        <Link
-          to="/agenda"
-          className={location.pathname === "/" ? styles.active : ""}
-        >
-          Agenda
-        </Link>
-        <div className={styles.dropdownContainer}>
-          <span onClick={toggleServices} className={styles.dropdownButton}>
-            Servicios
-          </span>
-          {showServices && (
-            <div className={styles.dropdownContent}>
-              {services.map((service, index) => (
-                <Link key={index} to={service.path}>
-                  {service.name}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <DesplegableC />
-        <Link
-          to="/perfil"
-          className={location.pathname === "/perfil" ? styles.active : ""}
-        >
-          Perfil
-        </Link>
-
-        <button onClick={handleLogout} className={styles.logoutButton}>
-          Cerrar Sesión
-        </button>
-      </nav>
     </header>
   );
 };
