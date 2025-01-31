@@ -54,14 +54,19 @@ export const CartItem = ({
       />
       <div className={styles.itemDetails}>
         <h3>{item.title}</h3>
-        <div className={styles.itemVariant}>Duración: {item.duration} cada una</div>
+        <div className={styles.itemVariant}>
+          Duración: {item.duration} cada una
+        </div>
         <div className={styles.itemDescription}>
-          <strong>Nota:</strong> {item.note}
+          <strong>Nota:</strong> {item.note || "Sin nota"}
+        </div>
+        <div className={styles.itemDuration}>
+          Duración total: {calculateTotalDuration(item.duration, item.quantity)}
         </div>
         <div className={styles.itemActions}>
           <select
             value={item.quantity}
-            onChange={(e) => onQuantityChange(index, e.target.value)}
+            onChange={(e) => onQuantityChange(index, parseInt(e.target.value))}
             className={styles.quantitySelect}
           >
             {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
@@ -76,6 +81,7 @@ export const CartItem = ({
           <button
             className={styles.removeButton}
             onClick={() => onRemove(index)}
+            aria-label="Eliminar item"
           >
             Eliminar
           </button>

@@ -11,39 +11,30 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product) => {
     setCartItems((prevCartItems) => {
-      const existingProduct = prevCartItems.find(
-        (item) => item.id === product.id
-      );
+      const instanceId = `${product.id}_${Date.now()}`;
+      const newProduct = {
+        ...product,
+        instanceId,
+        quantity: 1,
+      };
 
-      if (existingProduct) {
-        const updatedCartItems = prevCartItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-        return updatedCartItems;
-      } else {
-        const newCartItems = [...prevCartItems, product];
-        return newCartItems;
-      }
+      return [...prevCartItems, newProduct];
     });
   };
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = (instanceId) => {
     setCartItems((prevCartItems) => {
-      const updatedCartItems = prevCartItems.filter(
-        (item) => item.id !== productId
-      );
-      return updatedCartItems;
+      return prevCartItems.filter((item) => item.instanceId !== instanceId);
     });
   };
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = (instanceId, newQuantity) => {
     setCartItems((prevCartItems) => {
-      const updatedCartItems = prevCartItems.map((item) =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
+      return prevCartItems.map((item) =>
+        item.instanceId === instanceId
+          ? { ...item, quantity: newQuantity }
+          : item
       );
-      return updatedCartItems;
     });
   };
 

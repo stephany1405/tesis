@@ -98,6 +98,14 @@ const Bolsa = () => {
     };
     handleToken();
   }, []);
+  useEffect(() => {
+    if (checkoutStep === 2 && !selectedDate) {
+      const nextButton = document.querySelector(`.${styles.nextButton}`);
+      if (nextButton) {
+        nextButton.disabled = true;
+      }
+    }
+  }, [checkoutStep, selectedDate]);
 
   const handleCalendarReset = () => {
     setSelectedDate(null);
@@ -190,10 +198,10 @@ const Bolsa = () => {
       try {
         setLoadingMobile(true);
 
-        const note = cartItems
-          .filter((_, index) => selectedItems[index])
-          .map((item) => item.note || "Sin nota");
-
+        const selectedProducts = cartItems.filter(
+          (_, index) => selectedItems[index]
+        );
+        const notes = selectedProducts.map((item) => item.note || "Sin nota");
         let appointmentData = null;
         if (selectedDate) {
           appointmentData = {
@@ -209,7 +217,7 @@ const Bolsa = () => {
             userId: decodedUserId,
             PrecioTotal: total,
             products: cartItems.filter((_, index) => selectedItems[index]),
-            noteOfServices: note,
+            noteOfServices: notes,
             cita: appointmentData,
             dirección:
               selectedLocation?.address || "Presencial en el Salón de Belleza",
@@ -251,7 +259,8 @@ const Bolsa = () => {
   };
 
   const handleQuantityChange = (index, newQuantity) => {
-    updateQuantity(cartItems[index].id, parseInt(newQuantity));
+    const item = cartItems[index];
+    updateQuantity(item.instanceId, parseInt(newQuantity));
   };
 
   const handleCheckboxChange = (index) => {
@@ -272,7 +281,8 @@ const Bolsa = () => {
   };
 
   const handleRemoveItem = (index) => {
-    removeFromCart(cartItems[index].id);
+    const item = cartItems[index];
+    removeFromCart(item.instanceId);
   };
 
   const handleCashPayment = async () => {
@@ -283,10 +293,10 @@ const Bolsa = () => {
     if (confirmCash) {
       try {
         setLoadingCash(true);
-
-        const note = cartItems
-          .filter((_, index) => selectedItems[index])
-          .map((item) => item.note || "Sin nota");
+        const selectedProducts = cartItems.filter(
+          (_, index) => selectedItems[index]
+        );
+        const notes = selectedProducts.map((item) => item.note || "Sin nota");
 
         let appointmentData = null;
         if (selectedDate) {
@@ -303,7 +313,7 @@ const Bolsa = () => {
             userId: decodedUserId,
             PrecioTotal: total,
             products: cartItems.filter((_, index) => selectedItems[index]),
-            noteOfServices: note,
+            noteOfServices: notes,
             cita: appointmentData,
             dirección:
               selectedLocation?.address || "Presencial en el Salón de Belleza",
@@ -360,14 +370,7 @@ const Bolsa = () => {
       } else {
         setCheckoutStep(checkoutStep - 1);
       }
-
-      if (checkoutStep === 3 || checkoutStep === 2) {
-        handleCalendarReset();
-      }
-
-      if (checkoutStep === 2) {
-        setSelectedDate(null);
-      }
+      handleCalendarReset();
     }
   };
 
@@ -670,7 +673,8 @@ const Bolsa = () => {
             disabled={
               cartItems.length === 0 ||
               !hasSelectedItems() ||
-              (checkoutStep === 2 && !selectedDate) ||
+              (checkoutStep === 2 &&
+                (!selectedDate || !selectedDate.formattedStart)) ||
               (checkoutStep === 3 &&
                 isHomeService &&
                 (!selectedLocation || !isAddressFormValid))
