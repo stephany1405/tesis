@@ -33,6 +33,10 @@ export function DesplegableC() {
     }, 300);
   };
 
+  const handleRemoveItem = (instanceId) => {
+    removeFromCart(instanceId);
+  };
+
   return (
     <div
       className={styles.dropdownContainer}
@@ -57,16 +61,22 @@ export function DesplegableC() {
                 <h3 className={styles.cartTitle}>Carrito de Compras</h3>
                 <ul className={styles.cartItems}>
                   {cartItems.map((item) => (
-                    <li key={item.id} className={styles.cartItem}>
+                    <li key={item.instanceId} className={styles.cartItem}>
                       <div className={styles.itemInfo}>
                         <span className={styles.itemTitle}>{item.title}</span>
                         <span className={styles.itemQuantity}>
                           {item.quantity} x ${item.price}
                         </span>
+                        {item.note && (
+                          <span className={styles.itemNote}>
+                            Nota: {item.note}
+                          </span>
+                        )}
                       </div>
                       <button
                         className={styles.removeButton}
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => handleRemoveItem(item.instanceId)}
+                        aria-label={`Eliminar ${item.title} del carrito`}
                       >
                         <X size={16} />
                       </button>
