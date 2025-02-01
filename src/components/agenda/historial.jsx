@@ -97,6 +97,9 @@ function Historial({ setSelectedService }) {
                     <div className={styles.specialistName}>
                       {specialist.name} {specialist.lastname}
                     </div>
+                    <span className={styles.specialistRating}>
+                      Evaluación⭐:  {specialist.rating}/5
+                    </span>
                   </div>
                 ))}
               </div>
