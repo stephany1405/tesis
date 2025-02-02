@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import styles from "./servicios.module.css";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Sparkles } from "lucide-react";
 import Modal from "./Modal";
 import NuevoServicio from "./nuevoServicio";
 import axios from "axios";
@@ -67,7 +67,7 @@ const Servicios = () => {
 
   return (
     <div className={styles.servicesContainer}>
-      <h1 className={styles.title}>Servicios</h1>
+      <h1 className={styles.title}><Sparkles size={35}/> Servicios</h1>
       <div className={styles.searchContainer}>
         <input
           type="text"

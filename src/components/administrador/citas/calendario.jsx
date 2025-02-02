@@ -123,9 +123,7 @@ const AdminAppointmentCalendar = () => {
   return (
     <div className={styles.container}>
       <div className={styles.calendarContainer}>
-        <h2 className={styles.calendarTitle}>
-          Calendario de Citas Presenciales
-        </h2>
+       
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="timeGridWeek"

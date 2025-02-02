@@ -2,8 +2,9 @@ import React, { useState, useMemo, useEffect } from "react";
 import styles from "./PerfilesE.module.css";
 import Modal from "./modal";
 import Registro from "./registro";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, UserCog } from "lucide-react";
 import axios from "axios";
+import { size } from "lodash";
 const SpecialistProfiles = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,12 +66,12 @@ const SpecialistProfiles = () => {
   }, []);
 
   if (isLoading)
-    return <div className={styles.loading}>Cargando clientes...</div>;
+    return <div className={styles.loading}>Cargando especialistas...</div>;
   if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
     <div className={styles.clientProfilesContainer}>
-      <h1 className={styles.title}>Perfiles de especialistas</h1>
+      <h1 className={styles.title}><UserCog size={35} /> Especialistas</h1>
       <div className={styles.searchContainer}>
         <input
           type="text"

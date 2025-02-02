@@ -8,6 +8,10 @@
   display: flex;
   flex-direction: column;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
 
 .collapsed {
@@ -72,6 +76,23 @@
   flex-grow: 1;
   padding: 20px 0;
   overflow-y: auto;
+}
+
+.sidebarNav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebarNav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .sidebarMenu {
@@ -143,19 +164,24 @@
   font-weight: 500;
 }
 
-.sidebarNav::-webkit-scrollbar {
-  width: 5px;
+/* Add this new class */
+.mainContent {
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
 }
 
-.sidebarNav::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+/* Add this new class */
+.mainContentCollapsed {
+  margin-left: 80px;
 }
 
-.sidebarNav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 5px;
+/* Add this class to push content away from sidebar */
+:global(body) {
+  padding-left: 280px; /* Same as sidebar width */
+  transition: padding-left 0.3s ease;
 }
 
-.sidebarNav::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+:global(body.sidebar-collapsed) {
+  padding-left: 80px; /* Same as collapsed sidebar width */
 }
+

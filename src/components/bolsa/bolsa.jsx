@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import { Elements, CardElement } from "@stripe/react-stripe-js"
+import clsx from "clsx"
+import { Elements } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { useNavigate } from "react-router-dom"
 import { useCart } from "../inicio/useContext.jsx"
@@ -9,6 +10,7 @@ import { jwtDecode } from "jwt-decode"
 import { FaShoppingCart, FaCalendarAlt, FaMapMarkerAlt, FaCreditCard } from "react-icons/fa"
 
 import { getJWT } from "../middlewares/getToken.jsx"
+import { CheckOutForm } from "../inicio/CheckoutForm.jsx"
 import { AddressForm } from "../inicio/AddressForm.jsx"
 import { AppointmentCalendar } from "../inicio/AppointmentCalendar.jsx"
 import { CartItem } from "../inicio/CartItem.jsx"
@@ -24,7 +26,7 @@ const Bolsa = () => {
 
   const [selectedItems, setSelectedItems] = useState(cartItems.map(() => true))
   const [showForm, setShowForm] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState("Tarjeta")
+  const [paymentMethod, setPaymentMethod] = useState("Efectivo") // Updated initial state
   const [loadingCash, setLoadingCash] = useState(false)
   const [redirect, setRedirect] = useState(false)
   const [isHomeService, setIsHomeService] = useState(false)
@@ -40,8 +42,6 @@ const Bolsa = () => {
   const [modalContent, setModalContent] = useState({ title: "", message: "" })
   const [paymentReference, setPaymentReference] = useState("")
   const [showReferenceInput, setShowReferenceInput] = useState(false)
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
 
   const selectedAppointmentData = useSelectedAppointment(selectedDate)
 
@@ -156,7 +156,7 @@ const Bolsa = () => {
   const domicilio = isHomeService ? 5 : 0
   const total = subtotal + iva + domicilio
 
-  const handleMobilePayment = () => {
+  const handleMobilePayment = async () => {
     setModalContent({
       title: "Pago Móvil",
       message: `Para continuar, realice el pago móvil con los siguientes datos:
@@ -221,6 +221,7 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
       alert("Hubo un error al procesar el pago en efectivo")
     } finally {
       setLoadingCash(false)
+      setIsModalOpen(false)
     }
   }
 
@@ -274,17 +275,21 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
   }
 
   const handleModalConfirm = () => {
-    if (!showReferenceInput) {
-      setShowReferenceInput(true)
-      setModalContent({
-        title: "Número de Referencia",
-        message: "Por favor, ingrese el número de referencia del pago:",
-      })
-    } else {
-      if (paymentReference.length === 12) {
-        processMobilePayment()
+    if (paymentMethod === "Efectivo") {
+      processCashPayment()
+    } else if (paymentMethod === "PagoMovil") {
+      if (!showReferenceInput) {
+        setShowReferenceInput(true)
+        setModalContent({
+          title: "Número de Referencia",
+          message: "Por favor, ingrese el número de referencia del pago:",
+        })
       } else {
-        alert("El número de referencia debe tener exactamente 12 caracteres.")
+        if (paymentReference.length === 12) {
+          processMobilePayment()
+        } else {
+          alert("El número de referencia debe tener exactamente 12 caracteres.")
+        }
       }
     }
   }
@@ -375,25 +380,6 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
     ? selectedLocation.address.replace(/, /g, ",\n")
     : "No se ha especificado la dirección"
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    setLoading(true)
-    setError(null)
-    try {
-      // Aquí iría la lógica de procesamiento del pago
-      console.log("Procesando pago...")
-      // Simular un proceso de pago
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      console.log("Pago procesado con éxito")
-      resetCart()
-      setRedirect(true)
-    } catch (err) {
-      setError(err.message || "Hubo un error al procesar el pago")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const renderCartStep = () => (
     <div className={styles.bolsaContent}>
       <div className={styles.bolsaItems}>
@@ -478,7 +464,7 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
         <div className={styles.summaryAndAddressGrid}>
           <div className={styles.summaryColumn}>
             {cartItems.map((item, index) => (
-              <div key={index} className={`${styles.cartItemSummary} ${styles.cartSummaryItem}`}>
+              <div key={index} className={clsx(styles.cartItemSummary, styles.cartSummaryItem)}>
                 <div className={styles.itemTitle}>
                   {item.title} - {item.quantity} sesión(es)
                 </div>
@@ -539,50 +525,37 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
             onChange={(e) => setPaymentMethod(e.target.value)}
             className={styles.paymentMethodSelect}
           >
-            <option value="Tarjeta">Tarjeta</option>
             <option value="Efectivo">Efectivo</option>
             <option value="PagoMovil">Pago Móvil</option>
+            <option value="Tarjeta">Tarjeta</option>
           </select>
         </label>
-        {paymentMethod === "Tarjeta" && (
-          <Elements stripe={stripePromise}>
-            <form onSubmit={handleSubmit} className={styles.paymentForm}>
-              <div className={styles.cardElementContainer}>
-                <CardElement
-                  options={{
-                    hidePostalCode: true,
-                    style: {
-                      base: {
-                        fontSize: "16px",
-                        color: "#424770",
-                        "::placeholder": {
-                          color: "#aab7c4",
-                        },
-                      },
-                      invalid: {
-                        color: "#9e2146",
-                      },
-                    },
-                  }}
-                />
-              </div>
-              {error && <div className={styles.error}>{error}</div>}
-              <button type="submit" className={styles.paymentButton} disabled={loading}>
-                {loading ? <span className={styles.loader}></span> : "Pagar"}
-              </button>
-            </form>
-          </Elements>
-        )}
-        {paymentMethod === "Efectivo" ? (
-          <button className={styles.payButton} onClick={() => handleCashPayment()} disabled={loadingCash}>
-            {loadingCash ? <span className={styles.loader}></span> : "Siguiente"}
+
+        {paymentMethod === "Efectivo" && (
+          <button className={styles.payButton} onClick={handleCashPayment} disabled={loadingCash}>
+            {loadingCash ? <span className={styles.loader}></span> : "Pagar en Efectivo"}
           </button>
-        ) : (
-          paymentMethod === "PagoMovil" && (
-            <button className={styles.payButton} onClick={() => handleMobilePayment()} disabled={loadingMobile}>
-              {loadingMobile ? <span className={styles.loader}></span> : "Siguiente"}
-            </button>
-          )
+        )}
+
+        {paymentMethod === "PagoMovil" && (
+          <button className={styles.payButton} onClick={handleMobilePayment} disabled={loadingMobile}>
+            {loadingMobile ? <span className={styles.loader}></span> : "Pagar con Pago Móvil"}
+          </button>
+        )}
+        {paymentMethod === "Tarjeta" && (
+          <div className={styles.paymentFormContainer}>
+            <Elements stripe={stripePromise}>
+              <CheckOutForm
+                total={total}
+                cartItems={cartItems}
+                selectedItems={selectedItems}
+                resetCart={resetCart}
+                selectedAppointment={selectedAppointmentData}
+                addressAppointment={selectedLocation?.address || null}
+                appointmentCoordinates={selectedLocation?.coordinates || null}
+              />
+            </Elements>
+          </div>
         )}
       </div>
     </div>

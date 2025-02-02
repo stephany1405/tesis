@@ -3,7 +3,7 @@ import axios from "axios";
 import styles from "./Perfiles.module.css";
 import ClientModal from "./clientModal";
 import Registro from "./registro";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus,Users } from "lucide-react";
 
 const ClientProfiles = () => {
   const [selectedClient, setSelectedClient] = useState(null);
@@ -64,7 +64,7 @@ const ClientProfiles = () => {
 
   return (
     <div className={styles.clientProfilesContainer}>
-      <h1 className={styles.title}>Perfiles de Clientes</h1>
+      <h1 className={styles.title}> <Users  size={35}/> Clientes</h1>
       <div className={styles.searchContainer}>
         <input
           type="text"

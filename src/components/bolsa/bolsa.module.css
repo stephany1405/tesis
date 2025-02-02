@@ -54,8 +54,6 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-
-
 .itemsHeader {
   display: flex;
   justify-content: space-between;
@@ -278,29 +276,28 @@
 
 .paymentMethodSelect {
   width: 100%;
-  padding: 0.75rem;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   font-size: 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
   background-color: #fff;
 }
 
 .payButton {
   width: 100%;
-  padding: 1rem;
+  padding: 12px;
+  margin-top: 20px;
   font-size: 1rem;
   font-weight: 600;
   color: #ffffff;
   background-color: var(--primary-color);
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 1rem;
 }
 
 .payButton:hover {
@@ -309,7 +306,7 @@
 }
 
 .payButton:disabled {
-  background-color: var(--border-color);
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
@@ -395,8 +392,8 @@
   cursor: not-allowed;
 }
 
- /* item */
- .item {
+/* item */
+.item {
   display: flex;
   align-items: flex-start;
   background-color: #fff;
@@ -430,7 +427,7 @@
 }
 
 .itemCheckbox:checked::after {
-  content: '✓';
+  content: "✓";
   font-size: 16px;
   color: white;
   position: absolute;
@@ -479,7 +476,8 @@
   transition: all 0.2s ease;
 }
 
-.quantitySelect:hover, .quantitySelect:focus {
+.quantitySelect:hover,
+.quantitySelect:focus {
   border-color: #ff69b4;
   outline: none;
 }
@@ -521,7 +519,9 @@
     gap: 10px;
   }
 
-  .quantitySelect, .itemPrice, .removeButton {
+  .quantitySelect,
+  .itemPrice,
+  .removeButton {
     flex: 1 1 auto;
   }
 }
@@ -534,7 +534,6 @@
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   /* margin-bottom: 30px; */
-  
 }
 
 .selectedAppointment {
@@ -543,8 +542,7 @@
   padding: 20px;
   border: 2px solid #ff69b4;
   transition: all 0.3s ease;
-  margin-bottom:30px ;
-
+  margin-bottom: 30px;
 }
 
 .selectedAppointment:hover {
@@ -693,5 +691,77 @@
   box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
+.paymentFormContainer {
+  margin-bottom: 20px;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
 
+.paymentFormContainer:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.paymentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cardElementContainer {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+}
+
+.cardElementContainer:hover {
+  border-color: #ff69b4;
+}
+
+.paymentButton {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #ff69b4;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.paymentButton:hover {
+  background-color: #ff1493;
+}
+
+.paymentButton:disabled {
+  background-color: #ffb6c1;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #f44336;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.loader {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
