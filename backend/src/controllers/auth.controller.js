@@ -19,10 +19,13 @@ export const register = async (req, res) => {
       name,
       lastname,
       identification,
+      gender,
       email,
       telephone_number,
       password,
       date_of_birth,
+      security_question,
+      security_answer,
     } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -41,11 +44,14 @@ export const register = async (req, res) => {
       name,
       lastname,
       identification,
+      gender,
       email,
       telephone_number,
       password: hashedPassword,
       role_id: RoleID,
       date_of_birth,
+      security_question,
+      security_answer,
     };
 
     const filteredColumns = columnNames.filter(

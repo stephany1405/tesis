@@ -78,8 +78,8 @@ export const ObtainNonActiveCustomerService = async (userID) => {
       text: `SELECT 
     a.id,
     a.services,
-    status_class.classification_type as status_name,
-    payment_class.classification_type as payment_method_name,
+    status_class.classification_type AS status_name,
+    payment_class.classification_type AS payment_method_name,
     as_link.start_appointment,
     as_link.end_appointment,
     a.status_order,
@@ -97,17 +97,32 @@ export const ObtainNonActiveCustomerService = async (userID) => {
                 'lastname', u.lastname,
                 'telephone_number', u.telephone_number,
                 'picture_profile', u.picture_profile,
-                'score', u.score
+                'score', u.score,
+                'rating', COALESCE(r.rating, 0)
             )
         ) FILTER (WHERE u.id IS NOT NULL),
         '[]'
-    ) as specialists 
+    ) AS specialists 
 FROM public.appointment a 
-LEFT JOIN public.classification status_class ON a.status_id = status_class.id 
-LEFT JOIN public.classification payment_class ON a.payment_method = payment_class.id 
-LEFT JOIN public.appointment_specialists as_link ON a.id = as_link.appointment_id 
-LEFT JOIN public."user" u ON as_link.specialist_id = u.id 
-WHERE a.user_id = $1 
+LEFT JOIN public.classification status_class 
+    ON a.status_id = status_class.id 
+LEFT JOIN public.classification payment_class 
+    ON a.payment_method = payment_class.id 
+LEFT JOIN public.appointment_specialists as_link 
+    ON a.id = as_link.appointment_id 
+LEFT JOIN public."user" u 
+    ON as_link.specialist_id = u.id 
+LEFT JOIN public.ratings r 
+    ON r.appointment_id = a.id 
+    AND r.rated_by = 'cliente' 
+    AND r.user_id = a.user_id -- Ahora hacemos el match con el cliente, no con el especialista
+    AND as_link.specialist_id = (
+        SELECT specialist_id 
+        FROM public.appointment_specialists 
+        WHERE appointment_id = a.id 
+        LIMIT 1
+    )
+WHERE a.user_id = $1
 AND a.status_order = false 
 GROUP BY 
     a.id,
@@ -124,7 +139,8 @@ GROUP BY
     a.scheduled_date,
     a.reference_payment 
 ORDER BY a.scheduled_date DESC
-LIMIT 10`,
+LIMIT 10;
+`,
       values: [parseInt(userID, 10)],
     };
 

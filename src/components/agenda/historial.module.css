@@ -13,42 +13,57 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
 .historyItem:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-color: #ff69b4;
-  transform: translateY(-5px);
-}
-
-.historyItem:active {
-  transform: translateY(0);
+  transform: translateY(-2px);
 }
 
 .serviceName {
   font-size: 1.2rem;
   font-weight: bold;
   color: #333;
+  margin-bottom: 1rem;
 }
 
-.serviceDate,
-.serviceDuration {
-  color: #666;
+.serviceInfo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #555;
   font-size: 0.9rem;
-  margin-top: 0.25rem;
 }
 
-.paymentMethod,
-.serviceAddress,
-.serviceAmount {
-  color: #444;
-  font-size: 1rem;
-  margin-top: 0.5rem;
+.infoItem svg {
+  color: #ff69b4;
 }
 
 .specialists {
   margin-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.specialistsHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.specialistsHeader svg {
+  color: #ff69b4;
 }
 
 .specialistList {
@@ -61,19 +76,31 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  background-color: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 8px;
 }
 
 .specialistImage {
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e5e7eb;
+}
+
+.specialistInfo {
+  display: flex;
+  flex-direction: column;
 }
 
 .specialistName {
   font-weight: bold;
   color: #333;
+}
+
+.starRating {
+  display: flex;
+  gap: 2px;
 }
 
 .loading,
@@ -85,38 +112,17 @@
   font-weight: bold;
 }
 
-.loading {
-  font-size: 1.25rem;
-}
-
-.error {
-  font-size: 1.15rem;
-}
-
-.noHistory {
-  font-size: 1.25rem;
-  color: #666;
-}
-
 @media (max-width: 768px) {
   .historyItem {
     padding: 1rem;
   }
 
-  .serviceName {
-    font-size: 1.1rem;
+  .serviceInfo {
+    grid-template-columns: 1fr;
   }
 
-  .serviceDate,
-  .serviceDuration,
-  .paymentMethod,
-  .serviceAddress,
-  .serviceAmount {
-    font-size: 0.9rem;
-  }
-
-  .specialistImage {
-    width: 35px;
-    height: 35px;
+  .specialistList {
+    flex-direction: column;
   }
 }
+
