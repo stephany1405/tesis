@@ -1,34 +1,30 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { LogOut, Bell, User, Activity } from "lucide-react";
-import styles from "./header.module.css";
-import axios from "axios";
-import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom"
+import { LogOut, Bell, User, Activity, Calendar } from "lucide-react"
+import styles from "./header.module.css"
+import axios from "axios"
+import Cookies from "js-cookie"
 
 export default function Header({ setActiveTab, activeTab }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const handleLogout = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/usuario/logout"
-      );
+      const response = await axios.post("http://localhost:3000/api/usuario/logout")
 
       if (response.status === 200) {
-        localStorage.clear();
-        Cookies.remove("token", { path: "/" });
-        document.cookie =
-          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        localStorage.clear()
+        Cookies.remove("token", { path: "/" })
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
 
-        console.log("Sesión cerrada correctamente.");
-        navigate("/login");
+        console.log("Sesión cerrada correctamente.")
+        navigate("/login")
       } else {
-        console.error("Error al cerrar sesión:", response.data);
+        console.error("Error al cerrar sesión:", response.data)
       }
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.error("Error al cerrar sesión:", error)
     }
-    console.log("Cerrando sesión...");
-  };
+    console.log("Cerrando sesión...")
+  }
 
   return (
     <header className={styles.header}>
@@ -36,25 +32,29 @@ export default function Header({ setActiveTab, activeTab }) {
         <div className={styles.logo}>Uñimas Especialista</div>
         <nav className={styles.nav}>
           <button
+            onClick={() => setActiveTab("calendar")}
+            className={`${styles.navButton} ${activeTab === "calendar" ? styles.active : ""}`}
+          >
+            <Calendar size={18} />
+            <span>Calendario</span>
+          </button>
+          <button
             onClick={() => setActiveTab("notifications")}
-            className={`${styles.navButton} ${activeTab === "notifications" ? styles.active : ""
-              }`}
+            className={`${styles.navButton} ${activeTab === "notifications" ? styles.active : ""}`}
           >
             <Bell size={18} />
             <span>Notificaciones</span>
           </button>
           <button
             onClick={() => setActiveTab("status")}
-            className={`${styles.navButton} ${activeTab === "status" ? styles.active : ""
-              }`}
+            className={`${styles.navButton} ${activeTab === "status" ? styles.active : ""}`}
           >
             <Activity size={18} />
             <span>Estado</span>
           </button>
           <button
             onClick={() => setActiveTab("profile")}
-            className={`${styles.navButton} ${activeTab === "profile" ? styles.active : ""
-              }`}
+            className={`${styles.navButton} ${activeTab === "profile" ? styles.active : ""}`}
           >
             <User size={18} />
             <span>Perfil</span>
@@ -66,5 +66,6 @@ export default function Header({ setActiveTab, activeTab }) {
         </button>
       </div>
     </header>
-  );
+  )
 }
+
