@@ -29,6 +29,7 @@ const Registro = ({ onClose, onSubmit }) => {
     telephone_number: "",
     password: "",
     date_of_birth: "",
+    picture_profile: "/uploads/profile-pics/user.webp",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);

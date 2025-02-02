@@ -36,7 +36,7 @@ export const createCategory = async (req, res) => {
     const query = {
       text: `INSERT INTO classification (classification_type, description, service_image, service_category)
              VALUES ($1, $2, $3, $4) RETURNING *`,
-      values: [name, description, imageUrl, true]
+      values: [name, description, imageUrl, true],
     };
 
     const result = await pool.query(query);
@@ -47,8 +47,6 @@ export const createCategory = async (req, res) => {
   }
 };
 
-
-
 export const createServiceOfCategory = async (req, res, next) => {
   try {
     const { id, name, description, price, duration } = req.body;
@@ -58,8 +56,8 @@ export const createServiceOfCategory = async (req, res, next) => {
     }
     const query = {
       text: `INSERT INTO public.classification (classification_type, parent_classification_id, service_image, description, price, time) values ($1,$2,$3,$4,$5,$6)`,
-      values: [name, id, imageUrl, description, price, duration]
-    }
+      values: [name, id, imageUrl, description, price, duration],
+    };
     const result = await pool.query(query);
     res.json(result.rows[0]);
   } catch (error) {
@@ -72,16 +70,16 @@ export const deleteServiceOfCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const query = {
-      text: `DELETE FROM public.classification WHERE id = $1`,
-      values: [id]
-    }
+      text: `UPDATE public.classification SET service_category = false WHERE id = $1`,
+      values: [id],
+    };
     const result = await pool.query(query);
     res.json(result.rows[0]);
   } catch (error) {
     console.error(error);
     next(error);
   }
-}
+};
 
 export const updateServiceOfCategory = async (req, res, next) => {
   try {
@@ -89,11 +87,13 @@ export const updateServiceOfCategory = async (req, res, next) => {
     const { name, description, price, duration } = req.body;
 
     if (!name) {
-      return res.status(400).json({ error: 'classification_type es obligatorio' });
+      return res
+        .status(400)
+        .json({ error: "classification_type es obligatorio" });
     }
-    
+
     const existingServiceQuery = {
-      text: 'SELECT service_image FROM public.classification WHERE id = $1',
+      text: "SELECT service_image FROM public.classification WHERE id = $1",
       values: [id],
     };
     const existingServiceResult = await pool.query(existingServiceQuery);
@@ -120,7 +120,6 @@ export const updateServiceOfCategory = async (req, res, next) => {
 
     console.log("Resultado de la actualización:", result.rows[0]);
     res.json(result.rows[0]);
-
   } catch (error) {
     console.error(error);
     next(error);

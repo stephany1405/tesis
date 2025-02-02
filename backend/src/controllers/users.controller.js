@@ -21,6 +21,7 @@ export const insertClient = async (req, res) => {
       telephone_number,
       password,
       date_of_birth,
+      picture_profile,
     } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -44,6 +45,7 @@ export const insertClient = async (req, res) => {
       password: hashedPassword,
       role_id: RoleID,
       date_of_birth,
+      picture_profile: picture_profile,
     };
 
     const filteredColumns = columnNames.filter(
@@ -93,9 +95,10 @@ export const insertSpecialist = async (req, res) => {
       telephone_number,
       password,
       date_of_birth,
-      specialization,
+      picture_profile,
+      specialties,
     } = req.body;
-
+    console.log("Datos recibidos:", req.body);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const tableName = "user";
@@ -115,11 +118,12 @@ export const insertSpecialist = async (req, res) => {
       email,
       telephone_number,
       password: hashedPassword,
+      picture_profile: picture_profile,
       role_id: RoleID,
       date_of_birth,
-      specialization,
+      specialization: specialties,
     };
-
+    console.log("Datos a insertar:", data);
     const filteredColumns = columnNames.filter(
       (col) => data[col] !== undefined
     );

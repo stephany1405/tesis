@@ -42,7 +42,6 @@ const ClientProfiles = () => {
   const closeModal = () => setSelectedClient(null);
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
   const handleAddClient = () => setIsRegistrationModalOpen(true);
-
   const handleSubmitRegistrationForm = (newClient) => {
     const newId =
       clients.length > 0
@@ -53,7 +52,7 @@ const ClientProfiles = () => {
       {
         ...newClient,
         id: newId.toString(),
-        picture_profile: `https://i.pravatar.cc/300?img=${newId}`,
+        picture_profile: `"/uploads/profile-pics/user.webp"`,
       },
     ]);
     setIsRegistrationModalOpen(false);
@@ -88,11 +87,7 @@ const ClientProfiles = () => {
             onClick={() => handleClientClick(client)}
           >
             <img
-              src={
-                client.picture_profile
-                  ? `http://localhost:3000${client.picture_profile}`
-                  : `https://i.pravatar.cc/300?img=${client.id}`
-              }
+              src={`http://localhost:3000${client.picture_profile}`}
               alt={`${client.name} ${client.lastname}`}
               className={styles.clientImage}
             />

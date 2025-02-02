@@ -16,40 +16,68 @@ const SubServiceModal = ({ service, onClose }) => {
   const fetchServices = async () => {
     setIsLoading(true);
     try {
+      if (!service?.id) {
+        throw new Error("Service ID is undefined");
+      }
+
       const response = await axios.get(
-        `http://localhost:3000/api/servicios/categoria/${service.id}`
+        `http://localhost:3000/api/servicios/categoria/${service.id}`,
+        {
+          timeout: 5000,
+          headers: {
+            Accept: "application/json",
+          },
+        }
       );
+
+      if (!Array.isArray(response.data)) {
+        console.error("Invalid response format:", response.data);
+        toast.error("Formato de respuesta inválido del servidor");
+        return;
+      }
+
       const fetchedServices = response.data.map((service) => ({
         id: service.id,
         name: service.classification_type,
         description: service.description,
         service_image: service.service_image
           ? service.service_image.startsWith("/uploads")
-            ? `http://localhost:3000${service.service_image}`
+            ? `${BASE_URL}${service.service_image}`
             : service.service_image
           : "/placeholder.svg",
         price: service.price,
         duration: service.time,
       }));
-      if (fetchServices === 0) {
-        console.log("No hay subservicios para esta categoría.");
-      }
+
       setSubServices(fetchedServices);
 
       if (fetchedServices.length === 0 && !noSubServicesShown) {
-        toast.info("No hay subservicios disponibles.");
+        toast.info("No hay subservicios disponibles para esta categoría.");
         setNoSubServicesShown(true);
       }
     } catch (error) {
-      toast.error("Error al cargar los subservicios.");
+      console.error("Error detallado:", error);
+      if (error.response) {
+        if (error.response.status === 404) {
+          toast.error("No se encontró los servicios de categoria");
+        } else {
+          toast.error(`Error del servidor: ${error.response.status}`);
+        }
+      } else if (error.request) {
+        toast.error("No se pudo conectar con el servidor");
+      } else {
+        toast.error("Error al procesar la solicitud");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchServices();
-  }, [service.id]);
+    if (service?.id) {
+      fetchServices();
+    }
+  }, [service?.id]);
 
   const handleAddSubService = async (formData) => {
     try {
@@ -64,7 +92,6 @@ const SubServiceModal = ({ service, onClose }) => {
       setShowForm(false);
       toast.success("¡Subservicio registrado correctamente!");
     } catch (error) {
-      console.error("Error al crear subservicio:", error);
       toast.error("Error al registrar el subservicio.");
     }
   };
@@ -80,7 +107,6 @@ const SubServiceModal = ({ service, onClose }) => {
         await fetchServices();
         toast.success("¡Subservicio eliminado correctamente!");
       } catch (error) {
-        console.error("Error al eliminar el subservicio:", error);
         toast.error("Error al eliminar el subservicio.");
       }
     }
@@ -105,7 +131,6 @@ const SubServiceModal = ({ service, onClose }) => {
       setShowForm(false);
       toast.success("¡Subservicio actualizado correctamente!");
     } catch (error) {
-      console.error("Error al actualizar el subservicio:", error);
       toast.error("Error al actualizar el subservicio.");
     }
   };

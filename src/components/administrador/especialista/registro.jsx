@@ -1,30 +1,30 @@
-import React, { useState, forwardRef } from "react"
-import { IMaskInput } from "react-imask"
-import styles from "./registro.module.css"
-import { X } from "lucide-react"
+import React, { useState, forwardRef } from "react";
+import { IMaskInput } from "react-imask";
+import styles from "./registro.module.css";
+import { X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const TextMaskCustom2 = forwardRef(function TextMaskCustom2(props, ref) {
-  const { onChange, ...other } = props
+  const { onChange, ...other } = props;
   return (
     <IMaskInput
       {...other}
       mask="00000000"
       inputRef={ref}
       onAccept={(value, mask) => {
-        onChange({ target: { name: props.name, value: mask._unmaskedValue } })
+        onChange({ target: { name: props.name, value: mask._unmaskedValue } });
       }}
       overwrite
       className={styles.input}
     />
-  )
-})
+  );
+});
 
 const formatSelectedSpecialties = (specialties) => {
-  if (specialties.length === 0) return "Ninguna especialidad seleccionada"
-  return specialties.join(", ")
-}
+  if (specialties.length === 0) return "Ninguna especialidad seleccionada";
+  return specialties.join(", ");
+};
 
 const Registro = ({ onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -36,41 +36,47 @@ const Registro = ({ onClose, onSubmit }) => {
     password: "",
     date_of_birth: "",
     specialty: "",
+    picture_profile: "/uploads/profile-pics/user.webp",
     specialties: [],
-  })
-  const [error, setError] = useState("")
+  });
+
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
   const handleSpecialtyChange = (e) => {
-    const { value, checked } = e.target
+    const { value, checked } = e.target;
     setFormData((prevState) => ({
       ...prevState,
       specialties: checked
         ? [...prevState.specialties, value]
         : prevState.specialties.filter((specialty) => specialty !== value),
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const response = axios.post("http://localhost:3000/api/registro-especialista", formData)
+      const response = axios.post(
+        "http://localhost:3000/api/registro-especialista",
+        formData
+      );
       setSuccess(true);
       setTimeout(() => {
         navigate("/administrador");
       }, 2000);
     } catch (error) {
-      console.error("Error al registrar:", error)
-      setError("Error al registrar. Por favor, inténtelo de nuevo.")
+      console.error("Error al registrar:", error);
+      setError("Error al registrar. Por favor, inténtelo de nuevo.");
     }
-  }
+  };
+  console.log("Datos del formulario:", formData);
 
   return (
     <div className={styles.formOverlay}>
@@ -183,25 +189,35 @@ const Registro = ({ onClose, onSubmit }) => {
           <div className={styles.formGroup}>
             <label className={styles.label}>Especialidades</label>
             <div className={styles.checkboxGroup}>
-              {["Manicura", "Pedicura", "Faciales", "Corporales", "Epilaciones", "Extensiones", "Quiropodía"].map(
-                (specialty) => (
-                  <label key={specialty} className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      name="specialties"
-                      value={specialty}
-                      checked={formData.specialties.includes(specialty)}
-                      onChange={handleSpecialtyChange}
-                      className={styles.checkbox}
-                    />
-                    {specialty}
-                  </label>
-                ),
-              )}
+              {[
+                "Manicura",
+                "Pedicura",
+                "Faciales",
+                "Corporales",
+                "Epilaciones",
+                "Extensiones",
+                "Quiropodía",
+              ].map((specialty) => (
+                <label key={specialty} className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    name="specialties"
+                    value={specialty}
+                    checked={formData.specialties.includes(specialty)}
+                    onChange={handleSpecialtyChange}
+                    className={styles.checkbox}
+                  />
+                  {specialty}
+                </label>
+              ))}
             </div>
             <div className={styles.specialtySummary}>
-              <span className={styles.specialtySummaryLabel}>Usted se especializa en:</span>
-              <span className={styles.specialtySummaryText}>{formatSelectedSpecialties(formData.specialties)}</span>
+              <span className={styles.specialtySummaryLabel}>
+                Usted se especializa en:
+              </span>
+              <span className={styles.specialtySummaryText}>
+                {formatSelectedSpecialties(formData.specialties)}
+              </span>
             </div>
           </div>
           <button type="submit" className={styles.submitButton}>
@@ -210,8 +226,7 @@ const Registro = ({ onClose, onSubmit }) => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Registro
-
+export default Registro;
