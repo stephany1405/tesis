@@ -8,7 +8,7 @@ import {
 } from "react-leaflet";
 import axios from "axios";
 import debounce from "lodash/debounce";
-import styles from "./bolsa.module.css";
+import styles from "../bolsa/bolsa.module.css";
 import "leaflet/dist/leaflet.css";
 import "../inicio/hooks/mapIcon.js";
 

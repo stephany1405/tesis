@@ -1,0 +1,697 @@
+:root {
+  --primary-color: #ff69b4;
+  --secondary-color: #f8bbd0;
+  --background-color: #fff5f8;
+  --text-color: #333;
+  --border-color: #ffc0cb;
+  --success-color: #4caf50;
+  --error-color: #f44336;
+}
+
+.bolsaContainer {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--background-color);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.stepIndicator {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3rem;
+  padding: 0 1rem;
+}
+
+.step {
+  position: relative;
+  flex: 1;
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.step.active {
+  color: var(--primary-color);
+}
+
+.step svg {
+  font-size: 1.5rem;
+}
+
+.bolsaContent {
+  background-color: #ffffff;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+
+
+.itemsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--secondary-color);
+}
+
+.itemsHeader h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.selectAllButton,
+.homeServiceButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.selectAllButton {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.selectAllButton:hover {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.homeServiceButton {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.homeServiceButton:hover {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.homeServiceButton.active {
+  background-color: var(--success-color);
+}
+
+.summaryDetails {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 15px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: var(--text-color);
+}
+
+.total {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--primary-color);
+  border-top: 2px solid var(--secondary-color);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.stepContainer {
+  max-width: 1200px;
+  margin: 1rem auto;
+  padding: 1.5rem 2.5rem;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.stepContainer h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendarWrapper {
+  background-color: var(--background-color);
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.calendar {
+  font-family: "Arial", sans-serif;
+}
+
+.calendarDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.calendarDay {
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.calendarDay:hover {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.calendarDay.selected {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.timeSlots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.timeSlot {
+  padding: 0.75rem;
+  text-align: center;
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.timeSlot:hover {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.timeSlot.selected {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.addressForm {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.formGroup input,
+.formGroup select {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.25);
+}
+
+.cartItemSummary {
+  background-color: var(--background-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.itemTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.itemDuration,
+.itemPrice,
+.itemNote {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.paymentMethodSelect {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  background-color: #fff;
+}
+
+.payButton {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 1rem;
+}
+
+.payButton:hover {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.payButton:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+.loader {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.addressBox {
+  background-color: var(--background-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.addressBox h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.addressBox pre {
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--text-color);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.navigationButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.prevButton,
+.nextButton {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.prevButton {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.prevButton:hover {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.nextButton {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.nextButton:hover {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+.nextButton:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+ /* item */
+ .item {
+  display: flex;
+  align-items: flex-start;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.itemCheckbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ff69b4;
+  border-radius: 50%;
+  margin-right: 20px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.itemCheckbox:checked {
+  background-color: #ff69b4;
+}
+
+.itemCheckbox:checked::after {
+  content: '✓';
+  font-size: 16px;
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.itemDetails {
+  flex: 1;
+}
+
+.itemDetails h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.itemVariant {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.itemDescription {
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.itemActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quantitySelect {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #333;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quantitySelect:hover, .quantitySelect:focus {
+  border-color: #ff69b4;
+  outline: none;
+}
+
+.itemPrice {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #ff69b4;
+}
+
+.removeButton {
+  background-color: transparent;
+  border: none;
+  color: #ff69b4;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.removeButton:hover {
+  background-color: #fff0f5;
+  color: #ff1493;
+}
+
+@media (max-width: 768px) {
+  .item {
+    flex-direction: column;
+  }
+
+  .itemCheckbox {
+    align-self: flex-start;
+    margin-bottom: 15px;
+  }
+
+  .itemActions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .quantitySelect, .itemPrice, .removeButton {
+    flex: 1 1 auto;
+  }
+}
+
+/* Calendar */
+
+.calendarContainer {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  /* margin-bottom: 30px; */
+  
+}
+
+.selectedAppointment {
+  background-color: #fff0f5;
+  border-radius: 8px;
+  padding: 20px;
+  border: 2px solid #ff69b4;
+  transition: all 0.3s ease;
+  margin-bottom:30px ;
+
+}
+
+.selectedAppointment:hover {
+  box-shadow: 0 6px 12px rgba(255, 105, 180, 0.15);
+}
+
+.appointmentHeader {
+  border-bottom: 2px solid #ff69b4;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.appointmentHeader h3 {
+  color: #ff1493;
+  font-size: 1.4rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.appointmentDetails {
+  display: grid;
+  gap: 10px;
+}
+
+.appointmentDetails p {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.appointmentDetails p::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #ff69b4;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+  .calendarContainer {
+    padding: 15px;
+  }
+
+  .selectedAppointment {
+    padding: 15px;
+  }
+
+  .appointmentHeader h3 {
+    font-size: 1.2rem;
+  }
+
+  .appointmentDetails p {
+    font-size: 0.9rem;
+  }
+}
+
+/* address */
+
+.addressFormContainer {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.searchContainer {
+  margin-bottom: 20px;
+}
+
+.inputWrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.searchInput {
+  flex-grow: 1;
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 2px solid #ff69b4;
+  border-radius: 25px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+  box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.3);
+}
+
+.searchInput::placeholder {
+  color: #999;
+}
+
+.searchInput:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.locationButton {
+  padding: 12px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #ff69b4;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.locationButton:hover {
+  background-color: #ff1493;
+}
+
+.locationButton:disabled {
+  background-color: #ffb6c1;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .inputWrapper {
+    flex-direction: column;
+  }
+
+  .searchInput,
+  .locationButton {
+    width: 100%;
+  }
+}
+.referenceInput {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.referenceInput:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+
+

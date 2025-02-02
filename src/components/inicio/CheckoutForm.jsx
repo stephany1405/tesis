@@ -1,7 +1,7 @@
 import React from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { useCheckout } from "./hooks/useCheckout";
-import styles from "./bolsa.module.css";
+import styles from "../bolsa/bolsa.module.css";
 
 export const CheckOutForm = ({
   total,

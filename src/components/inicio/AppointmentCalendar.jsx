@@ -4,7 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
-import styles from "./bolsa.module.css";
+import styles from "../bolsa/bolsa.module.css";
 import { formatDuration } from "./hooks/utils.js";
 
 export const AppointmentCalendar = ({ onDateSelect, totalDuration }) => {

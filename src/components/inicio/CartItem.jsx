@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./bolsa.module.css";
+import styles from "../bolsa/bolsa.module.css";
 
 export const CartItem = ({
   item,
@@ -73,12 +73,7 @@ export const CartItem = ({
           <span className={styles.itemPrice}>
             ${(item.price * item.quantity).toFixed(2)}
           </span>
-          <button
-            className={styles.removeButton}
-            onClick={() => onRemove(index)}
-          >
-            Eliminar
-          </button>
+         
         </div>
       </div>
     </div>

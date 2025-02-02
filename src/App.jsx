@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { CartProvider } from "./components/inicio/useContext";
 import Layout from "./components/layouts/layout.jsx";
 import Inicio from "./components/inicio/inicio.jsx";
-import Bolsa from "./components/inicio/bolsa.jsx";
+import Bolsa from "./components/bolsa/bolsa.jsx";
 import DynamicCategory from "./components/categorias/DinamycCategory.jsx";
 import ProtectedRoute from "./components/middlewares/protectedRoute.jsx";
 import CheckOutSuccess from "./components/inicio/CheckSuccess.jsx";
