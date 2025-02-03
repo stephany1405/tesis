@@ -148,6 +148,46 @@ export const getSpecialistStatistics = async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
+
+export const dashboardConnect = async (req, res) => {
+  try {
+    const client = await pool.connect();
+
+    const { rows } = await client.query(
+      `SELECT ID FROM classification WHERE classification_type = 'Asignando especialista'`
+    );
+
+    const status_id = parseInt(rows[0].id);
+    const newClientsResult = await client.query(`
+   SELECT COUNT(*) as new_clients
+   FROM public.USER
+   WHERE role_id = 57
+   AND status = true
+   AND DATE(created_at) = CURRENT_DATE
+ `);
+
+    const services =
+      await client.query(`SELECT COUNT(*) as service from PUBLIC.APPOINTMENT
+ `);
+
+    const pendingQuotes = await client.query(
+      `SELECT COUNT(*) as pendingQuotes from PUBLIC.APPOINTMENT WHERE status_id = $1
+ `,
+      [status_id]
+    );
+
+    client.release();
+
+    res.status(200).json({
+      newClientsResult: newClientsResult.rows[0].new_clients || 0,
+      services: services.rows[0].service || 0,
+      pendingQuotes: pendingQuotes.rows[0].pendingquotes || 0,
+    });
+  } catch (error) {
+    console.error("Error en dashboardConnect:", error);
+    res.status(500).json({ error: "error interno en el servidor" });
+  }
+};
 export const getPaymentMethod = async (req, res) => {
   try {
     const query = `
