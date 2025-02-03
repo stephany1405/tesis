@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { LogOut, Bell, User, Activity, Calendar } from "lucide-react"
+import { LogOut, Bell, User, Activity, Clock } from "lucide-react"
 import styles from "./header.module.css"
 import axios from "axios"
 import Cookies from "js-cookie"
@@ -32,13 +32,6 @@ export default function Header({ setActiveTab, activeTab }) {
         <div className={styles.logo}>Uñimas Especialista</div>
         <nav className={styles.nav}>
           <button
-            onClick={() => setActiveTab("calendar")}
-            className={`${styles.navButton} ${activeTab === "calendar" ? styles.active : ""}`}
-          >
-            <Calendar size={18} />
-            <span>Calendario</span>
-          </button>
-          <button
             onClick={() => setActiveTab("notifications")}
             className={`${styles.navButton} ${activeTab === "notifications" ? styles.active : ""}`}
           >
@@ -51,6 +44,13 @@ export default function Header({ setActiveTab, activeTab }) {
           >
             <Activity size={18} />
             <span>Estado</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`${styles.navButton} ${activeTab === "history" ? styles.active : ""}`}
+          >
+            <Clock size={18} />
+            <span>Historial</span>
           </button>
           <button
             onClick={() => setActiveTab("profile")}

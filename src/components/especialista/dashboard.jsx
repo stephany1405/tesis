@@ -3,7 +3,7 @@ import Header from "./header"
 import Notificaciones from "./notificaciones"
 import Perfil from "./perfil"
 import Status from "./serviceStatus"
-import Calendario from "./calendario"
+import Historial from "./historial"
 import styles from "./dashboard.module.css"
 
 export default function SpecialistDashboard() {
@@ -18,10 +18,10 @@ export default function SpecialistDashboard() {
         return <Perfil />
       case "status":
         return <Status />
-      case "calendar":
-        return <Calendario specialistId={specialistId} />
+      case "history":
+        return <Historial />
       default:
-        return <Calendario specialistId={specialistId} />
+        return null
     }
   }
 
