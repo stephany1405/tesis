@@ -140,7 +140,13 @@ const Profile = () => {
       alert(error.response?.data?.message || "Error al cambiar la contraseña");
     }
   };
-
+  const securityQuestions = [
+    "¿Cuál es el nombre de tu primera mascota?",
+    "¿En qué ciudad naciste?",
+    "¿Cuál es el nombre de tu mejor amigo de la infancia?",
+    "¿Cuál es tu película favorita?",
+    "¿Cuál es el nombre de tu escuela primaria?",
+  ];
   const handleSecurityQuestionChange = async (event) => {
     event.preventDefault();
 
@@ -305,15 +311,21 @@ const Profile = () => {
             <FaIdCard /> Cambiar pregunta de seguridad
           </h2>
           <form onSubmit={handleSecurityQuestionChange}>
-            <input
-              type="text"
-              placeholder="Nueva pregunta de seguridad"
+            <select
+              id="securityQuestion"
               name="securityQuestion"
+              className={styles.input}
               value={userData.securityQuestion}
               onChange={handleChange}
-              className={styles.input}
               required
-            />
+            >
+              <option value="">Seleccione una pregunta de seguridad</option>
+              {securityQuestions.map((question, index) => (
+                <option key={index} value={question}>
+                  {question}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               placeholder="Respuesta"
