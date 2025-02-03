@@ -17,7 +17,7 @@ const SubServiceModal = ({ service, onClose }) => {
     setIsLoading(true);
     try {
       if (!service?.id) {
-        throw new Error("Service ID is undefined");
+        throw new Error("Service ID es undefined");
       }
 
       const response = await axios.get(
@@ -29,10 +29,8 @@ const SubServiceModal = ({ service, onClose }) => {
           },
         }
       );
-
       if (!Array.isArray(response.data)) {
-        console.error("Invalid response format:", response.data);
-        toast.error("Formato de respuesta inválido del servidor");
+        console.error(response.data);
         return;
       }
 
@@ -40,11 +38,9 @@ const SubServiceModal = ({ service, onClose }) => {
         id: service.id,
         name: service.classification_type,
         description: service.description,
-        service_image: service.service_image
-          ? service.service_image.startsWith("/uploads")
-            ? `${BASE_URL}${service.service_image}`
-            : service.service_image
-          : "/placeholder.svg",
+        service_image: service.service_image.startsWith("http")
+          ? service.service_image
+          : `http://localhost:3000${service.service_image}`,
         price: service.price,
         duration: service.time,
       }));
@@ -96,18 +92,31 @@ const SubServiceModal = ({ service, onClose }) => {
     }
   };
 
-  const handleDeleteSubService = async (id) => {
+  const handleDeleteCategory = async (id) => {
     if (
-      window.confirm("¿Estás seguro de que deseas eliminar este subservicio?")
+      window.confirm("¿Estás seguro de que deseas eliminar esta categoría?")
     ) {
       try {
-        await axios.delete(
+        await axios.put(
           `http://localhost:3000/api/servicios/eliminarServicio/${id}`
         );
         await fetchServices();
-        toast.success("¡Subservicio eliminado correctamente!");
+        toast.success("Categoría eliminada correctamente!");
       } catch (error) {
-        toast.error("Error al eliminar el subservicio.");
+        toast.error("Error al eliminar la Categoría.");
+      }
+    }
+  };
+  const handleDeleteService = async (id) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar esta servicio?")) {
+      try {
+        await axios.put(
+          `http://localhost:3000/api/servicios/eliminarServiciodeCategoria/${id}`
+        );
+        await fetchServices();
+        toast.success("Servicio eliminado correctamente!");
+      } catch (error) {
+        toast.error("Error al eliminar el servicio.");
       }
     }
   };
@@ -140,6 +149,7 @@ const SubServiceModal = ({ service, onClose }) => {
     setEditingSubService(null);
   };
 
+  console.log(subServices);
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
@@ -152,7 +162,7 @@ const SubServiceModal = ({ service, onClose }) => {
         <div className={styles.headerActions}>
           <button
             className={`${styles.deleteButton} ${styles.deleteCategoryButton}`}
-            onClick={() => handleDeleteSubService(service.id)}
+            onClick={() => handleDeleteCategory(service.id)}
           >
             <Trash size={18} />
             Eliminar Categoría
@@ -167,7 +177,7 @@ const SubServiceModal = ({ service, onClose }) => {
               <div key={subService.id} className={styles.subServiceCard}>
                 <div className={styles.imageContainer}>
                   <img
-                    src={subService.service_image || "/placeholder.svg"}
+                    src={subService.service_image}
                     alt={subService.name}
                     className={styles.subServiceImage}
                   />
@@ -197,7 +207,7 @@ const SubServiceModal = ({ service, onClose }) => {
                     </button>
                     <button
                       className={styles.deleteButton}
-                      onClick={() => handleDeleteSubService(subService.id)}
+                      onClick={() => handleDeleteService(subService.id)}
                     >
                       <Trash size={18} />
                       Eliminar

@@ -38,6 +38,7 @@ const ProductModal = ({ isOpen, onClose, product }) => {
       note: note,
     };
     addToCart(productInfo);
+    setNote("");
     onClose();
   };
 

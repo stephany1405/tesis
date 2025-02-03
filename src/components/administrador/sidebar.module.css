@@ -164,24 +164,13 @@
   font-weight: 500;
 }
 
-/* Add this new class */
+
 .mainContent {
   margin-left: 280px;
   transition: margin-left 0.3s ease;
 }
 
-/* Add this new class */
 .mainContentCollapsed {
   margin-left: 80px;
-}
-
-/* Add this class to push content away from sidebar */
-:global(body) {
-  padding-left: 280px; /* Same as sidebar width */
-  transition: padding-left 0.3s ease;
-}
-
-:global(body.sidebar-collapsed) {
-  padding-left: 80px; /* Same as collapsed sidebar width */
 }
 

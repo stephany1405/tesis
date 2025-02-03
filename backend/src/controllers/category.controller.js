@@ -1,4 +1,3 @@
-import { text } from "express";
 import { getAllCategory, getServices } from "../models/appointment.model.js";
 import { pool } from "../db.js";
 
@@ -16,11 +15,9 @@ export const getServicesByCategory = async (req, res, next) => {
   try {
     const rows = await getServices(req.params.categoryID);
     if (!rows || rows.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No se encontraron servicios para esta categoría." });
+      return res.json({ message: "No se encontraron servicios para esta categoría." });
     }
-    res.status(200).json(rows);
+    res.json(rows);
   } catch (error) {
     next(error);
   }
@@ -123,5 +120,20 @@ export const updateServiceOfCategory = async (req, res, next) => {
   } catch (error) {
     console.error(error);
     next(error);
+  }
+};
+
+export const deleteService = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const query = {
+      text: `UPDATE public.classification SET is_active = false where id = $1`,
+      values: [id],
+    };
+    const result = await pool.query(query);
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ message: "Error interno en el servidor." });
+    console.error(error);
   }
 };

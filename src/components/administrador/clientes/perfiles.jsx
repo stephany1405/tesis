@@ -3,7 +3,7 @@ import axios from "axios";
 import styles from "./Perfiles.module.css";
 import ClientModal from "./clientModal";
 import Registro from "./registro";
-import { Search, UserPlus,Users } from "lucide-react";
+import { Search, UserPlus, Users } from "lucide-react";
 
 const ClientProfiles = () => {
   const [selectedClient, setSelectedClient] = useState(null);
@@ -12,7 +12,22 @@ const ClientProfiles = () => {
   const [clients, setClients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  useEffect(() => {
+    const handleSidebarChange = () => {
+      setIsSidebarCollapsed(
+        document.body.classList.contains("sidebar-collapsed")
+      );
+    };
+    handleSidebarChange();
+    const observer = new MutationObserver(handleSidebarChange);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -63,49 +78,57 @@ const ClientProfiles = () => {
   if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
-    <div className={styles.clientProfilesContainer}>
-      <h1 className={styles.title}> <Users  size={35}/> Clientes</h1>
-      <div className={styles.searchContainer}>
-        <input
-          type="text"
-          placeholder="Buscar clientes..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          className={styles.searchInput}
-        />
-        <Search className={styles.searchIcon} size={20} />
-      </div>
-      <div className={styles.clientProfiles}>
-        <div className={styles.addClientProfile} onClick={handleAddClient}>
-          <UserPlus size={40} />
-          <span>Agregar Cliente</span>
+    <div
+      className={`${styles.pageWrapper} ${
+        isSidebarCollapsed ? styles.pageWrapperCollapsed : ""
+      }`}
+    >
+      <div className={styles.clientProfilesContainer}>
+        <h1 className={styles.title}>
+          <Users size={35} /> Clientes
+        </h1>
+        <div className={styles.searchContainer}>
+          <input
+            type="text"
+            placeholder="Buscar clientes..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className={styles.searchInput}
+          />
+          <Search className={styles.searchIcon} size={20} />
         </div>
-        {filteredClients.map((client) => (
-          <div
-            key={client.id}
-            className={styles.clientProfile}
-            onClick={() => handleClientClick(client)}
-          >
-            <img
-              src={`http://localhost:3000${client.picture_profile}`}
-              alt={`${client.name} ${client.lastname}`}
-              className={styles.clientImage}
-            />
-            <span className={styles.clientName}>
-              {client.name} {client.lastname}
-            </span>
+        <div className={styles.clientProfiles}>
+          <div className={styles.addClientProfile} onClick={handleAddClient}>
+            <UserPlus size={40} />
+            <span>Agregar Cliente</span>
           </div>
-        ))}
+          {filteredClients.map((client) => (
+            <div
+              key={client.id}
+              className={styles.clientProfile}
+              onClick={() => handleClientClick(client)}
+            >
+              <img
+                src={`http://localhost:3000${client.picture_profile}`}
+                alt={`${client.name} ${client.lastname}`}
+                className={styles.clientImage}
+              />
+              <span className={styles.clientName}>
+                {client.name} {client.lastname}
+              </span>
+            </div>
+          ))}
+        </div>
+        {selectedClient && (
+          <ClientModal client={selectedClient} onClose={closeModal} />
+        )}
+        {isRegistrationModalOpen && (
+          <Registro
+            onClose={() => setIsRegistrationModalOpen(false)}
+            onSubmit={handleSubmitRegistrationForm}
+          />
+        )}
       </div>
-      {selectedClient && (
-        <ClientModal client={selectedClient} onClose={closeModal} />
-      )}
-      {isRegistrationModalOpen && (
-        <Registro
-          onClose={() => setIsRegistrationModalOpen(false)}
-          onSubmit={handleSubmitRegistrationForm}
-        />
-      )}
     </div>
   );
 };

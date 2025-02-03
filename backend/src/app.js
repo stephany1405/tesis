@@ -17,6 +17,7 @@ import statisticRouter from "./routes/statistics.router.js";
 import { errorHandler } from "./middlewares/catch.middleware.js";
 
 const app = express();
+
 const __dirname = path.dirname("uploads");
 
 const corsOptions = {

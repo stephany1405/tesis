@@ -1,3 +1,12 @@
+.pageWrapper {
+  padding-left: 280px;
+  transition: padding-left 0.3s ease;
+}
+
+.pageWrapperCollapsed {
+  padding-left: 80px;
+}
+
 .container {
   display: flex;
   flex-direction: column;
@@ -135,4 +144,3 @@
 .addSpecialistButton:hover {
   background-color: #059669;
 }
-

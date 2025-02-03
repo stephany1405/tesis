@@ -6,6 +6,7 @@ import {
   createServiceOfCategory,
   deleteServiceOfCategory,
   updateServiceOfCategory,
+  deleteService
 } from "../controllers/category.controller.js";
 import {
   getActiveAppointment,
@@ -19,7 +20,7 @@ import {
   getClassification,
   createRatingController2,
   getInPersonAppointments,
-  cancelAppointment
+  cancelAppointment,
 } from "../controllers/service.controller.js";
 import { upload2, upload3 } from "../middlewares/uploadMiddleware.js";
 
@@ -29,7 +30,8 @@ router.get("/categoria", getCategory);
 router.get("/categoria/:categoryID", getServicesByCategory);
 router.post("/nuevaCategoria", upload2.single("image"), createCategory);
 router.post("/nuevoServicio", upload3.single("image"), createServiceOfCategory);
-router.delete("/eliminarServicio/:id", deleteServiceOfCategory);
+router.put("/eliminarServicio/:id", deleteServiceOfCategory);
+router.put("/eliminarServiciodeCategoria/:id", deleteService);
 router.put(
   "/actualizarServicio/:id",
   upload3.single("image"),

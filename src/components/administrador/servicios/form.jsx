@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import styles from "./form.module.css";
 
-const SubServiceForm = ({ categoryId, onSubmit, onClose, initialData = null }) => {
+const SubServiceForm = ({
+  categoryId,
+  onSubmit,
+  onClose,
+  initialData = null,
+}) => {
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     description: initialData?.description || "",
@@ -10,7 +15,22 @@ const SubServiceForm = ({ categoryId, onSubmit, onClose, initialData = null }) =
     price: initialData?.price || "",
     image: null,
   });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  useEffect(() => {
+    const handleSidebarChange = () => {
+      setIsSidebarCollapsed(
+        document.body.classList.contains("sidebar-collapsed")
+      );
+    };
+    handleSidebarChange();
+    const observer = new MutationObserver(handleSidebarChange);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -27,10 +47,10 @@ const SubServiceForm = ({ categoryId, onSubmit, onClose, initialData = null }) =
     e.preventDefault();
     const formDataToSubmit = new FormData();
 
-    formDataToSubmit.append('id', categoryId);
+    formDataToSubmit.append("id", categoryId);
 
     for (const key in formData) {
-      if (key === 'image') {
+      if (key === "image") {
         if (formData[key] || !initialData) {
           formDataToSubmit.append(key, formData[key]);
         }
@@ -57,12 +77,21 @@ const SubServiceForm = ({ categoryId, onSubmit, onClose, initialData = null }) =
           <X size={24} />
         </button>
 
-        <h2 className={styles.formTitle}>{initialData ? "Editar Subservicio" : "Agregar Nuevo Subservicio"}</h2>
+        <h2 className={styles.formTitle}>
+          {initialData ? "Editar Subservicio" : "Agregar Nuevo Subservicio"}
+        </h2>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="name">Nombre del Subservicio</label>
-            <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className={styles.formGroup}>
@@ -107,7 +136,11 @@ const SubServiceForm = ({ categoryId, onSubmit, onClose, initialData = null }) =
             <label htmlFor="image">Imagen del Subservicio</label>
             {initialData && initialData.service_image && (
               <div>
-                <img src={initialData.service_image} alt="Imagen actual" style={{ width: '100px', height: 'auto' }} />
+                <img
+                  src={initialData.service_image}
+                  alt="Imagen actual"
+                  style={{ width: "100px", height: "auto" }}
+                />
                 <p>Imagen actual</p>
               </div>
             )}

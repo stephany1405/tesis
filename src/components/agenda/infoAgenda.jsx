@@ -3,25 +3,40 @@ import styles from "./infoAgenda.module.css";
 import axios from "axios";
 import { getJWT } from "../middlewares/getToken.jsx";
 import { jwtDecode } from "jwt-decode";
+import { useWebSocket } from "../hooks/useWebSocket";
 
 function InfoAgenda({ data }) {
   const [specialistStatuses, setSpecialistStatuses] = useState({});
   const [ratingMessages, setRatingMessages] = useState({});
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const handleWebSocketMessage = (message) => {
+    if (message.type === "STATUS_UPDATE") {
+      setSpecialistStatuses((prev) => {
+        return {
+          ...prev,
+          [`${message.data.appointmentId}_${message.data.specialistId}`]:
+            message.data.status,
+        };
+      });
+    }
+  };
+
+  useWebSocket("ws://localhost:3000", handleWebSocketMessage);
+
   useEffect(() => {
-    const fetchSpecialistStatuses = async () => {
+    const fetchInitialStatuses = async () => {
       if (!data || data.length === 0) return;
 
       const statuses = {};
       for (const servicio of data) {
         for (const especialista of servicio.especialistas) {
           try {
-            // Obtener el status_id del especialista para ese servicio
             const response = await axios.get(
               `http://localhost:3000/api/servicios/especialista-estado/${servicio.id}/${especialista.id}`
             );
             const statusId = response.data.status;
 
-            // Obtener el classification_type usando el status_id
             if (statusId) {
               const classificationResponse = await axios.get(
                 `http://localhost:3000/api/servicios/classification/${statusId}`
@@ -34,7 +49,7 @@ function InfoAgenda({ data }) {
                 "Sin estado asignado";
             }
           } catch (error) {
-            console.error("Error fetching specialist status:", error);
+            console.error("Error fetching initial status:", error);
             statuses[`${servicio.id}_${especialista.id}`] =
               "Sin estado asignado";
           }
@@ -43,7 +58,7 @@ function InfoAgenda({ data }) {
       setSpecialistStatuses(statuses);
     };
 
-    fetchSpecialistStatuses();
+    fetchInitialStatuses();
   }, [data]);
 
   const renderMap = (coordenadas) => {
@@ -86,10 +101,10 @@ function InfoAgenda({ data }) {
         }
       );
 
-      const updatedStatuses = { ...specialistStatuses };
-      updatedStatuses[`${appointmentId}_${specialistId}`] =
-        "Final del servicio";
-      setSpecialistStatuses(updatedStatuses);
+      setSpecialistStatuses((prev) => ({
+        ...prev,
+        [`${appointmentId}_${specialistId}`]: "Final del servicio",
+      }));
 
       const ratingKey = `${appointmentId}_${specialistId}`;
       setRatingMessages((prev) => ({
@@ -97,7 +112,6 @@ function InfoAgenda({ data }) {
         [ratingKey]: `¡Calificación de ${rating} estrellas enviada correctamente!`,
       }));
 
-      // Remove message after 3 seconds
       setTimeout(() => {
         setRatingMessages((prev) => ({
           ...prev,
@@ -106,17 +120,15 @@ function InfoAgenda({ data }) {
       }, 3000);
     } catch (error) {
       console.error("Error rating specialist:", error);
-      // Optionally, add user-friendly error handling
       alert("No se pudo guardar la calificación. Intente nuevamente.");
     }
   };
 
-  if (!data || data.length === 0) return null;
-
-  const [openIndex, setOpenIndex] = useState(null);
   const toggleContent = (index) => {
     setOpenIndex(openIndex === index ? null : index);
   };
+
+  if (!data || data.length === 0) return null;
 
   return (
     <div className={styles.mainContainer}>
@@ -183,6 +195,7 @@ function InfoAgenda({ data }) {
                       const currentStatus =
                         specialistStatuses[specialistKey] ||
                         "Especialista asignado";
+
                       return (
                         <div key={index} className={styles.specialistInfo}>
                           <img
@@ -216,7 +229,7 @@ function InfoAgenda({ data }) {
                                       key={rating}
                                       onClick={() =>
                                         handleRating(
-                                          servicio.id, // Use servicio from the map context
+                                          servicio.id,
                                           especialista.id,
                                           rating
                                         )
@@ -227,15 +240,9 @@ function InfoAgenda({ data }) {
                                     </span>
                                   ))}
                                 </div>
-                                {ratingMessages[
-                                  `${servicio.id}_${especialista.id}`
-                                ] && (
+                                {ratingMessages[specialistKey] && (
                                   <p className={styles.ratingSuccessMessage}>
-                                    {
-                                      ratingMessages[
-                                        `${servicio.id}_${especialista.id}`
-                                      ]
-                                    }
+                                    {ratingMessages[specialistKey]}
                                   </p>
                                 )}
                               </div>

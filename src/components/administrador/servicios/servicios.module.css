@@ -1,3 +1,12 @@
+.pageWrapper {
+  padding-left: 280px;
+  transition: padding-left 0.3s ease;
+}
+
+.pageWrapperCollapsed {
+  padding-left: 80px;
+}
+
 .clientProfilesContainer {
   padding: 20px;
 }
@@ -285,4 +294,3 @@
   text-align: center;
   margin-top: 1rem;
 }
-

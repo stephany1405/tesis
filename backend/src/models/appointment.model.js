@@ -20,7 +20,7 @@ export const getServices = async (categoryID) => {
   const client = await pool.connect();
   try {
     const query = {
-      text: `SELECT id, classification_type, description, service_image, price, time FROM classification WHERE parent_classification_id = $1`,
+      text: `SELECT id, classification_type, description, service_image, price, time FROM classification WHERE parent_classification_id = $1 AND is_active = true`,
       values: [categoryID],
     };
 

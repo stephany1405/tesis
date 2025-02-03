@@ -350,6 +350,17 @@ export const updateStatus = async (req, res, next) => {
       status,
       specialistId
     );
+    console.log("WebSocket en req.app.locals:", req.app.locals.wss);
+
+    if (!req.app.locals.wss) {
+      throw new Error("WebSocket Server no está disponible");
+    }
+
+    req.app.locals.wss.broadcastStatusUpdate(
+      appointmentId,
+      specialistId,
+      status
+    );
 
     res.status(200).json({
       status: updatedStatus,

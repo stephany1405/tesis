@@ -1,160 +1,166 @@
-import { useState, useEffect } from "react"
-import clsx from "clsx"
-import { Elements } from "@stripe/react-stripe-js"
-import { loadStripe } from "@stripe/stripe-js"
-import { useNavigate } from "react-router-dom"
-import { useCart } from "../inicio/useContext.jsx"
-import styles from "./bolsa.module.css"
-import axios from "axios"
-import { jwtDecode } from "jwt-decode"
-import { FaShoppingCart, FaCalendarAlt, FaMapMarkerAlt, FaCreditCard } from "react-icons/fa"
+import { useState, useEffect } from "react";
+import clsx from "clsx";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../inicio/useContext.jsx";
+import styles from "./bolsa.module.css";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import {
+  FaShoppingCart,
+  FaCalendarAlt,
+  FaMapMarkerAlt,
+  FaCreditCard,
+} from "react-icons/fa";
 
-import { getJWT } from "../middlewares/getToken.jsx"
-import { CheckOutForm } from "../inicio/CheckoutForm.jsx"
-import { AddressForm } from "../inicio/AddressForm.jsx"
-import { AppointmentCalendar } from "../inicio/AppointmentCalendar.jsx"
-import { CartItem } from "../inicio/CartItem.jsx"
-import { formatDuration } from "../inicio/hooks/utils.js"
-import { useSelectedAppointment } from "../inicio/hooks/useSelectedAppointment.js"
-import Modal from "./modal.jsx"
+import { getJWT } from "../middlewares/getToken.jsx";
+import { CheckOutForm } from "../inicio/CheckoutForm.jsx";
+import { AddressForm } from "../inicio/AddressForm.jsx";
+import { AppointmentCalendar } from "../inicio/AppointmentCalendar.jsx";
+import { CartItem } from "../inicio/CartItem.jsx";
+import { formatDuration } from "../inicio/hooks/utils.js";
+import { useSelectedAppointment } from "../inicio/hooks/useSelectedAppointment.js";
+import Modal from "./modal.jsx";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const Bolsa = () => {
-  const { cartItems, updateQuantity, removeFromCart, resetCart } = useCart()
-  const navigate = useNavigate()
+  const { cartItems, updateQuantity, removeFromCart, resetCart } = useCart();
+  const navigate = useNavigate();
 
-  const [selectedItems, setSelectedItems] = useState(cartItems.map(() => true))
-  const [showForm, setShowForm] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState("Efectivo") // Updated initial state
-  const [loadingCash, setLoadingCash] = useState(false)
-  const [redirect, setRedirect] = useState(false)
-  const [isHomeService, setIsHomeService] = useState(false)
-  const [selectedDate, setSelectedDate] = useState(null)
-  const [selectedLocation, setSelectedLocation] = useState(null)
-  const [checkoutStep, setCheckoutStep] = useState(1)
-  const [isAddressFormValid, setIsAddressFormValid] = useState(false)
-  const [loadingMobile, setLoadingMobile] = useState(false)
-  const [dolarPrice, setDolarPrice] = useState(null)
-  const [decodedUserId, setDecodedUserId] = useState(null)
-  const [calendarKey, setCalendarKey] = useState(0)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [modalContent, setModalContent] = useState({ title: "", message: "" })
-  const [paymentReference, setPaymentReference] = useState("")
-  const [showReferenceInput, setShowReferenceInput] = useState(false)
+  const [selectedItems, setSelectedItems] = useState(cartItems.map(() => true));
+  const [showForm, setShowForm] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("Efectivo");
+  const [loadingCash, setLoadingCash] = useState(false);
+  const [redirect, setRedirect] = useState(false);
+  const [isHomeService, setIsHomeService] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [checkoutStep, setCheckoutStep] = useState(1);
+  const [isAddressFormValid, setIsAddressFormValid] = useState(false);
+  const [loadingMobile, setLoadingMobile] = useState(false);
+  const [dolarPrice, setDolarPrice] = useState(null);
+  const [decodedUserId, setDecodedUserId] = useState(null);
+  const [calendarKey, setCalendarKey] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: "", message: "" });
+  const [paymentReference, setPaymentReference] = useState("");
+  const [showReferenceInput, setShowReferenceInput] = useState(false);
 
-  const selectedAppointmentData = useSelectedAppointment(selectedDate)
+  const selectedAppointmentData = useSelectedAppointment(selectedDate);
 
   useEffect(() => {
     if (redirect) {
-      navigate("/checkout/success", { replace: true })
+      navigate("/checkout/success", { replace: true });
     }
-  }, [redirect, navigate])
+  }, [redirect, navigate]);
 
   useEffect(() => {
     if (loadingCash) {
       setTimeout(() => {
-        setLoadingCash(false)
-        setRedirect(true)
-      }, 2000)
+        setLoadingCash(false);
+        setRedirect(true);
+      }, 2000);
     }
-  }, [loadingCash])
+  }, [loadingCash]);
 
   useEffect(() => {
-    setSelectedItems(cartItems.map(() => true))
-  }, [cartItems])
+    setSelectedItems(cartItems.map(() => true));
+  }, [cartItems]);
 
   useEffect(() => {
     if (loadingMobile) {
       setTimeout(() => {
-        setLoadingMobile(false)
-        setRedirect(true)
-      }, 2000)
+        setLoadingMobile(false);
+        setRedirect(true);
+      }, 2000);
     }
-  }, [loadingMobile])
+  }, [loadingMobile]);
 
   useEffect(() => {
     const fetchDolar = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/dolar")
+        const response = await fetch("http://localhost:3000/api/dolar");
         if (!response.ok) {
-          throw new Error(`Error en consulta API DOLAR:  ${response.status}`)
+          throw new Error(`Error en consulta API DOLAR:  ${response.status}`);
         }
-        const data = await response.json()
-        setDolarPrice(data.price)
+        const data = await response.json();
+        setDolarPrice(data.price);
       } catch (error) {
-        console.error("Error consultando API DOLAR", error)
+        console.error("Error consultando API DOLAR", error);
       }
-    }
-    fetchDolar()
-  }, [])
+    };
+    fetchDolar();
+  }, []);
 
   useEffect(() => {
     const handleToken = async () => {
-      const token = getJWT("token")
+      const token = getJWT("token");
       if (!token) {
-        window.location.href = "/login"
-        return
+        window.location.href = "/login";
+        return;
       }
 
       try {
-        const { id: decodedUserId } = jwtDecode(token)
-        setDecodedUserId(decodedUserId)
+        const { id: decodedUserId } = jwtDecode(token);
+        setDecodedUserId(decodedUserId);
       } catch (error) {
-        console.log("Error decoding token:", error)
+        console.log("Error decoding token:", error);
       }
-    }
-    handleToken()
-  }, [])
+    };
+    handleToken();
+  }, []);
 
   const handleCalendarReset = () => {
-    setSelectedDate(null)
-    setCalendarKey((prevKey) => prevKey + 1)
-  }
+    setSelectedDate(null);
+    setCalendarKey((prevKey) => prevKey + 1);
+  };
 
-  const conversion = dolarPrice
+  const conversion = dolarPrice;
 
   const parseDuration = (durationString) => {
-    if (!durationString) return 0
+    if (!durationString) return 0;
 
-    const parts = durationString.split(" ")
-    let hours = 0
-    let minutes = 0
+    const parts = durationString.split(" ");
+    let hours = 0;
+    let minutes = 0;
 
     for (let i = 0; i < parts.length; i++) {
-      const value = Number.parseInt(parts[i])
-      if (isNaN(value)) continue
+      const value = Number.parseInt(parts[i]);
+      if (isNaN(value)) continue;
 
       if (parts[i + 1] === "hora" || parts[i + 1] === "horas") {
-        hours = value
-        i++
+        hours = value;
+        i++;
       } else if (parts[i + 1] === "minuto" || parts[i + 1] === "minutos") {
-        minutes = value
-        i++
+        minutes = value;
+        i++;
       }
     }
 
-    return hours + minutes / 60
-  }
+    return hours + minutes / 60;
+  };
 
   const calculateTotalDuration = () => {
     return cartItems.reduce((total, item, index) => {
       if (selectedItems[index] && item.duration) {
-        const duration = parseDuration(item.duration)
-        return total + duration
+        const duration = parseDuration(item.duration);
+        return total + duration;
       }
-      return total
-    }, 0)
-  }
+      return total;
+    }, 0);
+  };
 
   const subtotal = cartItems.reduce(
-    (sum, item, index) => sum + (selectedItems[index] ? item.price * item.quantity : 0),
-    0,
-  )
+    (sum, item, index) =>
+      sum + (selectedItems[index] ? item.price * item.quantity : 0),
+    0
+  );
 
-  const iva = subtotal * 0.16
-  const domicilio = isHomeService ? 5 : 0
-  const total = subtotal + iva + domicilio
+  const iva = subtotal * 0.16;
+  const domicilio = isHomeService ? 5 : 0;
+  const total = subtotal + iva + domicilio;
 
   const handleMobilePayment = async () => {
     setModalContent({
@@ -165,34 +171,37 @@ Banco: Banco Ejemplo
 Número: 0123-4567890
 Cédula/RIF: V-12345678
 Monto: ${(total * conversion).toFixed(2)} Bs.S`,
-    })
-    setIsModalOpen(true)
-    setShowReferenceInput(false)
-  }
+    });
+    setIsModalOpen(true);
+    setShowReferenceInput(false);
+  };
 
   const handleCashPayment = async () => {
     setModalContent({
       title: "Confirmación de Pago en Efectivo",
-      message: "¿Está seguro de que desea pagar en efectivo al momento del servicio?",
-    })
-    setIsModalOpen(true)
-  }
+      message:
+        "¿Está seguro de que desea pagar en efectivo al momento del servicio?",
+    });
+    setIsModalOpen(true);
+  };
 
   const processCashPayment = async () => {
     try {
-      setLoadingCash(true)
+      setLoadingCash(true);
 
-      const note = cartItems.filter((_, index) => selectedItems[index]).map((item) => item.note || "Sin nota")
+      const note = cartItems
+        .filter((_, index) => selectedItems[index])
+        .map((item) => item.note || "Sin nota");
 
-      let appointmentData = null
+      let appointmentData = null;
       if (selectedDate) {
         appointmentData = {
           start: selectedDate.formattedStart,
           end: selectedDate.formattedEnd,
           duration: formatDuration(calculateTotalDuration()),
-        }
+        };
       }
-      const token = getJWT("token")
+      const token = getJWT("token");
       const response = await axios.post(
         "http://localhost:3000/api/orden/checkout/cash",
         {
@@ -201,45 +210,50 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
           products: cartItems.filter((_, index) => selectedItems[index]),
           noteOfServices: note,
           cita: appointmentData,
-          dirección: selectedLocation?.address || "Presencial en el Salón de Belleza",
+          dirección:
+            selectedLocation?.address || "Presencial en el Salón de Belleza",
           referencePayment: "efectivo",
-          coordenadas: selectedLocation?.coordinates || "{'latitud':10.493435, 'longitud': -66.878370}",
+          coordenadas:
+            selectedLocation?.coordinates ||
+            "{'latitud':10.493435, 'longitud': -66.878370}",
         },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        },
-      )
+        }
+      );
 
       if (response.data.success) {
-        resetCart()
-        setRedirect(true)
+        resetCart();
+        setRedirect(true);
       }
     } catch (error) {
-      console.error("Error procesando pago en efectivo:", error)
-      alert("Hubo un error al procesar el pago en efectivo")
+      console.error("Error procesando pago en efectivo:", error);
+      alert("Hubo un error al procesar el pago en efectivo");
     } finally {
-      setLoadingCash(false)
-      setIsModalOpen(false)
+      setLoadingCash(false);
+      setIsModalOpen(false);
     }
-  }
+  };
 
   const processMobilePayment = async () => {
     try {
-      setLoadingMobile(true)
+      setLoadingMobile(true);
 
-      const note = cartItems.filter((_, index) => selectedItems[index]).map((item) => item.note || "Sin nota")
+      const note = cartItems
+        .filter((_, index) => selectedItems[index])
+        .map((item) => item.note || "Sin nota");
 
-      let appointmentData = null
+      let appointmentData = null;
       if (selectedDate) {
         appointmentData = {
           start: selectedDate.formattedStart,
           end: selectedDate.formattedEnd,
           duration: formatDuration(calculateTotalDuration()),
-        }
+        };
       }
-      const token = getJWT("token")
+      const token = getJWT("token");
       const response = await axios.post(
         "http://localhost:3000/api/orden/checkout/mobilePayment",
         {
@@ -248,137 +262,142 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
           products: cartItems.filter((_, index) => selectedItems[index]),
           noteOfServices: note,
           cita: appointmentData,
-          dirección: selectedLocation?.address || "Presencial en el Salón de Belleza",
+          dirección:
+            selectedLocation?.address || "Presencial en el Salón de Belleza",
           referencePayment: paymentReference,
-          coordenadas: selectedLocation?.coordinates || "{'latitud':10.493435, 'longitud': -66.878370}",
+          coordenadas:
+            selectedLocation?.coordinates ||
+            "{'latitud':10.493435, 'longitud': -66.878370}",
         },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        },
-      )
+        }
+      );
 
       if (response.data.success) {
-        resetCart()
-        setRedirect(true)
+        resetCart();
+        setRedirect(true);
       }
     } catch (error) {
-      console.error("Error procesando pago móvil:", error)
-      alert("Hubo un error al procesar el pago móvil")
+      console.error("Error procesando pago móvil:", error);
+      alert("Hubo un error al procesar el pago móvil");
     } finally {
-      setLoadingMobile(false)
-      setIsModalOpen(false)
-      setShowReferenceInput(false)
-      setPaymentReference("")
+      setLoadingMobile(false);
+      setIsModalOpen(false);
+      setShowReferenceInput(false);
+      setPaymentReference("");
     }
-  }
+  };
 
   const handleModalConfirm = () => {
     if (paymentMethod === "Efectivo") {
-      processCashPayment()
+      processCashPayment();
     } else if (paymentMethod === "PagoMovil") {
       if (!showReferenceInput) {
-        setShowReferenceInput(true)
+        setShowReferenceInput(true);
         setModalContent({
           title: "Número de Referencia",
           message: "Por favor, ingrese el número de referencia del pago:",
-        })
+        });
       } else {
         if (paymentReference.length === 12) {
-          processMobilePayment()
+          processMobilePayment();
         } else {
-          alert("El número de referencia debe tener exactamente 12 caracteres.")
+          alert(
+            "El número de referencia debe tener exactamente 12 caracteres."
+          );
         }
       }
     }
-  }
+  };
 
   const handleModalClose = () => {
-    setIsModalOpen(false)
-    setShowReferenceInput(false)
-    setPaymentReference("")
-  }
+    setIsModalOpen(false);
+    setShowReferenceInput(false);
+    setPaymentReference("");
+  };
 
   const handleFormValidityChange = (isValid) => {
-    setIsAddressFormValid(isValid)
-  }
+    setIsAddressFormValid(isValid);
+  };
 
   const toggleForm = () => {
-    setShowForm(!showForm)
-  }
+    setShowForm(!showForm);
+  };
 
   const hasSelectedItems = () => {
-    return selectedItems.some((selected) => selected === true)
-  }
+    return selectedItems.some((selected) => selected === true);
+  };
 
   const handleQuantityChange = (index, newQuantity) => {
-    updateQuantity(cartItems[index].id, Number.parseInt(newQuantity))
-  }
+    updateQuantity(cartItems[index].uniqueId, Number.parseInt(newQuantity));
+  };
 
   const handleCheckboxChange = (index) => {
-    const updatedSelectedItems = [...selectedItems]
-    updatedSelectedItems[index] = !updatedSelectedItems[index]
-    setSelectedItems(updatedSelectedItems)
-  }
+    const updatedSelectedItems = [...selectedItems];
+    updatedSelectedItems[index] = !updatedSelectedItems[index];
+    setSelectedItems(updatedSelectedItems);
+  };
 
   const toggleHomeService = () => {
-    setIsHomeService(!isHomeService)
+    setIsHomeService(!isHomeService);
     if (isHomeService) {
-      setSelectedLocation(null)
+      setSelectedLocation(null);
     }
-  }
+  };
 
   const handleSelectAll = () => {
-    setSelectedItems(selectedItems.map(() => true))
-  }
+    setSelectedItems(selectedItems.map(() => true));
+  };
 
   const handleRemoveItem = (index) => {
-    removeFromCart(cartItems[index].id)
-  }
+    removeFromCart(cartItems[index].uniqueId);
+  };
 
   const handleDateSelect = (dateInfo) => {
-    setSelectedDate(dateInfo)
-  }
+    setSelectedDate(dateInfo);
+  };
 
   const handleLocationSelect = (locationData) => {
     setSelectedLocation({
       address: locationData.address,
       coordinates: locationData.coordinates,
-    })
-  }
+    });
+  };
 
   const nextStep = () => {
     if (checkoutStep < 4) {
       if (!isHomeService && checkoutStep === 2) {
-        setCheckoutStep(4)
+        setCheckoutStep(4);
       } else {
-        setCheckoutStep(checkoutStep + 1)
+        setCheckoutStep(checkoutStep + 1);
       }
     }
-  }
+  };
 
   const prevStep = () => {
     if (checkoutStep > 1) {
       if (!isHomeService && checkoutStep === 4) {
-        setCheckoutStep(2)
+        setCheckoutStep(2);
       } else {
-        setCheckoutStep(checkoutStep - 1)
+        setCheckoutStep(checkoutStep - 1);
       }
 
       if (checkoutStep === 3 || checkoutStep === 2) {
-        handleCalendarReset()
+        handleCalendarReset();
       }
 
       if (checkoutStep === 2) {
-        setSelectedDate(null)
+        setSelectedDate(null);
       }
     }
-  }
+  };
 
   const formattedAddress = selectedLocation?.address
     ? selectedLocation.address.replace(/, /g, ",\n")
-    : "No se ha especificado la dirección"
+    : "No se ha especificado la dirección";
 
   const renderCartStep = () => (
     <div className={styles.bolsaContent}>
@@ -387,7 +406,9 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
           <h2>SERVICIOS SELECCIONADOS ({cartItems.length})</h2>
           <div className={styles.headerActions}>
             <button
-              className={`${styles.homeServiceButton} ${isHomeService ? styles.active : ""}`}
+              className={`${styles.homeServiceButton} ${
+                isHomeService ? styles.active : ""
+              }`}
               onClick={toggleHomeService}
             >
               {isHomeService ? "Desactivar" : "Activar"} Servicio a Domicilio
@@ -427,35 +448,47 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
           </div>
           <div className={`${styles.summaryRow} ${styles.total}`}>
             <span>Total Bs.S :</span>
-            <span>{dolarPrice ? (total * conversion).toFixed(2) : "Cargando..."}</span>
+            <span>
+              {dolarPrice ? (total * conversion).toFixed(2) : "Cargando..."}
+            </span>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 
   const renderAppointmentStep = () => (
     <div className={styles.stepContainer}>
       <h2>Selección de Fecha y Hora</h2>
-      <AppointmentCalendar key={calendarKey} onDateSelect={handleDateSelect} totalDuration={calculateTotalDuration()} />
+      <AppointmentCalendar
+        key={calendarKey}
+        onDateSelect={handleDateSelect}
+        totalDuration={calculateTotalDuration()}
+      />
     </div>
-  )
+  );
 
   const renderLocationStep = () => (
     <div className={styles.stepContainer}>
       <h2>Ubicación del Servicio</h2>
       {isHomeService ? (
-        <AddressForm onLocationSelect={handleLocationSelect} onFormValidityChange={handleFormValidityChange} />
+        <AddressForm
+          onLocationSelect={handleLocationSelect}
+          onFormValidityChange={handleFormValidityChange}
+        />
       ) : (
         <div className={styles.noLocationRequired}>
-          <p>No se requiere ubicación para este servicio por que seleccionaste ir al salón de belleza.</p>
+          <p>
+            No se requiere ubicación para este servicio por que seleccionaste ir
+            al salón de belleza.
+          </p>
           <button className={styles.nextButton} onClick={nextStep}>
             Siguiente
           </button>
         </div>
       )}
     </div>
-  )
+  );
 
   const renderPaymentStep = () => (
     <div className={styles.orderSummaryContainer}>
@@ -464,13 +497,22 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
         <div className={styles.summaryAndAddressGrid}>
           <div className={styles.summaryColumn}>
             {cartItems.map((item, index) => (
-              <div key={index} className={clsx(styles.cartItemSummary, styles.cartSummaryItem)}>
+              <div
+                key={index}
+                className={clsx(styles.cartItemSummary, styles.cartSummaryItem)}
+              >
                 <div className={styles.itemTitle}>
                   {item.title} - {item.quantity} sesión(es)
                 </div>
-                <div className={styles.itemDuration}>Duración: {item.duration}</div>
-                <div className={styles.itemPrice}>Precio: ${item.price * item.quantity}</div>
-                <div className={styles.itemNote}>Nota: {item.note ? item.note : "Sin nota"}</div>
+                <div className={styles.itemDuration}>
+                  Duración: {item.duration}
+                </div>
+                <div className={styles.itemPrice}>
+                  Precio: ${item.price * item.quantity}
+                </div>
+                <div className={styles.itemNote}>
+                  Nota: {item.note ? item.note : "Sin nota"}
+                </div>
               </div>
             ))}
             {selectedDate && (
@@ -479,7 +521,9 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
                 <div className={styles.appointmentDetails}>
                   <p>Inicio: {selectedDate.formattedStart}</p>
                   <p>Fin: {selectedDate.formattedEnd}</p>
-                  <p>Duración total: {formatDuration(calculateTotalDuration())}</p>
+                  <p>
+                    Duración total: {formatDuration(calculateTotalDuration())}
+                  </p>
                 </div>
               </div>
             )}
@@ -515,7 +559,9 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
           </div>
           <div className={`${styles.summaryRow} ${styles.total}`}>
             <span>Total Bs.S :</span>
-            <span>{dolarPrice ? (total * conversion).toFixed(2) : "Cargando..."}</span>
+            <span>
+              {dolarPrice ? (total * conversion).toFixed(2) : "Cargando..."}
+            </span>
           </div>
         </div>
         <label>
@@ -532,14 +578,30 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
         </label>
 
         {paymentMethod === "Efectivo" && (
-          <button className={styles.payButton} onClick={handleCashPayment} disabled={loadingCash}>
-            {loadingCash ? <span className={styles.loader}></span> : "Pagar en Efectivo"}
+          <button
+            className={styles.payButton}
+            onClick={handleCashPayment}
+            disabled={loadingCash}
+          >
+            {loadingCash ? (
+              <span className={styles.loader}></span>
+            ) : (
+              "Pagar en Efectivo"
+            )}
           </button>
         )}
 
         {paymentMethod === "PagoMovil" && (
-          <button className={styles.payButton} onClick={handleMobilePayment} disabled={loadingMobile}>
-            {loadingMobile ? <span className={styles.loader}></span> : "Pagar con Pago Móvil"}
+          <button
+            className={styles.payButton}
+            onClick={handleMobilePayment}
+            disabled={loadingMobile}
+          >
+            {loadingMobile ? (
+              <span className={styles.loader}></span>
+            ) : (
+              "Pagar con Pago Móvil"
+            )}
           </button>
         )}
         {paymentMethod === "Tarjeta" && (
@@ -559,41 +621,51 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
         )}
       </div>
     </div>
-  )
+  );
 
   const renderStep = () => {
     switch (checkoutStep) {
       case 1:
-        return renderCartStep()
+        return renderCartStep();
       case 2:
-        return renderAppointmentStep()
+        return renderAppointmentStep();
       case 3:
-        return isHomeService ? renderLocationStep() : null
+        return isHomeService ? renderLocationStep() : null;
       case 4:
-        return renderPaymentStep()
+        return renderPaymentStep();
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className={styles.bolsaContainer}>
       <div className={styles.stepIndicator}>
-        <div className={`${styles.step} ${checkoutStep >= 1 ? styles.active : ""}`}>
+        <div
+          className={`${styles.step} ${checkoutStep >= 1 ? styles.active : ""}`}
+        >
           <FaShoppingCart />
           <span>Servicios</span>
         </div>
-        <div className={`${styles.step} ${checkoutStep >= 2 ? styles.active : ""}`}>
+        <div
+          className={`${styles.step} ${checkoutStep >= 2 ? styles.active : ""}`}
+        >
           <FaCalendarAlt />
           <span>Fecha y Hora</span>
         </div>
         {isHomeService && (
-          <div className={`${styles.step} ${checkoutStep >= 3 ? styles.active : ""}`}>
+          <div
+            className={`${styles.step} ${
+              checkoutStep >= 3 ? styles.active : ""
+            }`}
+          >
             <FaMapMarkerAlt />
             <span>Ubicación</span>
           </div>
         )}
-        <div className={`${styles.step} ${checkoutStep >= 4 ? styles.active : ""}`}>
+        <div
+          className={`${styles.step} ${checkoutStep >= 4 ? styles.active : ""}`}
+        >
           <FaCreditCard />
           <span>Pago</span>
         </div>
@@ -615,23 +687,30 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
               cartItems.length === 0 ||
               !hasSelectedItems() ||
               (checkoutStep === 2 && !selectedDate) ||
-              (checkoutStep === 3 && isHomeService && (!selectedLocation || !isAddressFormValid))
+              (checkoutStep === 3 &&
+                isHomeService &&
+                (!selectedLocation || !isAddressFormValid))
             }
           >
             Siguiente
           </button>
         )}
       </div>
-      <Modal isOpen={isModalOpen} onClose={handleModalClose} onConfirm={handleModalConfirm} title={modalContent.title}>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onConfirm={handleModalConfirm}
+        title={modalContent.title}
+      >
         <p>{modalContent.message}</p>
         {showReferenceInput && (
           <input
             type="text"
             value={paymentReference}
             onChange={(e) => {
-              const value = e.target.value.replace(/[^0-9]/g, "")
+              const value = e.target.value.replace(/[^0-9]/g, "");
               if (value.length <= 12) {
-                setPaymentReference(value)
+                setPaymentReference(value);
               }
             }}
             placeholder="Número de referencia (12 dígitos)"
@@ -640,8 +719,7 @@ Monto: ${(total * conversion).toFixed(2)} Bs.S`,
         )}
       </Modal>
     </div>
-  )
-}
+  );
+};
 
-export default Bolsa
-
+export default Bolsa;

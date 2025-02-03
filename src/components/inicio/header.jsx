@@ -4,10 +4,12 @@ import { DesplegableC } from "./desplegableC";
 import axios from "axios";
 import styles from "./Header.module.css";
 import Cookies from "js-cookie";
+import { useCart } from "./useContext";
 
 const Header = () => {
   const [showServices, setShowServices] = useState(false);
   const [categorias, setCategorias] = useState([]);
+  const {resetCart} = useCart();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -17,6 +19,7 @@ const Header = () => {
       );
       if (response.status === 200) {
         localStorage.clear();
+        resetCart();
         Cookies.remove("token", { path: "/" });
         document.cookie =
           "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";

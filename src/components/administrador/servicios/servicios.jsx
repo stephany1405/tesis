@@ -10,7 +10,22 @@ const Servicios = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewServiceFormOpen, setIsNewServiceFormOpen] = useState(false);
   const [services, setServices] = useState([]);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  useEffect(() => {
+    const handleSidebarChange = () => {
+      setIsSidebarCollapsed(
+        document.body.classList.contains("sidebar-collapsed")
+      );
+    };
+    handleSidebarChange();
+    const observer = new MutationObserver(handleSidebarChange);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
@@ -66,47 +81,55 @@ const Servicios = () => {
   };
 
   return (
-    <div className={styles.servicesContainer}>
-      <h1 className={styles.title}><Sparkles size={35}/> Servicios</h1>
-      <div className={styles.searchContainer}>
-        <input
-          type="text"
-          placeholder="Buscar servicio..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          className={styles.searchInput}
-        />
-        <Search className={styles.searchIcon} size={20} />
-      </div>
-      <div className={styles.servicesGrid}>
-        <div className={styles.addServiceCard} onClick={handleAddService}>
-          <Plus size={40} />
-          <span>Agregar un nuevo servicio</span>
+    <div
+      className={`${styles.pageWrapper} ${
+        isSidebarCollapsed ? styles.pageWrapperCollapsed : ""
+      }`}
+    >
+      <div className={styles.servicesContainer}>
+        <h1 className={styles.title}>
+          <Sparkles size={35} /> Servicios
+        </h1>
+        <div className={styles.searchContainer}>
+          <input
+            type="text"
+            placeholder="Buscar servicio..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className={styles.searchInput}
+          />
+          <Search className={styles.searchIcon} size={20} />
         </div>
-        {filteredServices.map((service) => (
-          <div
-            key={service.id}
-            className={styles.serviceCard}
-            onClick={() => handleServiceClick(service)}
-          >
-            <img
-              src={service.imageUrl || "/placeholder.svg"}
-              alt={service.name}
-              className={styles.serviceImage}
-            />
-            <span className={styles.serviceName}>{service.name}</span>
+        <div className={styles.servicesGrid}>
+          <div className={styles.addServiceCard} onClick={handleAddService}>
+            <Plus size={40} />
+            <span>Agregar un nuevo servicio</span>
           </div>
-        ))}
+          {filteredServices.map((service) => (
+            <div
+              key={service.id}
+              className={styles.serviceCard}
+              onClick={() => handleServiceClick(service)}
+            >
+              <img
+                src={service.imageUrl || "/placeholder.svg"}
+                alt={service.name}
+                className={styles.serviceImage}
+              />
+              <span className={styles.serviceName}>{service.name}</span>
+            </div>
+          ))}
+        </div>
+        {selectedService && (
+          <Modal service={selectedService} onClose={closeModal} />
+        )}
+        {isNewServiceFormOpen && (
+          <NuevoServicio
+            onSubmit={handleSubmitNewService}
+            onClose={() => setIsNewServiceFormOpen(false)}
+          />
+        )}
       </div>
-      {selectedService && (
-        <Modal service={selectedService} onClose={closeModal} />
-      )}
-      {isNewServiceFormOpen && (
-        <NuevoServicio
-          onSubmit={handleSubmitNewService}
-          onClose={() => setIsNewServiceFormOpen(false)}
-        />
-      )}
     </div>
   );
 };

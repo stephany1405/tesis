@@ -57,7 +57,7 @@ export function DesplegableC() {
                 <h3 className={styles.cartTitle}>Carrito de Compras</h3>
                 <ul className={styles.cartItems}>
                   {cartItems.map((item) => (
-                    <li key={item.id} className={styles.cartItem}>
+                    <li key={item.uniqueId} className={styles.cartItem}>
                       <div className={styles.itemInfo}>
                         <span className={styles.itemTitle}>{item.title}</span>
                         <span className={styles.itemQuantity}>
@@ -66,13 +66,14 @@ export function DesplegableC() {
                       </div>
                       <button
                         className={styles.removeButton}
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.uniqueId)}
                       >
                         <X size={16} />
                       </button>
                     </li>
                   ))}
                 </ul>
+
                 <div className={styles.cartTotal}>
                   <span>Total:</span>
                   <span>${total.toFixed(2)}</span>
