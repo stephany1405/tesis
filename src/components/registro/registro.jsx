@@ -35,6 +35,13 @@ const TextMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) {
   );
 });
 
+const securityQuestions = [
+  "¿Cuál es el nombre de tu primera mascota?",
+  "¿En qué ciudad naciste?",
+  "¿Cuál es el nombre de tu mejor amigo de la infancia?",
+  "¿Cuál es tu película favorita?",
+  "¿Cuál es el nombre de tu escuela primaria?",
+];
 const Registro = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -418,16 +425,24 @@ const Registro = () => {
               Pregunta de Seguridad
             </label>
             <HelpCircle className={styles.icon} size={18} />
-            <input
-              type="text"
+            <select
               id="security_question"
               name="security_question"
               className={styles.input}
               value={formData.security_question}
               onChange={handleChange}
-              placeholder="Ingrese su pregunta de seguridad"
               required
-            />
+            >
+              <option value="">Seleccione una pregunta de seguridad</option>
+              {securityQuestions.map((question, index) => (
+                <option key={index} value={question}>
+                  {question}
+                </option>
+              ))}
+            </select>
+            {errors.security_question && (
+              <p className={styles.error}>{errors.security_question}</p>
+            )}
           </div>
 
           <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
