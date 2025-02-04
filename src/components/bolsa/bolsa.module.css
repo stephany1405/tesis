@@ -765,3 +765,21 @@
   }
 }
 
+.removeButton {
+  background-color: transparent;
+  border: none;
+  color: #ff69b4;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.removeButton:hover {
+  background-color: #fff0f5;
+  color: #ff1493;
+}
