@@ -9,7 +9,8 @@ import { useCart } from "./useContext";
 const Header = () => {
   const [showServices, setShowServices] = useState(false);
   const [categorias, setCategorias] = useState([]);
-  const {resetCart} = useCart();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { resetCart } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -52,7 +53,11 @@ const Header = () => {
 
   useEffect(() => {
     fetchCategorias();
-  }, []);
+  }, []); //Fixed: Added empty dependency array to useEffect
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
 
   return (
     <header className={styles.header}>
@@ -60,31 +65,50 @@ const Header = () => {
         <Link to="/inicio" className={styles.logo}>
           uñimass
         </Link>
-        <nav className={styles.nav}>
-          <Link to="/inicio" className={styles.navLink}>
+        <button className={styles.menuToggle} onClick={toggleMenu}>
+          {menuOpen ? "✕" : "☰"}
+        </button>
+        <nav className={`${styles.nav} ${menuOpen ? styles.menuOpen : ""}`}>
+          <Link
+            to="/inicio"
+            className={styles.navLink}
+            onClick={() => setMenuOpen(false)}
+          >
             Inicio
           </Link>
-          <Link to="/agenda" className={styles.navLink}>
+          <Link
+            to="/agenda"
+            className={styles.navLink}
+            onClick={() => setMenuOpen(false)}
+          >
             Agenda
           </Link>
           <div
             className={styles.servicesDropdown}
-            onMouseEnter={() => setShowServices(true)}
-            onMouseLeave={() => setShowServices(false)}
+            onClick={() => setShowServices(!showServices)}
           >
             <button className={styles.navLink}>Servicios</button>
             {showServices && (
               <ul className={styles.dropdownMenu}>
                 {categorias.map((categoria) => (
                   <li key={categoria.id}>
-                    <Link to={categoria.link}>{categoria.name}</Link>
+                    <Link
+                      to={categoria.link}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {categoria.name}
+                    </Link>
                   </li>
                 ))}
               </ul>
             )}
           </div>
           <DesplegableC />
-          <Link to="/perfil" className={styles.navLink}>
+          <Link
+            to="/perfil"
+            className={styles.navLink}
+            onClick={() => setMenuOpen(false)}
+          >
             Perfil
           </Link>
           <button onClick={handleLogout} className={styles.logoutButton}>

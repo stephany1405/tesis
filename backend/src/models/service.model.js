@@ -115,7 +115,7 @@ LEFT JOIN public."user" u
 LEFT JOIN public.ratings r 
     ON r.appointment_id = a.id 
     AND r.rated_by = 'cliente' 
-    AND r.user_id = a.user_id -- Ahora hacemos el match con el cliente, no con el especialista
+    AND r.user_id = a.user_id
     AND as_link.specialist_id = (
         SELECT specialist_id 
         FROM public.appointment_specialists 

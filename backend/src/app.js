@@ -57,6 +57,11 @@ app.use(errorHandler);
 
 app.use(morgan("dev"));
 
+app.use((req, res, next) => {
+  req.wss = app.locals.wss;
+  next();
+});
+
 app.use("/api/usuario", authRoutes);
 app.use("/api/servicios", appointmentRoutes);
 app.use("/api/orden", orderRouter);

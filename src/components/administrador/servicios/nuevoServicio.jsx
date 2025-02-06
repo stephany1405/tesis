@@ -42,10 +42,9 @@ const NewServiceForm = ({ onSubmit, onClose }) => {
       );
 
       setSuccess(true);
-      // Recargar la página después de un breve retraso
       setTimeout(() => {
         window.location.reload();
-      }, 1000); // Opcional: Añade un retraso para mostrar el mensaje de éxito
+      }, 1000);
     } catch (error) {
       console.error("Error:", error);
       setError("Error al registrar categoria.");

@@ -6,7 +6,7 @@ import {
   createServiceOfCategory,
   deleteServiceOfCategory,
   updateServiceOfCategory,
-  deleteService
+  deleteService,
 } from "../controllers/category.controller.js";
 import {
   getActiveAppointment,
@@ -21,6 +21,7 @@ import {
   createRatingController2,
   getInPersonAppointments,
   cancelAppointment,
+  historySpecialist,
 } from "../controllers/service.controller.js";
 import { upload2, upload3 } from "../middlewares/uploadMiddleware.js";
 
@@ -49,6 +50,7 @@ router.post("/actualizar-estado", updateStatus);
 router.get("/servicios-asignados/:specialistId", getAssignedServices);
 router.post("/calificaciones/crear", createRatingController);
 router.post("/calificaciones/crear2", createRatingController2);
+router.get("/historia-especialista", historySpecialist);
 
 router.get(
   "/especialista-estado/:appointmentId/:specialistId",

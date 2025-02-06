@@ -32,8 +32,8 @@ const StarRating = ({ rating }) => {
 };
 
 const ServiceItem = ({ service, setSelectedService }) => {
-  const services = JSON.parse(service.services);
-  const scheduledDate = JSON.parse(service.scheduled_date);
+  const services = service.services;
+  const scheduledDate = service.scheduled_date;
   const parseCustomDate = (dateStr) => {
     try {
       if (typeof dateStr !== "string") {
@@ -123,10 +123,6 @@ const ServiceItem = ({ service, setSelectedService }) => {
     }
   };
 
-  // Para depuración
-  console.log("Scheduled Date:", scheduledDate);
-  console.log("Start Date String:", scheduledDate.start);
-
   return (
     <div
       className={styles.historyItem}
@@ -149,7 +145,7 @@ const ServiceItem = ({ service, setSelectedService }) => {
         <div className={styles.infoItem}>
           <CreditCard size={16} />
           <span>
-            Método de pago: {service.payment_method_name || "No especificado"}
+            Método de pago: {service.payment_method || "No especificado"}
           </span>
         </div>
         <div className={styles.infoItem}>
@@ -165,8 +161,7 @@ const ServiceItem = ({ service, setSelectedService }) => {
         <div className={styles.infoItem}>
           <CreditCard size={16} />
           <span>
-            Referencia de Pago:{" "}
-            {service.payment_method_name || "No especificada"}
+            Referencia de Pago: {service.reference_payment || "No especificada"}
           </span>
         </div>
       </div>
@@ -227,7 +222,7 @@ function Historial({ setSelectedService }) {
         );
 
         const data = await response.json();
-
+        console.log(data);
         if (data) {
           setServicioNoActivo(data);
         }

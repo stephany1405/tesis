@@ -1,89 +1,86 @@
-import { useEffect, useState } from "react"
-import styles from "./historial.module.css"
-import LocationMap from "./LocationMap.jsx"
-
+import { useEffect, useState } from "react";
+import styles from "./historial.module.css";
+import LocationMap from "./LocationMap.jsx";
+import { getJWT } from "../middlewares/getToken.jsx";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 export default function Historial() {
-  const [history, setHistory] = useState([])
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simulating data fetch
-    const sampleData = [
-      {
-        id: 1001,
-        status_name: "Completado",
-        services: JSON.stringify([
-          {
-            title: "Manicura Gel",
-            price: 35.0,
-            duration: "45 min",
-            quantity: 1,
-          },
-          {
-            title: "Pedicura Spa",
-            price: 45.0,
-            duration: "60 min",
-            quantity: 1,
-          },
-        ]),
-        scheduled_date: JSON.stringify({
-          start: "2023-05-15 14:00",
-          duration: "1 hora 45 minutos",
-        }),
-        payment_method_name: "Tarjeta de Crédito",
-        amount: 80.0,
-        point: JSON.stringify({ lat: 19.4326, lng: -99.1332 }),
-        address: "Av. Insurgentes Sur 1602, Ciudad de México",
-      },
-      {
-        id: 1002,
-        status_name: "Completado",
-        services: JSON.stringify([
-          {
-            title: "Corte de Cabello",
-            price: 25.0,
-            duration: "30 min",
-            quantity: 1,
-          },
-          {
-            title: "Tinte",
-            price: 60.0,
-            duration: "90 min",
-            quantity: 1,
-          },
-        ]),
-        scheduled_date: JSON.stringify({
-          start: "2023-05-10 10:00",
-          duration: "2 horas",
-        }),
-        payment_method_name: "Efectivo",
-        amount: 85.0,
-        point: JSON.stringify({ lat: 19.42, lng: -99.165 }),
-        address: "Calle Madero 1, Centro Histórico, Ciudad de México",
-      },
-      {
-        id: 1003,
-        status_name: "Completado",
-        services: JSON.stringify([
-          {
-            title: "Masaje Relajante",
-            price: 70.0,
-            duration: "60 min",
-            quantity: 1,
-          },
-        ]),
-        scheduled_date: JSON.stringify({
-          start: "2023-05-05 16:30",
-          duration: "1 hora",
-        }),
-        payment_method_name: "PayPal",
-        amount: 70.0,
-        point: JSON.stringify({ lat: 19.44, lng: -99.2 }),
-        address: "Av. Paseo de la Reforma 222, Juárez, Ciudad de México",
-      },
-    ]
+    const fetchHistory = async () => {
+      try {
+        const token = getJWT("token");
+        const { role_id, id } = jwtDecode(token);
 
-    setHistory(sampleData)
-  }, [])
+        const { data } = await axios.get(
+          `http://localhost:3000/api/servicios/historia-especialista?roleID=${role_id}&specialistID=${id}`
+        );
+
+        if (data.length === 0) {
+          throw new Error("Error al obtener el historial");
+        }
+
+        const transformedData = data.map((item, index) => {
+          const fechaCita = JSON.parse(item.fecha_cita);
+
+          return {
+            id: item.id_appointment,
+            status_name: item.estado_servicio,
+            services: JSON.stringify([
+              {
+                title: item.nombre_servicio,
+                price: item.ganancias_servicio,
+                duration: fechaCita.duration || "No disponible",
+                quantity: 1,
+              },
+            ]),
+            scheduled_date: JSON.stringify({
+              start: fechaCita.start,
+              duration: fechaCita.duration,
+              end: fechaCita.end,
+            }),
+            payment_method_name: item.metodo_pago,
+            amount: item.ganancias_servicio,
+            point: item.coordenadas,
+            address: item.direccion,
+            specialist_name: item.nombre_especialista,
+            client_name: item.nombre_cliente,
+            client_rating: item.calificacion_cliente,
+            specialist_rating: item.calificacion_especialista,
+          };
+        });
+
+        setHistory(transformedData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className={styles.loadingState}>
+        <h2 className={styles.title}>Historial de Servicios</h2>
+        <p>Cargando historial...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.errorState}>
+        <h2 className={styles.title}>Historial de Servicios</h2>
+        <p>Error: {error}</p>
+      </div>
+    );
+  }
 
   if (!history || history.length === 0) {
     return (
@@ -91,7 +88,7 @@ export default function Historial() {
         <h2 className={styles.title}>Historial de Servicios</h2>
         <p>No hay servicios realizados en tu historial</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -99,15 +96,19 @@ export default function Historial() {
       <h2 className={styles.title}>Historial de Servicios</h2>
       <div className={styles.historyList}>
         {history.map((item) => {
-          const services = JSON.parse(item.services)
-          const scheduledDate = JSON.parse(item.scheduled_date)
+          const services = JSON.parse(item.services);
+          const scheduledDate = JSON.parse(item.scheduled_date);
 
           return (
             <article key={item.id} className={styles.historyCard}>
               <header className={styles.cardHeader}>
                 <div className={styles.badges}>
-                  <span className={`${styles.badge} ${styles.statusBadge}`}>{item.status_name}</span>
-                  <span className={`${styles.badge} ${styles.paidBadge}`}>Pagado</span>
+                  <span className={`${styles.badge} ${styles.statusBadge}`}>
+                    {item.status_name}
+                  </span>
+                  <span className={`${styles.badge} ${styles.paidBadge}`}>
+                    Pagado
+                  </span>
                 </div>
                 <span className={styles.orderId}>ID: {item.id}</span>
               </header>
@@ -122,7 +123,7 @@ export default function Historial() {
                         <dl>
                           <div className={styles.dataRow}>
                             <dt>Precio:</dt>
-                            <dd>${service.price.toFixed(2)}</dd>
+                            <dd>${service.price}</dd>
                           </div>
                           <div className={styles.dataRow}>
                             <dt>Duración:</dt>
@@ -141,6 +142,14 @@ export default function Historial() {
                     <h3>Detalles de la cita</h3>
                     <dl>
                       <div className={styles.dataRow}>
+                        <dt>Cliente:</dt>
+                        <dd>{item.client_name}</dd>
+                      </div>
+                      <div className={styles.dataRow}>
+                        <dt>Especialista:</dt>
+                        <dd>{item.specialist_name}</dd>
+                      </div>
+                      <div className={styles.dataRow}>
                         <dt>Fecha y hora:</dt>
                         <dd>{scheduledDate.start}</dd>
                       </div>
@@ -154,22 +163,31 @@ export default function Historial() {
                       </div>
                       <div className={styles.dataRow}>
                         <dt>Monto total:</dt>
-                        <dd>${item.amount.toFixed(2)}</dd>
+                        <dd>${item.amount}</dd>
+                      </div>
+                      <div className={styles.dataRow}>
+                        <dt>Calificación del cliente:</dt>
+                        <dd>{item.client_rating || "Sin calificación"}</dd>
+                      </div>
+                      <div className={styles.dataRow}>
+                        <dt>Calificación del especialista:</dt>
+                        <dd>{item.specialist_rating || "Sin calificación"}</dd>
                       </div>
                     </dl>
                     <div className={styles.address}>
                       <h4>Ubicación del servicio</h4>
                       <p>{item.address}</p>
-                      <LocationMap point={JSON.parse(item.point)} address={item.address} />
+                      <LocationMap
+                        point={JSON.parse(item.point)}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             </article>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
-

@@ -14,13 +14,20 @@ export const PASSWORD = process.env.PASSWORD;
 
 import nodemailer from "nodemailer";
 export const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: EMAIL,
     pass: PASSWORD,
   },
+  timeout: 10000,
 });
 
-transporter.verify().then(() => {
-  console.log("listo para enviar correos.");
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log("Error de configuración:", error);
+  } else {
+    console.log("Servidor listo para enviar emails");
+  }
 });

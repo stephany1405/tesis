@@ -1,4 +1,3 @@
-// src/hooks/useWebSocket.js
 import React, { useEffect, useRef } from "react";
 export const useWebSocket = (url, onMessage) => {
   const ws = useRef(null);

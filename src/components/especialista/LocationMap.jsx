@@ -8,7 +8,7 @@ const LocationMap = ({ point, address }) => {
 
   return (
     <div className={styles.mapContainer}>
-      <h4>Ubicación</h4>
+      <h4>Coordenadas GPS</h4>
       <p className={styles.address}>{address}</p>
       <div className={styles.mapWrapper}>
         <iframe

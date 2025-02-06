@@ -40,7 +40,7 @@ const SubServiceModal = ({ service, onClose }) => {
         description: service.description,
         service_image: service.service_image.startsWith("http")
           ? service.service_image
-          : `http://localhost:3000${service.service_image}`,
+          : `http://localhost:5173/${service.service_image}`,
         price: service.price,
         duration: service.time,
       }));

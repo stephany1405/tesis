@@ -28,7 +28,6 @@ export default function Notificaciones() {
         }
       );
       const { data } = response;
-      console.log(data);
       if (!data || data.length === 0) {
         setNotifications([]);
         return;

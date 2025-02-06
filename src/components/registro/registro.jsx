@@ -301,7 +301,7 @@ const Registro = () => {
 
           <div className={styles.inputGroup}>
             <label htmlFor="gender" className={styles.label}>
-              Genero
+              Género
             </label>
             <UserRoundSearch className={styles.icon} size={18} />
             <select
@@ -312,7 +312,7 @@ const Registro = () => {
               onChange={handleChange}
               required
             >
-              <option value="">Seleccione un genero</option>
+              <option value="">Seleccione un género</option>
               <option value="femenina">Femenina</option>
               <option value="masculino">Masculino</option>
             </select>

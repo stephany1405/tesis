@@ -199,41 +199,44 @@ export const getInPersonAppointments = async (req, res) => {
 export const getAnonActiveAppointment = async (req, res) => {
   try {
     const { userID } = req.query;
+
     if (!userID) {
       return res
         .status(400)
         .json({ message: "No se ha enviado el id del usuario" });
     }
+
     const getNonActiveAppointment = await ObtainNonActiveCustomerService(
       userID
     );
-    res.json(getNonActiveAppointment);
+
     if (!getNonActiveAppointment || getNonActiveAppointment.length === 0) {
       return res.json({ message: "No hay servicios inactivos" });
-    } else {
-      const appointmentsData = getNonActiveAppointment.map((appointment) => {
-        const serviceJSON = JSON.parse(appointment.services);
-        const scheduled_dateJSON = JSON.parse(appointment.scheduled_date);
-        return {
-          id: appointment.id,
-          services: serviceJSON,
-          status_id: appointment.status_name,
-          start_appointment: appointment.start_appointment,
-          end_appointment: appointment.end_appointment,
-          status_order: appointment.status_order,
-          paid: appointment.paid,
-          address: appointment.address,
-          coordenadas: appointment.point,
-          payment_method: appointment.payment_method_name,
-          amount: appointment.amount,
-          scheduled_date: scheduled_dateJSON,
-          reference_payment: appointment.reference_payment,
-        };
-      });
-      res.status(200).json(appointmentsData);
     }
+
+    const appointmentsData = getNonActiveAppointment.map((appointment) => {
+      return {
+        id: appointment.id,
+        services: JSON.parse(appointment.services),
+        status_id: appointment.status_name,
+        start_appointment: appointment.start_appointment,
+        end_appointment: appointment.end_appointment,
+        status_order: appointment.status_order,
+        paid: appointment.paid,
+        address: appointment.address,
+        coordenadas: appointment.point,
+        payment_method: appointment.payment_method_name,
+        amount: appointment.amount,
+        scheduled_date: JSON.parse(appointment.scheduled_date),
+        reference_payment: appointment.reference_payment,
+        specialists: appointment.specialists,
+      };
+    });
+
+    res.status(200).json(appointmentsData);
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).json({ message: "Error interno en el servidor" });
   }
 };
 
@@ -327,6 +330,12 @@ export const assignSpecialist = async (req, res, next) => {
     }
 
     await client.query("COMMIT");
+    req.wss.broadcastStatusUpdate(
+      appointmentId,
+      specialistId,
+      "Especialista asignado"
+    );
+
     res.status(200).json(result[0]);
   } catch (error) {
     await client.query("ROLLBACK");
@@ -521,6 +530,58 @@ export const cancelAppointment = async (req, res) => {
     res.status(500).json({
       message: "Error interno en el servidor, controlador CancelAppointment",
       error: error,
+    });
+  }
+};
+
+export const historySpecialist = async (req, res) => {
+  try {
+    const { roleID, specialistID } = req.query;
+    console.log(roleID, specialistID);
+    if (!roleID || !specialistID) {
+      return res.status(400).json({ message: "Falta parámetros requeridos." });
+    }
+    const query = {
+      text: `WITH EspecialistasServicios AS (
+  SELECT
+    u.id AS especialista_id,
+    u.name || ' ' || u.lastname AS nombre_especialista,
+    s.classification_type AS nombre_servicio,
+    a.id AS id_appointment,
+    a.scheduled_date AS fecha_cita,
+    a.address AS direccion,
+    a.point AS coordenadas,
+    aspe.start_appointment AS inicio_cita,
+    aspe.end_appointment AS fin_cita,
+    aspe.earnings AS ganancias_servicio,
+    r.rating AS calificacion_cliente,
+    r2.rating AS calificacion_especialista,
+    uc.name || ' ' || uc.lastname AS nombre_cliente,
+    pm.classification_type AS metodo_pago,
+    as_status.classification_type AS estado_servicio  -- Nuevo: Estado del servicio
+  FROM public.user u
+  JOIN public.appointment_specialists aspe ON u.id = aspe.specialist_id
+  JOIN public.appointment a ON aspe.appointment_id = a.id
+  JOIN public.classification s ON aspe.service_id = s.id
+  JOIN public.user uc ON a.user_id = uc.id
+  LEFT JOIN public.ratings r ON a.id = r.appointment_id AND r.rated_by = 'cliente'
+  LEFT JOIN public.ratings r2 ON a.id = r2.appointment_id AND r2.rated_by = 'especialista'
+  LEFT JOIN public.classification pm ON a.payment_method = pm.id
+  LEFT JOIN public.classification as_status ON aspe.status_id = as_status.id  -- Unimos con classification para el estado del servicio
+  WHERE u.role_id = $1
+  AND a.status_order = false 
+  AND u.id IN ($2)
+)
+SELECT * FROM EspecialistasServicios ORDER BY nombre_especialista, fecha_cita;`,
+      values: [roleID, specialistID],
+    };
+    const result = await pool.query(query);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Error al obtener historial de especialista",
+      error: error.message,
     });
   }
 };

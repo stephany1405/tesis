@@ -174,22 +174,34 @@ export const forgotPassword = async (req, res) => {
     );
 
     const mailOptions = {
-      from: '"Equipo de Soporte 👨‍💻 de Unimas" <unimas304@gmail.com',
+      from: '"Equipo de Soporte de UÑIMAS" <unimas304@gmail.com',
       to: email,
-      subject: "Código de recuperación de contraseña 👨‍💻",
+      subject: "UÑIMAS - Código de recuperación de contraseña 👨‍💻",
       text: `Hola! ${name} ${lastname} hemos recibido la notificación de que intentas recuperar tu contraseña, el código es el siguiente. ¡Recuerda no compartirlo con nadie!: ${code}`,
     };
 
-    transporter.sendMail(mailOptions, (error) => {
-      if (error) {
-        return res
-          .status(500)
-          .json({ message: "Error al enviar el correo", error: error });
-      }
-      return res
-        .status(200)
-        .json({ valid: true, message: "Código enviado al correo" });
-    });
+    try {
+      await new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(info);
+          }
+        });
+      });
+
+      return res.status(200).json({
+        valid: true,
+        message: "Código enviado al correo",
+      });
+    } catch (error) {
+      console.error("Error al enviar el correo:", error);
+      return res.status(500).json({
+        message: "Error al enviar el correo",
+        error: error.message || "Error desconocido",
+      });
+    }
   } catch (error) {
     return res
       .status(500)

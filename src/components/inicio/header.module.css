@@ -108,10 +108,19 @@ button {
   outline: inherit;
 }
 
+.menuToggle {
+  display: none;
+  font-size: 1.5rem;
+  color: #333;
+}
+
 @media (max-width: 768px) {
   .headerContent {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .menuToggle {
+    display: block;
   }
 
   .nav {
@@ -119,6 +128,11 @@ button {
     align-items: flex-start;
     width: 100%;
     margin-top: 1rem;
+    display: none;
+  }
+
+  .nav.menuOpen {
+    display: flex;
   }
 
   .navLink,
@@ -127,9 +141,18 @@ button {
     text-align: left;
   }
 
+  .servicesDropdown {
+    width: 100%;
+  }
+
   .dropdownMenu {
     position: static;
     box-shadow: none;
     padding-left: 1rem;
+    width: 100%;
+  }
+
+  .dropdownMenu a {
+    padding-left: 2rem;
   }
 }

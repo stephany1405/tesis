@@ -10,19 +10,19 @@ function InfoAgenda({ data }) {
   const [ratingMessages, setRatingMessages] = useState({});
   const [openIndex, setOpenIndex] = useState(null);
 
-  const handleWebSocketMessage = (message) => {
+  useWebSocket("ws://localhost:3000", (message) => {
     if (message.type === "STATUS_UPDATE") {
+      const appointmentId = Number(message.data.appointmentId);
+      const specialistId = Number(message.data.specialistId);
       setSpecialistStatuses((prev) => {
-        return {
+        const newState = {
           ...prev,
-          [`${message.data.appointmentId}_${message.data.specialistId}`]:
-            message.data.status,
+          [`${appointmentId}_${specialistId}`]: message.data.status,
         };
+        return newState;
       });
     }
-  };
-
-  useWebSocket("ws://localhost:3000", handleWebSocketMessage);
+  });
 
   useEffect(() => {
     const fetchInitialStatuses = async () => {
@@ -130,8 +130,25 @@ function InfoAgenda({ data }) {
 
   if (!data || data.length === 0) return null;
 
+  const servicios = data.map((item) => {
+    if (
+      item.servicios &&
+      Array.isArray(item.servicios) &&
+      item.servicios.length > 0
+    ) {
+      return item.servicios.map((servicio) => servicio.title);
+    } else {
+      return [];
+    }
+  });
+
+  const specialistStatusKey = Object.entries(specialistStatuses)
+    .sort()
+    .map(([key, value]) => `${key}:${value}`)
+    .join(";");
+
   return (
-    <div className={styles.mainContainer}>
+    <div className={styles.mainContainer} key={specialistStatusKey}>
       {data.map((servicio, serviceIndex) => (
         <div key={servicio.id} className={styles.contentLayout}>
           <div className={styles.section}>
@@ -139,9 +156,8 @@ function InfoAgenda({ data }) {
               className={styles.sectionTitle}
               onClick={() => toggleContent(serviceIndex)}
             >
-              Información de agenda #{serviceIndex + 1}
+              {servicios[serviceIndex].join(", ")}
             </h2>
-
             {openIndex === serviceIndex && (
               <div
                 className={`${styles.sectionContent} ${
@@ -195,7 +211,10 @@ function InfoAgenda({ data }) {
                       const currentStatus =
                         specialistStatuses[specialistKey] ||
                         "Especialista asignado";
-
+                      console.log(
+                        "Renderizando InfoAgenda con estado:",
+                        specialistStatuses
+                      );
                       return (
                         <div key={index} className={styles.specialistInfo}>
                           <img

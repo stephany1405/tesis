@@ -119,7 +119,7 @@ const SubServiceForm = ({
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="price">Precio</label>
+            <label htmlFor="price">Precio $</label>
             <input
               type="number"
               id="price"
