@@ -10,7 +10,17 @@ import "moment/locale/es";
 import "moment-timezone";
 import styles from "./calendario.module.css";
 
-moment.locale("es");
+moment.locale("es", {
+  months:
+    "Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre".split(
+      "_"
+    ),
+  monthsShort:
+    "Ene._Feb._Mar._Abr._May._Jun._Jul._Ago._Sep._Oct._Nov._Dic.".split("_"),
+  weekdays: "Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado".split("_"),
+  weekdaysShort: "Dom._Lun._Mar._Mié._Jue._Vie._Sáb.".split("_"),
+  weekdaysMin: "Do_Lu_Ma_Mi_Ju_Vi_Sá".split("_"),
+});
 
 const AdminAppointmentCalendar = () => {
   const [appointments, setAppointments] = useState([]);
@@ -39,9 +49,16 @@ const AdminAppointmentCalendar = () => {
         const response = await axios.get(
           "http://localhost:3000/api/servicios/agenda/presencial"
         );
+        console.log(response.data);
         const appointmentsWithLocalTime = response.data.map((appointment) => {
-          const start = moment.utc(appointment.start).local().format();
-          const end = moment.utc(appointment.end).local().format();
+          const start = moment
+            .utc(appointment.start)
+            .tz(moment.tz.guess())
+            .format();
+          const end = moment
+            .utc(appointment.end)
+            .tz(moment.tz.guess())
+            .format();
           return {
             ...appointment,
             start,
@@ -57,7 +74,7 @@ const AdminAppointmentCalendar = () => {
     const fetchSpecialists = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/especialistas"
+          "http://localhost:3000/api/consulta-especialista"
         );
         setSpecialists(response.data);
       } catch (error) {
@@ -70,15 +87,26 @@ const AdminAppointmentCalendar = () => {
   }, []);
 
   const handleEventClick = (clickInfo) => {
-    setSelectedAppointment({
-      title: clickInfo.event.title,
-      start: clickInfo.event.start,
-      end: clickInfo.event.end,
-      ...clickInfo.event.extendedProps,
-    });
-    setSelectedSpecialist("");
-  };
+    const selectedApp = appointments.find(
+      (app) => app.id === clickInfo.event.id
+    );
 
+    if (selectedApp) {
+      setSelectedAppointment({
+        title: clickInfo.event.title,
+        start: clickInfo.event.start,
+        end: clickInfo.event.end,
+        id: clickInfo.event.id,
+        ...selectedApp.extendedProps,
+      });
+      setSelectedSpecialist("");
+    } else {
+      console.error(
+        "Cita no encontrada en el array appointments:",
+        clickInfo.event.id
+      );
+    }
+  };
   const handleAddSpecialist = async () => {
     if (!selectedSpecialist || !selectedAppointment) return;
 
@@ -89,18 +117,36 @@ const AdminAppointmentCalendar = () => {
           specialistId: selectedSpecialist,
         }
       );
+
+      const updatedAppointments = appointments.map((app) => {
+        if (app.id === selectedAppointment.id) {
+          const newApp = { ...app };
+          newApp.extendedProps = {
+            ...newApp.extendedProps,
+            specialist: specialists.find((s) => s.id == selectedSpecialist)
+              ?.name,
+          };
+          newApp.color = "green";
+          return newApp;
+        }
+        return app;
+      });
+      console.log(updatedAppointments);
+      setAppointments(updatedAppointments);
+
+      const foundSpecialist = specialists.find(
+        (s) => s.specialist_id == selectedSpecialist
+      );
+      const specialistName = foundSpecialist
+        ? `${foundSpecialist.specialist_name} ${foundSpecialist.specialist_lastname}`
+        : null;
+
       const updatedAppointment = {
         ...selectedAppointment,
-        specialist: specialists.find((s) => s.id === selectedSpecialist).name,
+        specialist: specialistName,
       };
+
       setSelectedAppointment(updatedAppointment);
-
-      setAppointments(
-        appointments.map((app) =>
-          app.id === selectedAppointment.id ? updatedAppointment : app
-        )
-      );
-
       setSelectedSpecialist("");
     } catch (error) {
       console.error("Error al agregar el especialista:", error);
@@ -196,7 +242,10 @@ const AdminAppointmentCalendar = () => {
                 <span>
                   {moment(selectedAppointment.start)
                     .locale("es")
-                    .format("dddd, D [de] MMMM [de] YYYY, h:mm A")}
+                    .format("dddd, D [de] MMMM [de] YYYY, h:mm A")
+                    .replace(/am/gi, "a. m.")
+                    .replace(/pm/gi, "p. m.")
+                    .replace(/^\w/, (l) => l.toUpperCase())}{" "}
                 </span>
               </div>
               <div className={styles.detailItem}>
@@ -253,8 +302,12 @@ const AdminAppointmentCalendar = () => {
                 >
                   <option value="">Seleccionar especialista</option>
                   {specialists.map((specialist) => (
-                    <option key={specialist.id} value={specialist.id}>
-                      {specialist.name}
+                    <option
+                      key={specialist.specialist_id}
+                      value={specialist.specialist_id}
+                    >
+                      {specialist.specialist_name}{" "}
+                      {specialist.specialist_lastname}
                     </option>
                   ))}
                 </select>

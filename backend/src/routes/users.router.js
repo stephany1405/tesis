@@ -1,5 +1,12 @@
 import { Router } from "express";
-import { insertClient, insertSpecialist, getClientsWithHistory, getSpecialistsWithHistory, blockUser, unlockUser } from "../controllers/users.controller.js";
+import {
+  insertClient,
+  insertSpecialist,
+  getClientsWithHistory,
+  getSpecialistsWithHistory,
+  blockUser,
+  unlockUser,
+} from "../controllers/users.controller.js";
 const router = Router();
 
 router.post("/registro-cliente", insertClient);

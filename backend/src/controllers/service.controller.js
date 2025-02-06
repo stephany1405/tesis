@@ -585,3 +585,50 @@ SELECT * FROM EspecialistasServicios ORDER BY nombre_especialista, fecha_cita;`,
     });
   }
 };
+
+export const addSpecialistToAppointment = async (req, res) => {
+  const { appointmentId } = req.params;
+  const { specialistId } = req.body;
+  try {
+    const appointmentCheck = await pool.query(
+      "SELECT * FROM appointment WHERE id = $1 AND address = 'Presencial en el Salón de Belleza'",
+      [appointmentId]
+    );
+
+    if (appointmentCheck.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Cita no encontrada o no es presencial." });
+    }
+
+    const specialistCheck = await pool.query(
+      "SELECT * FROM public.user WHERE id = $1 AND role_id = 58",
+      [specialistId]
+    );
+
+    if (specialistCheck.rows.length === 0) {
+      return res.status(404).json({ error: "Especialista no encontrado" });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO appointment_specialists (appointment_id, specialist_id, service_id, sessions_assigned, created_at, status_id)
+       VALUES ($1, $2, 
+         (SELECT (services::jsonb -> 0 ->> 'id')::int AS service_id
+          FROM APPOINTMENT WHERE ID = $1), 
+         1, NOW(), 66)
+       RETURNING *`,
+      [appointmentId, specialistId]
+    );
+
+    await pool.query("UPDATE appointment SET status_id = 70 WHERE id = $1", [
+      appointmentId,
+    ]);
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error al agregar especialista:", error);
+    res
+      .status(500)
+      .json({ error: "Error al agregar especialista", details: error.message });
+  }
+};

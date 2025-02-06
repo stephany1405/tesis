@@ -22,6 +22,7 @@ import {
   getInPersonAppointments,
   cancelAppointment,
   historySpecialist,
+  addSpecialistToAppointment,
 } from "../controllers/service.controller.js";
 import { upload2, upload3 } from "../middlewares/uploadMiddleware.js";
 
@@ -51,7 +52,7 @@ router.get("/servicios-asignados/:specialistId", getAssignedServices);
 router.post("/calificaciones/crear", createRatingController);
 router.post("/calificaciones/crear2", createRatingController2);
 router.get("/historia-especialista", historySpecialist);
-
+router.post("/agenda/:appointmentId/especialista", addSpecialistToAppointment);
 router.get(
   "/especialista-estado/:appointmentId/:specialistId",
   getStatusService
