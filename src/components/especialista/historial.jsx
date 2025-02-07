@@ -29,19 +29,19 @@ export default function Historial() {
           return {
             id: item.id_appointment,
             status_name: item.estado_servicio,
-            services: JSON.stringify([
+            services: [
               {
                 title: item.nombre_servicio,
                 price: item.ganancias_servicio,
                 duration: fechaCita.duration || "No disponible",
                 quantity: 1,
               },
-            ]),
-            scheduled_date: JSON.stringify({
+            ],
+            scheduled_date: {
               start: fechaCita.start,
               duration: fechaCita.duration,
               end: fechaCita.end,
-            }),
+            },
             payment_method_name: item.metodo_pago,
             amount: item.ganancias_servicio,
             point: item.coordenadas,
@@ -96,9 +96,10 @@ export default function Historial() {
       <h2 className={styles.title}>Historial de Servicios</h2>
       <div className={styles.historyList}>
         {history.map((item) => {
-          const services = JSON.parse(item.services);
-          const scheduledDate = JSON.parse(item.scheduled_date);
-
+          const services = item.services;
+          const scheduledDate = item.scheduled_date;
+          console.log(services);
+          console.log(scheduledDate);
           return (
             <article key={item.id} className={styles.historyCard}>
               <header className={styles.cardHeader}>
@@ -178,7 +179,18 @@ export default function Historial() {
                       <h4>Ubicación del servicio</h4>
                       <p>{item.address}</p>
                       <LocationMap
-                        point={JSON.parse(item.point)}
+                        point={(function () {
+                          try {
+                            return item.point ? JSON.parse(item.point) : {};
+                          } catch (error) {
+                            console.error(
+                              "Error parsing point JSON:",
+                              error,
+                              item.point
+                            );
+                            return {};
+                          }
+                        })()}
                       />
                     </div>
                   </div>

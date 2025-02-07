@@ -40,7 +40,6 @@ LEFT JOIN public.appointment_specialists as_link ON a.id = as_link.appointment_i
 LEFT JOIN public."user" u ON as_link.specialist_id = u.id 
 WHERE a.user_id = $1 
 AND a.status_order = true 
-AND a.address != 'Presencial en el Salón de Belleza' 
 GROUP BY 
     a.id,
     a.services,
@@ -403,6 +402,15 @@ export const updateAppointmentStatus = async (
 
     if (!statusRow) {
       throw new Error("Estado no válido");
+    }
+
+    if (status === "Inicio del servicio") {
+      await client.query(
+        `UPDATE appointment_specialists
+         SET start_appointment = CURRENT_TIMESTAMP
+         WHERE appointment_id = $1 AND specialist_id = $2`,
+        [appointmentId, specialistId]
+      );
     }
 
     const updateQuery = `

@@ -78,10 +78,11 @@ export const getActiveAppointment = async (req, res) => {
 export const getInPersonAppointments = async (req, res) => {
   try {
     const query = `
-      SELECT 
+      SELECT
         a.id,
         a.services,
         a.scheduled_date,
+        a.status_id,
         status_class.classification_type as status_name,
         payment_class.classification_type as payment_method_name,
         a.status_order,
@@ -116,6 +117,7 @@ export const getInPersonAppointments = async (req, res) => {
       GROUP BY
         a.id,
         a.services,
+        a.status_id,
         status_class.classification_type,
         payment_class.classification_type,
         as_link.start_appointment,
@@ -160,6 +162,12 @@ export const getInPersonAppointments = async (req, res) => {
             "es"
           ).toISOString();
 
+          let color;
+          if (parseInt(appointment.status_id) === 70) {
+            color = "#008000";
+          } else if (parseInt(appointment.status_id) === 67) {
+            color = "#FF69B4";
+          }
           return {
             id: appointment.id,
             title: serviceInfo.title,
@@ -168,7 +176,7 @@ export const getInPersonAppointments = async (req, res) => {
             client: `${appointment.client_name} ${appointment.client_lastname}`,
             status: appointment.status_name,
             service: serviceInfo.title,
-            color: "#FF69B4",
+            color: color,
             extendedProps: {
               amount: appointment.amount,
               paid: appointment.paid,
@@ -177,6 +185,10 @@ export const getInPersonAppointments = async (req, res) => {
               status: appointment.status_name,
               paymentMethod: appointment.payment_method_name,
               client: `${appointment.client_name} ${appointment.client_lastname}`,
+              specialist:
+                appointment.specialists && appointment.specialists.length > 0
+                  ? `${appointment.specialists[0].name} ${appointment.specialists[0].lastname}`
+                  : null,
             },
           };
         } catch (error) {
@@ -630,5 +642,47 @@ export const addSpecialistToAppointment = async (req, res) => {
     res
       .status(500)
       .json({ error: "Error al agregar especialista", details: error.message });
+  }
+};
+
+export const updateAppointmentSpecialist = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { appointmentId } = req.params;
+    const { newSpecialistId } = req.body;
+
+    await client.query("BEGIN");
+
+    const updateQuery = `
+      UPDATE appointment_specialists 
+      SET specialist_id = $1
+      WHERE appointment_id = $2
+      RETURNING *
+    `;
+
+    const result = await client.query(updateQuery, [
+      newSpecialistId,
+      appointmentId,
+    ]);
+
+    if (result.rows.length === 0) {
+      throw new Error("No se encontró la cita especificada");
+    }
+
+    await client.query("COMMIT");
+
+    res.json({
+      message: "Especialista actualizado exitosamente",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    console.error("Error al actualizar especialista:", error);
+    res.status(500).json({
+      error: "Error al actualizar el especialista",
+      details: error.message,
+    });
+  } finally {
+    client.release();
   }
 };

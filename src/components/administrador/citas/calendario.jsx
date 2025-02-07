@@ -9,6 +9,7 @@ import moment from "moment";
 import "moment/locale/es";
 import "moment-timezone";
 import styles from "./calendario.module.css";
+import { toast, ToastContainer } from "react-toastify";
 
 moment.locale("es", {
   months:
@@ -49,7 +50,6 @@ const AdminAppointmentCalendar = () => {
         const response = await axios.get(
           "http://localhost:3000/api/servicios/agenda/presencial"
         );
-        console.log(response.data);
         const appointmentsWithLocalTime = response.data.map((appointment) => {
           const start = moment
             .utc(appointment.start)
@@ -63,6 +63,8 @@ const AdminAppointmentCalendar = () => {
             ...appointment,
             start,
             end,
+            backgroundColor: appointment.color,
+            borderColor: appointment.color,
           };
         });
         setAppointments(appointmentsWithLocalTime);
@@ -97,6 +99,7 @@ const AdminAppointmentCalendar = () => {
         start: clickInfo.event.start,
         end: clickInfo.event.end,
         id: clickInfo.event.id,
+        color: selectedApp.backgroundColor,
         ...selectedApp.extendedProps,
       });
       setSelectedSpecialist("");
@@ -105,6 +108,61 @@ const AdminAppointmentCalendar = () => {
         "Cita no encontrada en el array appointments:",
         clickInfo.event.id
       );
+    }
+  };
+  const handleChangeSpecialist = async () => {
+    if (!selectedSpecialist || !selectedAppointment) return;
+
+    try {
+      await axios.put(
+        `http://localhost:3000/api/servicios/agenda/${selectedAppointment.id}/cambiar-especialista`,
+        {
+          newSpecialistId: selectedSpecialist,
+        }
+      );
+
+      const updatedAppointments = appointments.map((app) => {
+        if (app.id === selectedAppointment.id) {
+          const newApp = { ...app };
+          newApp.extendedProps = {
+            ...newApp.extendedProps,
+            specialist: specialists.find(
+              (s) => s.specialist_id == selectedSpecialist
+            )
+              ? `${
+                  specialists.find((s) => s.specialist_id == selectedSpecialist)
+                    .specialist_name
+                } ${
+                  specialists.find((s) => s.specialist_id == selectedSpecialist)
+                    .specialist_lastname
+                }`
+              : null,
+          };
+          return newApp;
+        }
+        return app;
+      });
+
+      setAppointments(updatedAppointments);
+
+      const foundSpecialist = specialists.find(
+        (s) => s.specialist_id == selectedSpecialist
+      );
+      const specialistName = foundSpecialist
+        ? `${foundSpecialist.specialist_name} ${foundSpecialist.specialist_lastname}`
+        : null;
+
+      setSelectedAppointment({
+        ...selectedAppointment,
+        specialist: specialistName,
+      });
+
+      setSelectedSpecialist("");
+
+      toast.success("Especialista actualizado exitosamente");
+    } catch (error) {
+      console.error("Error al cambiar el especialista:", error);
+      toast.error("Error al cambiar el especialista");
     }
   };
   const handleAddSpecialist = async () => {
@@ -126,12 +184,12 @@ const AdminAppointmentCalendar = () => {
             specialist: specialists.find((s) => s.id == selectedSpecialist)
               ?.name,
           };
-          newApp.color = "green";
+          newApp.backgroundColor = app.backgroundColor;
+          newApp.borderColor = app.borderColor;
           return newApp;
         }
         return app;
       });
-      console.log(updatedAppointments);
       setAppointments(updatedAppointments);
 
       const foundSpecialist = specialists.find(
@@ -185,6 +243,17 @@ const AdminAppointmentCalendar = () => {
       }`}
     >
       <div className={styles.container}>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
         <div className={styles.calendarContainer}>
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -195,6 +264,8 @@ const AdminAppointmentCalendar = () => {
               right: "timeGridWeek,timeGridDay",
             }}
             locale={esLocale}
+            eventColor={null}
+            eventDisplay="block"
             events={appointments}
             eventClick={handleEventClick}
             slotMinTime="09:00:00"
@@ -261,7 +332,7 @@ const AdminAppointmentCalendar = () => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>{selectedAppointment.service}</span>
+                <span>{selectedAppointment.serviceInfo.duration}</span>
               </div>
               <div className={styles.detailItem}>
                 <svg
@@ -311,12 +382,22 @@ const AdminAppointmentCalendar = () => {
                     </option>
                   ))}
                 </select>
-                <button
-                  onClick={handleAddSpecialist}
-                  className={styles.addSpecialistButton}
-                >
-                  Agregar Especialista
-                </button>
+
+                {selectedAppointment.specialist ? (
+                  <button
+                    onClick={handleChangeSpecialist}
+                    className={styles.changeSpecialistButton}
+                  >
+                    Cambiar Especialista
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleAddSpecialist}
+                    className={styles.addSpecialistButton}
+                  >
+                    Agregar Especialista
+                  </button>
+                )}
               </div>
             </div>
           </div>

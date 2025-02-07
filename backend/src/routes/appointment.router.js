@@ -23,6 +23,7 @@ import {
   cancelAppointment,
   historySpecialist,
   addSpecialistToAppointment,
+  updateAppointmentSpecialist,
 } from "../controllers/service.controller.js";
 import { upload2, upload3 } from "../middlewares/uploadMiddleware.js";
 
@@ -49,6 +50,10 @@ router.post("/cancelar", cancelAppointment);
 router.post("/asignar-servicio", assignSpecialist);
 router.post("/actualizar-estado", updateStatus);
 router.get("/servicios-asignados/:specialistId", getAssignedServices);
+router.put(
+  "/agenda/:appointmentId/cambiar-especialista",
+  updateAppointmentSpecialist
+);
 router.post("/calificaciones/crear", createRatingController);
 router.post("/calificaciones/crear2", createRatingController2);
 router.get("/historia-especialista", historySpecialist);

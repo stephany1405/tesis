@@ -144,3 +144,16 @@
 .addSpecialistButton:hover {
   background-color: #059669;
 }
+.changeSpecialistButton {
+  background-color: #ffa500;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.changeSpecialistButton:hover {
+  background-color: #ff8c00;
+}

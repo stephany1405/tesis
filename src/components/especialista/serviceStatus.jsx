@@ -66,7 +66,7 @@ function ServicesStatus() {
         {services.map((appointment) => {
           const parsedServices = parseJson(appointment.services);
           const parsedScheduledDate = parseJson(appointment.scheduled_date);
-          const parsedPoint = parseJson(appointment.point);
+          const parsedPoint = appointment.point;
 
           return (
             <li key={appointment.appointment_id} className={styles.serviceItem}>
