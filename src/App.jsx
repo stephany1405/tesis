@@ -23,7 +23,7 @@ import PerfilesE from "./components/administrador/especialista/perfilesE.jsx";
 import Servicios from "./components/administrador/servicios/servicios.jsx";
 import Cita from "./components/administrador/citas/cita.jsx";
 import Estadisticas from "./components/administrador/estadisticas/estadisticas.jsx";
-
+import Backup from "./components/administrador/backup/backup.jsx";
 const App = () => {
   const roles = useRoles();
 
@@ -126,6 +126,7 @@ const App = () => {
                       <Route path="servicios" element={<Servicios />} />
                       <Route path="citas" element={<Cita />} />
                       <Route path="estadisticas" element={<Estadisticas />} />
+                      <Route path="backup" element={<Backup />} />
                     </Routes>
                   </div>
                 </div>

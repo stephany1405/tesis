@@ -23,7 +23,7 @@ const Home = () => {
           pendingQuotes: response.data.pendingQuotes,
         });
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("error dashboard data:", error);
       }
     };
 

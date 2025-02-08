@@ -14,6 +14,7 @@ import profileRouter from "./routes/profile.router.js";
 import geoRouter from "./routes/geocode.router.js";
 import userRouter from "./routes/users.router.js";
 import statisticRouter from "./routes/statistics.router.js";
+import backupRouter from "./routes/backup.router.js";
 import { errorHandler } from "./middlewares/catch.middleware.js";
 
 const app = express();
@@ -71,6 +72,7 @@ app.use("/api", profileRouter);
 app.use("/api", geoRouter);
 app.use("/api", userRouter);
 app.use("/api", statisticRouter);
+app.use("/api", backupRouter);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.get("/", (req, res) => {
   res.send(`Hello !`);

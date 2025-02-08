@@ -1,52 +1,65 @@
-import { useState, useEffect } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { Users, UserCog, Sparkles, Calendar, BarChart2, ChevronLeft, ChevronRight, Home, LogOut } from "lucide-react"
-import styles from "./Sidebar.module.css"
-import axios from "axios"
-import Cookies from "js-cookie"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  Users,
+  UserCog,
+  Sparkles,
+  Calendar,
+  BarChart2,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  LogOut,
+  DatabaseBackup,
+} from "lucide-react";
+import styles from "./Sidebar.module.css";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  const location = useLocation()
-  const navigate = useNavigate()
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isCollapsed) {
-      document.body.classList.add("sidebar-collapsed")
+      document.body.classList.add("sidebar-collapsed");
     } else {
-      document.body.classList.remove("sidebar-collapsed")
+      document.body.classList.remove("sidebar-collapsed");
     }
 
-    // Cleanup
     return () => {
-      document.body.classList.remove("sidebar-collapsed")
-    }
-  }, [isCollapsed])
+      document.body.classList.remove("sidebar-collapsed");
+    };
+  }, [isCollapsed]);
 
   const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed)
-  }
+    setIsCollapsed(!isCollapsed);
+  };
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/api/usuario/logout")
+      const response = await axios.post(
+        "http://localhost:3000/api/usuario/logout"
+      );
 
       if (response.status === 200) {
-        localStorage.clear()
-        Cookies.remove("token", { path: "/" })
-        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+        localStorage.clear();
+        Cookies.remove("token", { path: "/" });
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-        console.log("Sesión cerrada correctamente.")
-        navigate("/login")
+        console.log("Sesión cerrada correctamente.");
+        navigate("/login");
       } else {
-        console.error("Error al cerrar sesión:", response.data)
+        console.error("Error al cerrar sesión:", response.data);
       }
     } catch (error) {
-      console.error("Error al cerrar sesión:", error)
+      console.error("Error al cerrar sesión:", error);
     }
-    console.log("Cerrando sesión...")
-  }
+    console.log("Cerrando sesión...");
+  };
 
   const menuItems = [
     { icon: <Home size={20} />, label: "Inicio", path: "/administrador" },
@@ -75,7 +88,12 @@ const Sidebar = () => {
       label: "Estadísticas",
       path: "/administrador/estadisticas",
     },
-  ]
+    {
+      icon: <DatabaseBackup size={20} />,
+      label: "Backup",
+      path: "/administrador/backup",
+    },
+  ];
 
   return (
     <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
@@ -91,7 +109,9 @@ const Sidebar = () => {
             <li key={index} className={styles.sidebarMenuItem}>
               <Link
                 to={item.path}
-                className={`${styles.sidebarMenuLink} ${location.pathname === item.path ? styles.active : ""}`}
+                className={`${styles.sidebarMenuLink} ${
+                  location.pathname === item.path ? styles.active : ""
+                }`}
                 title={item.label}
               >
                 {item.icon}
@@ -108,8 +128,7 @@ const Sidebar = () => {
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
-
+export default Sidebar;
