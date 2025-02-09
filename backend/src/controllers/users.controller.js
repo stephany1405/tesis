@@ -17,11 +17,13 @@ export const insertClient = async (req, res) => {
       name,
       lastname,
       identification,
+      gender,
       email,
       telephone_number,
       password,
       date_of_birth,
-      picture_profile,
+      security_question,
+      security_answer,
     } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -40,12 +42,15 @@ export const insertClient = async (req, res) => {
       name,
       lastname,
       identification,
+      gender,
       email,
       telephone_number,
       password: hashedPassword,
       role_id: RoleID,
       date_of_birth,
-      picture_profile: picture_profile,
+      security_question,
+      security_answer,
+      picture_profile: "/uploads/profile-pics/user.webp",
     };
 
     const filteredColumns = columnNames.filter(
@@ -65,8 +70,7 @@ export const insertClient = async (req, res) => {
     // eslint-disable-next-line no-unused-vars
     const { password: _, ...userWithoutPassword } = createdUser[0];
     res.status(201).json({
-      message: "Cliente creado exitosamente.",
-      user: userWithoutPassword,
+      message: "Usuario creado exitosamente.",
     });
   } catch (err) {
     console.error(err);
@@ -95,10 +99,10 @@ export const insertSpecialist = async (req, res) => {
       telephone_number,
       password,
       date_of_birth,
-      picture_profile,
       specialties,
+      security_question,
+      security_answer,
     } = req.body;
-    console.log("Datos recibidos:", req.body);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const tableName = "user";
@@ -118,10 +122,12 @@ export const insertSpecialist = async (req, res) => {
       email,
       telephone_number,
       password: hashedPassword,
-      picture_profile: picture_profile,
       role_id: RoleID,
       date_of_birth,
       specialization: specialties,
+      picture_profile: "/uploads/profile-pics/user.webp",
+      security_question,
+      security_answer,
     };
     console.log("Datos a insertar:", data);
     const filteredColumns = columnNames.filter(

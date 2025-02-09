@@ -231,6 +231,7 @@ CREATE TABLE public."user" (
     status boolean DEFAULT true,
     reset_code character varying(6),
     gender public.genero,
+    secret_password character varying(120),
     CONSTRAINT chk_user_email_format CHECK (((email)::text ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'::text)),
     CONSTRAINT chk_user_telephone CHECK (((telephone_number)::text ~ '^\+?[0-9]{10,15}$'::text)),
     CONSTRAINT user_score_check CHECK (((score >= 0.0) AND (score <= 5.0)))
@@ -263,6 +264,7 @@ COPY public.appointment (id, user_id, services, status_id, status_order, paid, a
 126	7	[{"id":"21","title":"Uñas acrílicas","price":"30.00","duration":"1 hora 30 minutos","quantity":1,"note":"Sin nota","uniqueId":1738822503399}]	70	f	f	Presencial en el Salón de Belleza	68	34.8 $	{"start":"sábado, 8 de enero de 2025, 02:30 p. m.","end":"04:00 p. m.","duration":"1 hora 30 minutos"}	efectivo	{'latitud':10.493435, 'longitud': -66.878370}	2025-02-06 06:15:13.408035
 127	7	[{"id":"43","title":"Cejas","price":"10.00","duration":"15 minutos","quantity":1,"note":"Sin nota","uniqueId":1738894192025}]	70	f	f	Macarao, Sector Macarao, Caracas, Parroquia Macarao, Municipio Libertador, Distrito Capital, Venezuela	68	16.6 $	{"start":"viernes, 7 de enero de 2025, 10:00 a. m.","end":"10:15 a. m.","duration":"15 minutos"}	efectivo	{"lat":10.4256,"lng":-67.0356}	2025-02-07 02:10:05.870476
 128	7	[{"id":"13","title":"Radiofrecuencia","price":"15.00","duration":"1 hora","quantity":1,"note":"Sin nota","uniqueId":1738900109301}]	70	f	f	Presencial en el Salón de Belleza	68	17.4 $	{"start":"viernes, 7 de enero de 2025, 03:30 p. m.","end":"04:30 p. m.","duration":"1 hora"}	efectivo	{'latitud':10.493435, 'longitud': -66.878370}	2025-02-07 03:48:39.181468
+130	9	[{"id":"19","title":"Manicura con gel","price":"20.00","duration":"1 hora","quantity":2,"note":"Sin nota","uniqueId":1739062661858}]	67	t	f	Presencial en el Salón de Belleza	68	46.4 $	{"start":"domingo, 9 de febrero de 2025, 12:00 p. m.","end":"01:00 p. m.","duration":"1 hora"}	efectivo	{'latitud':10.493435, 'longitud': -66.878370}	2025-02-09 00:58:32.982735
 \.
 
 
@@ -398,36 +400,46 @@ COPY public.specialist_cancelled_appointments (id, specialist_id, appointment_id
 -- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: tesis_unimas_user
 --
 
-COPY public."user" (id, name, lastname, identification, email, telephone_number, password, role_id, date_of_birth, created_at, picture_profile, security_question, answer, score, specialization, status, reset_code, gender) FROM stdin;
-5	nelso	briceño	9955919	briceo.nelso@yahoo.com	04241338828	$2a$10$lY8euejPghwHsDUz2ed7GOW6DM9jEdJssPN6v3vv85cms3mnbG0xC	58	2003-12-11	2025-01-10 04:39:28.288077	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿Cuál es el nombre de tu primera mascota?	princesa	5.0	\N	t	\N	masculino
-7	Jhonangel	Briceno	30111684	jhonangelbriceo04@gmail.com	04122252333	$2a$10$NzcNojB2SxZKcrPfA.SifOaj4Tft9OlbjSn.NrrhB0Kt/IDqynecO	57	2003-12-11	2025-01-18 08:20:30.41381	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿En qué ciudad naciste?	caracas	5.0	\N	t	8bcbcf	masculino
-11	jhon	jhoncito	12435153	manolo@gmail.com	04241263355	$2a$10$lY8euejPghwHsDUz2ed7GOW6DM9jEdJssPN6v3vv85cms3mnbG0xC	58	2003-11-12	2025-01-25 18:33:46.497742	/uploads/profile-pics/profile-1737922704151-141552852.jpg	\N	\N	5.0	\N	t	\N	masculino
-8	Stephany Carolina	Aranguren Conde	30429544	stephanya1405@gmail.com	04242636770	$2a$10$7VQ7zZwWNplLzsl/V/TPvuacxj0zzA.C1K/e4Dir5u9NVjQJInC7y	56	2004-05-14	2025-01-18 23:29:40.848363	/uploads/profile-pics/profile-1737308722306-913240773.jpg	\N	\N	0.0	\N	t	\N	femenino
-26	Jhonangel	Briceno	12121124	dadaawdaw@gmail.com	04241338828	$2a$10$Ya2phcZzWshEQpKFp.139OL.Me4fkIRJFdIz5Un5bqQn0an.pOhvq	58	2003-12-31	2025-02-02 08:27:33.468476	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N
-28	Jhonangel	Briceno	36765656	jhona04@gmail.com	04241338828	$2a$10$XDhprtYfNPKiI6Nr/kV8L.cOihubZ4yZvec46AUk67ZCa9rZRXjXG	57	2003-12-11	2025-02-02 08:33:36.924015	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N
-1	Maigle	Toro	12951025	maigletoro@hotmail.com	04241332222	$2a$10$zvjizII4heBrUEK/q5xvhObGQPcFlOIVltTInq04DTlZ3OPewGb.C	56	2003-11-12	2024-12-30 03:57:22.716559	/uploads/profile-pics/profile-1737510092572-697954616.jpeg	blablabla	blablabla	5.0	\N	t	\N	femenino
-29	Jhonangel	Briceno	43334654	malomalo@gmail.com	04241338828	$2a$10$2fnbzwvQdYsKY7Om8Kfu5uLJ6HuJKA7ZiBBDRf6JSxa0nPefjlGky	57	2003-12-11	2025-02-02 17:18:25.821648	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	masculino
-16	juanita	alcachofa	12931245	juanita@gmail.com	04241338828	$2a$10$lY8euejPghwHsDUz2ed7GOW6DM9jEdJssPN6v3vv85cms3mnbG0xC	57	1978-01-17	2025-01-29 02:02:57.862743	/uploads/profile-pics/profile-1737510092572-697954616.jpeg	blablabla	blablabla	5.0	\N	t	\N	femenino
-30	manolo	manilito	19838248	ajdajwdawj@gmail.com	04241338828	$2a$10$aAFHXHk8m/sbqh.zJJ7YauuFtQahzPGlrMdtvH8WQ0CjFCJVY13n6	58	2003-12-11	2025-02-02 17:35:39.774727	/uploads/profile-pics/user.webp	\N	\N	0.0	{"Faciales","Manicura"}	t	\N	femenina
-22	Jhonangel	Briceno	54336536	hoadlaw@gmail.com	04241338828	$2a$10$aW21Irmr.Dst4URJw16mWeyLXLMMBnkTGeXSDS2d8.UGmsZMtipoC	57	2003-12-11	2025-02-02 08:18:53.864995	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N
-27	dawdawdaw	wdadwad	12112121	dadwaadwawd@gmail.com	04241338828	$2a$10$hjm8EU522JcpsaDuH7UaLuWk903hWImVneXxyL9KpjhROnzFjkFv6	58	2003-12-11	2025-02-02 08:30:33.591087	/uploads/profile-pics/user.webp	\N	\N	0.0	{"Epilaciones","Faciales","Manicura","Quiropodía","Corporales","Extensiones","Pedicura"}	t	\N	masculino
-20	Jhonangel	Briceno	12122112	hola@gmail.com	04241338828	$2a$10$C2OoGyzUDtlZbJn9F9grAOYV47R6KVbjV1h8KJ62N768AOzuNr4GW	57	2003-12-11	2025-02-02 08:11:02.543257	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N
-23	Jhonangel	Briceno	98745745	adkwakdaw@gmail.com	04241338828	$2a$10$3TU.C3ruGGOOjbRf4WX8.u/tyDgVDljqgb7mWCQ1oC/N4l.3S/tzS	57	2003-12-11	2025-02-02 08:22:08.652463	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N
-4	camila	camila	31123424	dawdawda@gmail.com	04241338828	$2a$10$plTTx6HyPE2hAk3P6Ckz8us0TnspytLp95//ks.AsWNKl2zFPLqWu	57	1978-01-17	2025-01-10 04:38:11.911021	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino
-6	dwadaw	dwadaw	1221121	dwadawdaw@gmail.com	04241338828	$2a$10$XJMHtwm8VDJCecfHxqQ.SugknzkderpgzFE145R9ASbaHKJww4w6u	57	1978-01-17	2025-01-10 04:42:45.965831	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino
-24	Jhonangel	Briceno	87676767	jhonangelbr@gmail.com	04241338828	$2a$10$/HzUHd8yFBx09DczQqi0w.DusaeWWVvHz.DaaJmocrUCio1A7DESW	57	2003-12-11	2025-02-02 08:25:37.059818	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N
-14	maigle	toro	12951026	maigle@gmail.com	04121131155	$2a$10$WtibiFQAkvLdKDBRe7XJQuWtQ6LeEZVaLwQ4H6EH3xVUzl6xUxHKe	58	1978-01-17	2025-01-26 19:29:40.721025	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino
-10	manuel	manolito	12435123	manolomanolito@gmail.com	04241223355	$2a$10$7Ffe4GEk85g6pco1GY5d7OEDy/v0INaU6lYKTkay.YpzsT8jW1qoK	57	2003-11-12	2025-01-25 18:28:57.235499	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	masculino
-12	camila	camilita	12542124	camilacamilita@gmail.com	04241663323	$2a$10$jiPo4ts6oT.WagFb9G7kzOFgW76Hp8IkGPMqiTqOZDkYXbxU/tw2i	57	2003-12-11	2025-01-25 23:30:05.428703	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino
-13	princesa	princesita	12123123	asdasd12@gmail.com	04241338828	$2a$10$SY6iiyj2lARFHPiS.kUf5uyYmR3S/bq7iII3ZXApvE1wUsen6Hg4O	58	2003-12-11	2025-01-26 06:41:15.433667	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino
-9	chucha	chuchita	11692361	patricia72@gmail.com	04125906930	$2a$10$4ztV04tsCbgFV8XtT40WJe/okVxh0Vq24tQLuTyitnzLNYmmT2.UW	57	2004-05-14	2025-01-22 17:21:09.697302	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino
-15	eduard	Aranguren Conde	7956971	stephany@gmail.com	04142611162	$2a$10$0Y.DfXu76mCI8p7g417chODF7OCpBFifnuT4yJLNVUBxL3pibYKKO	57	2002-08-09	2025-01-27 22:48:49.608319	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	f	\N	masculino
-33	manolo	aranguren	30111356	jhonan@gmail.com	04241338828	$2a$10$hUGmS6cndy6BZ4/MNbin5.3nbMaC5/Jv3sRebB3/xQkTjHzoXKRoW	57	2003-12-11	2025-02-03 23:17:18.60789	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿Cuál es el nombre de tu primera mascota?	\N	0.0	\N	t	\N	femenina
-31	pedro	pedro	12122121	pedropedro@gmail.com	04241338828	$2a$10$2L5u.tPwQRIuUVs.1BwnbuWv0i7x9ZDPqsxGT7jZuwMQG.mkA9H6K	57	2003-12-11	2025-02-03 07:28:02.267652	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿Cuál es el nombre de tu primera mascota?	\N	0.0	\N	t	\N	femenina
-17	guillermo	sulbaran	29504340	guillermo@gmail.com	0412999999	$2a$10$Wwf0Aoxbd7oOjc4bQpJk3.M6jrXM9DSu7yiAB4cjOMvlmLc12EmR6	57	2002-02-27	2025-01-31 20:10:24.832671	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N
-19	camila	camilita	12953634	mercantil@gmail.com	04241338828	$2a$10$ChAO2NU2DgCUWCT9dmNBluNtRKTn8X5OJn.Fif8hrrC3IyjGFXAte	57	1998-02-03	2025-02-02 05:17:25.970603	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	princesa	\N	0.0	\N	t	\N	femenina
-21	Jhonangel	Briceno	67454554	dwadadaw@gmail.com	04241338828	$2a$10$.NKOHZNW.umYRg0JVCLF7uvLXQ9.EmiM0vAK4ZTVjwLCTx51M.D1C	57	2003-12-11	2025-02-02 08:14:48.482249	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N
-32	Jhonangel	Briceno	83823832	adjawjdawjdw@gmail.com	04241338828	$2a$10$DprTw4saAxSSBkcDon/4u.IMxUHio9RTxThkGJejpv62FNYqyF3wW	57	2003-12-11	2025-02-03 23:02:53.633254	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿Cuál es el nombre de tu mejor amigo de la infancia?	\N	0.0	\N	t	\N	masculino
+COPY public."user" (id, name, lastname, identification, email, telephone_number, password, role_id, date_of_birth, created_at, picture_profile, security_question, answer, score, specialization, status, reset_code, gender, secret_password) FROM stdin;
+44	rfgggggggggg	wdadaawddaw	12542124	wwwwwwwwwwwwwww@gmail.com	04241338828	$2a$10$etmqP/ccykr3FuqkjHxE6ObTWzD2kL8eJOkJW7Tzoj3iVXMeMtUJy	57	2000-12-11	2025-02-09 03:58:45.329161	/uploads/profile-pics/user.webp	¿En qué ciudad naciste?	\N	0.0	\N	t	\N	masculino	\N
+29	Jhonangel	Briceno	43334654	malomalo@gmail.com	04241338828	$2a$10$2fnbzwvQdYsKY7Om8Kfu5uLJ6HuJKA7ZiBBDRf6JSxa0nPefjlGky	57	2003-12-11	2025-02-02 17:18:25.821648	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	f	\N	masculino	\N
+36	lalalal	lelelele	19219129	jadjawjda@gmail.com	04241338828	$2a$10$cey6SR72NoiWj/C.3MA/UOIBx4SjdT3OUQD6iwPKCMnbtpDTmoH1S	57	2000-10-17	2025-02-08 21:27:13.331379	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N	\N
+38	el co;o	de tu madre	12344455	dugugyf@gmail.com	04142611166	$2a$10$Ui/mulICM0WD/A6Vp.QkMeV0f.kyDfubXqAim8ZX3mkPA0PZ3Aihi	57	1999-02-12	2025-02-08 21:29:11.359852	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N	\N
+1	Maigle	Toro	12951025	maigletoro@hotmail.com	04241332222	$2a$10$zvjizII4heBrUEK/q5xvhObGQPcFlOIVltTInq04DTlZ3OPewGb.C	56	2003-11-12	2024-12-30 03:57:22.716559	/uploads/profile-pics/profile-1737510092572-697954616.jpeg	blablabla	blablabla	5.0	\N	t	\N	femenino	$2a$10$dOdRRXkchWGQ1q/y0EIZB.owESOQ9KDQsM6Xu3pprNokDxwk9c8Ly
+5	nelso	briceño	9955919	briceo.nelso@yahoo.com	04241338828	$2a$10$lY8euejPghwHsDUz2ed7GOW6DM9jEdJssPN6v3vv85cms3mnbG0xC	58	2003-12-11	2025-01-10 04:39:28.288077	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿Cuál es el nombre de tu primera mascota?	princesa	5.0	\N	t	\N	masculino	\N
+8	Stephany Carolina	Aranguren Conde	30429544	stephanya1405@gmail.com	04242636770	$2a$10$.y57XxVNcy8b5R4bawbahuKCYxUQTZLO6ll6.HCuxXwqTbIvrtMju	56	2004-05-14	2025-01-18 23:29:40.848363	/uploads/profile-pics/profile-1737308722306-913240773.jpg	\N	\N	0.0	\N	t	\N	femenino	\N
+40	mia	miamia	24523156	miamia@gmail.com	04241338828	$2a$10$gmJO6eYrJqKdCQSgMWBMLODFHbjIkdCaOAbgqmbxaiGLDA6FkM3J2	57	1999-07-15	2025-02-09 03:06:43.609167	/uploads/profile-pics/user.webp	¿En qué ciudad naciste?	\N	0.0	\N	t	\N	femenina	\N
+42	zzzzzzzzzzzz	zzzzzzzzzzzz	54757788	kkkkkkkkkkk@gmail.com	04241338828	$2a$10$Xg59UwEk06M8ZUajEyCrEuMONG7pF4dTDEjL20hk8lvoIjZFMT5sm	57	1987-12-11	2025-02-09 03:13:09.493862	/uploads/profile-pics/user.webp	¿Cuál es el nombre de tu primera mascota?	\N	0.0	\N	t	\N	masculino	\N
+7	Jhonangel	Briceno	30111684	jhonangelbriceo04@gmail.com	04122252333	$2a$10$NzcNojB2SxZKcrPfA.SifOaj4Tft9OlbjSn.NrrhB0Kt/IDqynecO	57	2003-12-11	2025-01-18 08:20:30.41381	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿En qué ciudad naciste?	caracas	5.0	\N	t	8bcbcf	masculino	\N
+11	jhon	jhoncito	12435153	manolo@gmail.com	04241263355	$2a$10$lY8euejPghwHsDUz2ed7GOW6DM9jEdJssPN6v3vv85cms3mnbG0xC	58	2003-11-12	2025-01-25 18:33:46.497742	/uploads/profile-pics/profile-1737922704151-141552852.jpg	\N	\N	5.0	\N	t	\N	masculino	\N
+26	Jhonangel	Briceno	12121124	dadaawdaw@gmail.com	04241338828	$2a$10$Ya2phcZzWshEQpKFp.139OL.Me4fkIRJFdIz5Un5bqQn0an.pOhvq	58	2003-12-31	2025-02-02 08:27:33.468476	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N	\N
+28	Jhonangel	Briceno	36765656	jhona04@gmail.com	04241338828	$2a$10$XDhprtYfNPKiI6Nr/kV8L.cOihubZ4yZvec46AUk67ZCa9rZRXjXG	57	2003-12-11	2025-02-02 08:33:36.924015	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N	\N
+16	juanita	alcachofa	12931245	juanita@gmail.com	04241338828	$2a$10$lY8euejPghwHsDUz2ed7GOW6DM9jEdJssPN6v3vv85cms3mnbG0xC	57	1978-01-17	2025-01-29 02:02:57.862743	/uploads/profile-pics/profile-1737510092572-697954616.jpeg	blablabla	blablabla	5.0	\N	t	\N	femenino	\N
+30	manolo	manilito	19838248	ajdajwdawj@gmail.com	04241338828	$2a$10$aAFHXHk8m/sbqh.zJJ7YauuFtQahzPGlrMdtvH8WQ0CjFCJVY13n6	58	2003-12-11	2025-02-02 17:35:39.774727	/uploads/profile-pics/user.webp	\N	\N	0.0	{"Faciales","Manicura"}	t	\N	femenina	\N
+22	Jhonangel	Briceno	54336536	hoadlaw@gmail.com	04241338828	$2a$10$aW21Irmr.Dst4URJw16mWeyLXLMMBnkTGeXSDS2d8.UGmsZMtipoC	57	2003-12-11	2025-02-02 08:18:53.864995	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N	\N
+27	dawdawdaw	wdadwad	12112121	dadwaadwawd@gmail.com	04241338828	$2a$10$hjm8EU522JcpsaDuH7UaLuWk903hWImVneXxyL9KpjhROnzFjkFv6	58	2003-12-11	2025-02-02 08:30:33.591087	/uploads/profile-pics/user.webp	\N	\N	0.0	{"Epilaciones","Faciales","Manicura","Quiropodía","Corporales","Extensiones","Pedicura"}	t	\N	masculino	\N
+20	Jhonangel	Briceno	12122112	hola@gmail.com	04241338828	$2a$10$C2OoGyzUDtlZbJn9F9grAOYV47R6KVbjV1h8KJ62N768AOzuNr4GW	57	2003-12-11	2025-02-02 08:11:02.543257	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N	\N
+23	Jhonangel	Briceno	98745745	adkwakdaw@gmail.com	04241338828	$2a$10$3TU.C3ruGGOOjbRf4WX8.u/tyDgVDljqgb7mWCQ1oC/N4l.3S/tzS	57	2003-12-11	2025-02-02 08:22:08.652463	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N	\N
+4	camila	camila	31123424	dawdawda@gmail.com	04241338828	$2a$10$plTTx6HyPE2hAk3P6Ckz8us0TnspytLp95//ks.AsWNKl2zFPLqWu	57	1978-01-17	2025-01-10 04:38:11.911021	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino	\N
+6	dwadaw	dwadaw	1221121	dwadawdaw@gmail.com	04241338828	$2a$10$XJMHtwm8VDJCecfHxqQ.SugknzkderpgzFE145R9ASbaHKJww4w6u	57	1978-01-17	2025-01-10 04:42:45.965831	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino	\N
+24	Jhonangel	Briceno	87676767	jhonangelbr@gmail.com	04241338828	$2a$10$/HzUHd8yFBx09DczQqi0w.DusaeWWVvHz.DaaJmocrUCio1A7DESW	57	2003-12-11	2025-02-02 08:25:37.059818	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N	\N
+14	maigle	toro	12951026	maigle@gmail.com	04121131155	$2a$10$WtibiFQAkvLdKDBRe7XJQuWtQ6LeEZVaLwQ4H6EH3xVUzl6xUxHKe	58	1978-01-17	2025-01-26 19:29:40.721025	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino	\N
+10	manuel	manolito	12435123	manolomanolito@gmail.com	04241223355	$2a$10$7Ffe4GEk85g6pco1GY5d7OEDy/v0INaU6lYKTkay.YpzsT8jW1qoK	57	2003-11-12	2025-01-25 18:28:57.235499	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	masculino	\N
+12	camila	camilita	12542124	camilacamilita@gmail.com	04241663323	$2a$10$jiPo4ts6oT.WagFb9G7kzOFgW76Hp8IkGPMqiTqOZDkYXbxU/tw2i	57	2003-12-11	2025-01-25 23:30:05.428703	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino	\N
+13	princesa	princesita	12123123	asdasd12@gmail.com	04241338828	$2a$10$SY6iiyj2lARFHPiS.kUf5uyYmR3S/bq7iII3ZXApvE1wUsen6Hg4O	58	2003-12-11	2025-01-26 06:41:15.433667	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino	\N
+15	eduard	Aranguren Conde	7956971	stephany@gmail.com	04142611162	$2a$10$0Y.DfXu76mCI8p7g417chODF7OCpBFifnuT4yJLNVUBxL3pibYKKO	57	2002-08-09	2025-01-27 22:48:49.608319	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	f	\N	masculino	\N
+33	manolo	aranguren	30111356	jhonan@gmail.com	04241338828	$2a$10$hUGmS6cndy6BZ4/MNbin5.3nbMaC5/Jv3sRebB3/xQkTjHzoXKRoW	57	2003-12-11	2025-02-03 23:17:18.60789	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿Cuál es el nombre de tu primera mascota?	\N	0.0	\N	t	\N	femenina	\N
+31	pedro	pedro	12122121	pedropedro@gmail.com	04241338828	$2a$10$2L5u.tPwQRIuUVs.1BwnbuWv0i7x9ZDPqsxGT7jZuwMQG.mkA9H6K	57	2003-12-11	2025-02-03 07:28:02.267652	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿Cuál es el nombre de tu primera mascota?	\N	0.0	\N	t	\N	femenina	\N
+17	guillermo	sulbaran	29504340	guillermo@gmail.com	0412999999	$2a$10$Wwf0Aoxbd7oOjc4bQpJk3.M6jrXM9DSu7yiAB4cjOMvlmLc12EmR6	57	2002-02-27	2025-01-31 20:10:24.832671	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N	\N
+19	camila	camilita	12953634	mercantil@gmail.com	04241338828	$2a$10$ChAO2NU2DgCUWCT9dmNBluNtRKTn8X5OJn.Fif8hrrC3IyjGFXAte	57	1998-02-03	2025-02-02 05:17:25.970603	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	princesa	\N	0.0	\N	t	\N	femenina	\N
+21	Jhonangel	Briceno	67454554	dwadadaw@gmail.com	04241338828	$2a$10$.NKOHZNW.umYRg0JVCLF7uvLXQ9.EmiM0vAK4ZTVjwLCTx51M.D1C	57	2003-12-11	2025-02-02 08:14:48.482249	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	\N	\N
+32	Jhonangel	Briceno	83823832	adjawjdawjdw@gmail.com	04241338828	$2a$10$DprTw4saAxSSBkcDon/4u.IMxUHio9RTxThkGJejpv62FNYqyF3wW	57	2003-12-11	2025-02-03 23:02:53.633254	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	¿Cuál es el nombre de tu mejor amigo de la infancia?	\N	0.0	\N	t	\N	masculino	\N
+9	chucha	chuchita	11692361	patricia72@gmail.com	04125906930	$2a$10$4ztV04tsCbgFV8XtT40WJe/okVxh0Vq24tQLuTyitnzLNYmmT2.UW	57	2004-05-14	2025-01-22 17:21:09.697302	/uploads/profile-pics/profile-1737244972746-163748146.jpeg	\N	\N	0.0	\N	t	\N	femenino	\N
+37	Jhonangelwdawdaw	Bricenodwadawd	12122143	jheo04@gmail.com	04241338828	$2a$10$T/mELkyxUqH2I0HKnpXVl.1db13dXmWifMPSW382u/dZJOdpKQB0G	58	1999-06-16	2025-02-08 21:27:57.919679	/uploads/profile-pics/user.webp	\N	\N	0.0	{"Manicura","Faciales","Epilaciones","Quiropodía"}	t	\N	\N	\N
+39	maigleawdaw	ñlmjkm	45455544	rtftfttffty@gmail.com	04241338828	$2a$10$iuL47h.obipfjxExUyVWFud.d9Xlzl9nS3IctuVWmC8L4402IXoGi	57	1999-07-14	2025-02-09 01:59:30.880206	/uploads/profile-pics/user.webp	\N	\N	0.0	\N	t	\N	\N	\N
+41	maigleeeeeee	awdawdwa	12211441	awdaactyt@gmail.com	04265121212	$2a$10$pysEGeDDdVqC.lDiPWehH.wm50tZBuG7sMim1FSsQtfiXbtJaR3Qe	57	1995-09-19	2025-02-09 03:11:56.403694	/uploads/profile-pics/user.webp	¿En qué ciudad naciste?	\N	0.0	\N	t	\N	masculino	\N
+43	llllllllllll	llllllllllll	12121256	kkkkkkkkkkkkwq@gmail.com	04241338828	$2a$10$6m8GYYyoKXF/Q8J7kPXPCumaNn3e91NTjGbJp2ojNvxBlMVpryaDO	57	2000-12-11	2025-02-09 03:48:26.091301	/uploads/profile-pics/user.webp	¿Cuál es el nombre de tu mejor amigo de la infancia?	\N	0.0	\N	t	\N	masculino	\N
+45	rafael	manaure	12321125	gelbriceo04@gmail.com	04241338828	$2a$10$aOfcmjogLjabR6xCV/CxFe8lfoTh54I31ctzitHU65a7.FijEYULG	57	2000-12-11	2025-02-09 04:00:27.279917	/uploads/profile-pics/user.webp	¿Cuál es tu película favorita?	\N	0.0	\N	f	\N	femenina	\N
 \.
 
 
@@ -435,7 +447,7 @@ COPY public."user" (id, name, lastname, identification, email, telephone_number,
 -- Name: appointment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tesis_unimas_user
 --
 
-SELECT pg_catalog.setval('public.appointment_id_seq', 129, true);
+SELECT pg_catalog.setval('public.appointment_id_seq', 130, true);
 
 
 --
@@ -463,7 +475,7 @@ SELECT pg_catalog.setval('public.specialist_cancelled_appointments_id_seq', 17, 
 -- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: tesis_unimas_user
 --
 
-SELECT pg_catalog.setval('public.user_id_seq', 33, true);
+SELECT pg_catalog.setval('public.user_id_seq', 45, true);
 
 
 --

@@ -1,7 +1,5 @@
-"use client"
-
-import React, { useState, useEffect } from "react"
-import { IMaskInput } from "react-imask"
+import React, { useState, useEffect } from "react";
+import { IMaskInput } from "react-imask";
 import {
   User,
   UserPlus,
@@ -16,23 +14,28 @@ import {
   HelpCircle,
   UserRoundSearch,
   X,
-} from "lucide-react"
-import styles from "./registro.module.css"
-import TextMaskCustomTelefono from "../../Mascaras/telefono"
+} from "lucide-react";
+import styles from "./registro.module.css";
+import TextMaskCustomTelefono from "../../Mascaras/telefono";
+import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import axios from "axios";
 
 const TextMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) {
-  const { onChange, ...other } = props
+  const { onChange, ...other } = props;
   return (
     <IMaskInput
       {...other}
       mask="00000000"
       inputRef={ref}
-      onAccept={(value, mask) => onChange({ target: { name: props.name, value: mask._unmaskedValue } })}
+      onAccept={(value, mask) =>
+        onChange({ target: { name: props.name, value: mask._unmaskedValue } })
+      }
       overwrite
       className={styles.input}
     />
-  )
-})
+  );
+});
 
 const securityQuestions = [
   "¿Cuál es el nombre de tu primera mascota?",
@@ -40,7 +43,7 @@ const securityQuestions = [
   "¿Cuál es el nombre de tu mejor amigo de la infancia?",
   "¿Cuál es tu película favorita?",
   "¿Cuál es el nombre de tu escuela primaria?",
-]
+];
 
 const Registro = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -57,135 +60,152 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
     security_answer: "",
     confirm_security_answer: "",
     specialties: [],
-  })
-  const [errors, setErrors] = useState({})
-  const [success, setSuccess] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showSecurityAnswer, setShowSecurityAnswer] = useState(false)
-  const [isFormValid, setIsFormValid] = useState(false)
-
+  });
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showSecurityAnswer, setShowSecurityAnswer] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const navigate = useNavigate();
   const validateName = (name) => {
     if (name.length < 3 || name.length > 12 || /[^a-zA-Z]/.test(name)) {
-      return "Debe tener entre 3 y 12 caracteres y solo letras"
+      return "Debe tener entre 3 y 12 caracteres y solo letras";
     }
-    return ""
-  }
+    return "";
+  };
 
   const validatePassword = (password) => {
     if (password.length !== 8 || !/^[a-zA-Z0-9]{8}$/.test(password)) {
-      return "Debe tener exactamente 8 caracteres"
+      return "Debe tener exactamente 8 caracteres";
     }
-    return ""
-  }
+    return "";
+  };
 
   const validateConfirmPassword = (confirmPassword) => {
     if (confirmPassword !== formData.password) {
-      return "Las contraseñas no coinciden"
+      return "Las contraseñas no coinciden";
     }
-    return ""
-  }
+    return "";
+  };
 
   const validateDateOfBirth = (date) => {
-    const birthDate = new Date(date)
-    const now = new Date()
-    const hundredYearsAgo = new Date(now.getFullYear() - 100, now.getMonth(), now.getDate())
+    const birthDate = new Date(date);
+    const now = new Date();
+    const hundredYearsAgo = new Date(
+      now.getFullYear() - 100,
+      now.getMonth(),
+      now.getDate()
+    );
 
     if (birthDate > now) {
-      return "No es valida esa fecha"
+      return "No es valida esa fecha";
     }
     if (birthDate < hundredYearsAgo) {
-      return "La fecha no puede ser más de 100 años atrás"
+      return "La fecha no puede ser más de 100 años atrás";
     }
-    return ""
-  }
+    return "";
+  };
 
   const validateSecurityAnswer = (answer) => {
     if (answer.length < 3) {
-      return "La respuesta debe tener al menos 3 caracteres"
+      return "La respuesta debe tener al menos 3 caracteres";
     }
-    return ""
-  }
+    return "";
+  };
 
   const validateConfirmSecurityAnswer = (confirmAnswer) => {
     if (confirmAnswer !== formData.security_answer) {
-      return "Las respuestas no coinciden"
+      return "Las respuestas no coinciden";
     }
-    return ""
-  }
+    return "";
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    let newValue = value
+    const { name, value } = e.target;
+    let newValue = value;
 
     if (name === "name" || name === "lastname") {
-      newValue = value.replace(/[^a-zA-Z]/g, "").slice(0, 12)
+      newValue = value.replace(/[^a-zA-Z]/g, "").slice(0, 12);
     } else if (name === "telephone_number") {
-      newValue = value
+      newValue = value;
     } else if (name === "password" || name === "confirmPassword") {
-      newValue = value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8)
+      newValue = value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8);
     }
 
-    setFormData({ ...formData, [name]: newValue })
+    setFormData({ ...formData, [name]: newValue });
 
-    let error = ""
+    let error = "";
     if (name === "name" || name === "lastname") {
-      error = validateName(newValue)
+      error = validateName(newValue);
     } else if (name === "password") {
-      error = validatePassword(newValue)
+      error = validatePassword(newValue);
     } else if (name === "confirmPassword") {
-      error = validateConfirmPassword(newValue)
+      error = validateConfirmPassword(newValue);
     } else if (name === "date_of_birth") {
-      error = validateDateOfBirth(newValue)
+      error = validateDateOfBirth(newValue);
     } else if (name === "security_answer") {
-      error = validateSecurityAnswer(newValue)
+      error = validateSecurityAnswer(newValue);
     } else if (name === "confirm_security_answer") {
-      error = validateConfirmSecurityAnswer(newValue)
+      error = validateConfirmSecurityAnswer(newValue);
     }
 
-    setErrors({ ...errors, [name]: error })
-  }
+    setErrors({ ...errors, [name]: error });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!isFormValid) return
+    e.preventDefault();
+    if (!isFormValid) return;
 
     try {
-      // Aquí iría la lógica para enviar los datos al servidor
-      console.log("Datos del formulario:", formData)
-      onSubmit(formData) // Llama a la función onSubmit con los datos del nuevo cliente
-      setSuccess(true)
+      const response = await axios.post(
+        "http://localhost:3000/api/registro-especialista",
+        formData
+      );
+      toast.success("Especialista registrado con éxito.");
       setTimeout(() => {
-        setSuccess(false)
-        onClose()
-      }, 2000)
+        navigate("/administrador");
+        onClose();
+      }, 2000);
     } catch (error) {
-      console.error("Error al registrar:", error)
-      setErrors((prev) => ({ ...prev, backend: ["Error al registrar. Por favor, inténtelo de nuevo."] }))
+      if (error.response?.data?.errors) {
+        const backendErrors = Array.isArray(error.response.data.errors)
+          ? error.response.data.errors
+          : [error.response.data.errors];
+
+        setErrors((prev) => ({
+          ...prev,
+          backend: backendErrors,
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          backend: ["Error al registrar. Por favor, inténtelo de nuevo."],
+        }));
+      }
     }
-  }
+  };
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
   const toggleSecurityAnswerVisibility = () => {
-    setShowSecurityAnswer(!showSecurityAnswer)
-  }
+    setShowSecurityAnswer(!showSecurityAnswer);
+  };
 
   const handleSpecialtyChange = (e) => {
-    const { value, checked } = e.target
+    const { value, checked } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       specialties: checked
         ? [...prevData.specialties, value]
         : prevData.specialties.filter((specialty) => specialty !== value),
-    }))
-  }
+    }));
+  };
 
   const formatSelectedSpecialties = (specialties) => {
-    if (specialties.length === 0) return "Ninguna"
-    return specialties.join(", ")
-  }
+    if (specialties.length === 0) return "Ninguna";
+    return specialties.join(", ");
+  };
 
   useEffect(() => {
     const formErrors = {
@@ -195,33 +215,45 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
       confirmPassword: validateConfirmPassword(formData.confirmPassword),
       date_of_birth: validateDateOfBirth(formData.date_of_birth),
       security_answer: validateSecurityAnswer(formData.security_answer),
-      confirm_security_answer: validateConfirmSecurityAnswer(formData.confirm_security_answer),
-      specialties: formData.specialties.length === 0 ? "Debe seleccionar al menos una especialidad" : "",
-    }
+      confirm_security_answer: validateConfirmSecurityAnswer(
+        formData.confirm_security_answer
+      ),
+      specialties:
+        formData.specialties.length === 0
+          ? "Debe seleccionar al menos una especialidad"
+          : "",
+    };
 
     const isValid =
       Object.values(formErrors).every((error) => error === "") &&
       Object.values(formData).every((value) => value !== "") &&
-      formData.specialties.length > 0
+      formData.specialties.length > 0;
 
-    setIsFormValid(isValid)
-    setErrors(formErrors)
-  }, [formData, validateConfirmPassword, validateConfirmSecurityAnswer, validateDateOfBirth]) // Added validateDateOfBirth to dependencies
+    setIsFormValid(isValid);
+    setErrors(formErrors);
+  }, [
+    formData,
+    validateConfirmPassword,
+    validateConfirmSecurityAnswer,
+    validateDateOfBirth,
+  ]);
 
   const renderErrors = () => {
-    const errorMessages = []
+    const errorMessages = [];
 
     Object.entries(errors).forEach(([key, value]) => {
       if (value && key !== "backend") {
-        errorMessages.push(value)
+        errorMessages.push(value);
       }
-    })
+    });
     if (errors.backend) {
-      const backendErrors = Array.isArray(errors.backend) ? errors.backend : [errors.backend]
-      errorMessages.push(...backendErrors)
+      const backendErrors = Array.isArray(errors.backend)
+        ? errors.backend
+        : [errors.backend];
+      errorMessages.push(...backendErrors);
     }
 
-    if (errorMessages.length === 0) return null
+    if (errorMessages.length === 0) return null;
 
     return (
       <div className={styles.errorContainer}>
@@ -231,14 +263,15 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
           </div>
         ))}
       </div>
-    )
-  }
+    );
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
+        <ToastContainer position="top-right" autoClose={2000} />
         <div className={styles.modalHeader}>
           <h2 className={styles.title}>Registrar Nuevo Cliente</h2>
           <button className={styles.closeButton} onClick={onClose}>
@@ -247,8 +280,6 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
         </div>
         <form className={styles.form} onSubmit={handleSubmit}>
           {renderErrors()}
-          {success && <p className={styles.success}>¡Registro exitoso! Cerrando...</p>}
-
           <div className={styles.formGrid}>
             <div className={styles.inputGroup}>
               <label htmlFor="name" className={styles.label}>
@@ -291,7 +322,9 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   pattern="[A-Za-z]+"
                 />
               </div>
-              {errors.lastname && <p className={styles.error}>{errors.lastname}</p>}
+              {errors.lastname && (
+                <p className={styles.error}>{errors.lastname}</p>
+              )}
             </div>
 
             <div className={styles.inputGroup}>
@@ -386,7 +419,9 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   max={new Date().toISOString().split("T")[0]}
                 />
               </div>
-              {errors.date_of_birth && <p className={styles.error}>{errors.date_of_birth}</p>}
+              {errors.date_of_birth && (
+                <p className={styles.error}>{errors.date_of_birth}</p>
+              )}
             </div>
 
             <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
@@ -407,11 +442,17 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   maxLength={8}
                   pattern="[A-Za-z0-9]{8}"
                 />
-                <button type="button" className={styles.passwordToggle} onClick={togglePasswordVisibility}>
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={togglePasswordVisibility}
+                >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && <p className={styles.error}>{errors.password}</p>}
+              {errors.password && (
+                <p className={styles.error}>{errors.password}</p>
+              )}
             </div>
 
             <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
@@ -433,7 +474,9 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   pattern="[A-Za-z0-9]{8}"
                 />
               </div>
-              {errors.confirmPassword && <p className={styles.error}>{errors.confirmPassword}</p>}
+              {errors.confirmPassword && (
+                <p className={styles.error}>{errors.confirmPassword}</p>
+              )}
             </div>
 
             <div className={styles.inputGroup}>
@@ -458,7 +501,9 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   ))}
                 </select>
               </div>
-              {errors.security_question && <p className={styles.error}>{errors.security_question}</p>}
+              {errors.security_question && (
+                <p className={styles.error}>{errors.security_question}</p>
+              )}
             </div>
 
             <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
@@ -477,11 +522,21 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   required
                   placeholder="Ingrese su respuesta"
                 />
-                <button type="button" className={styles.passwordToggle} onClick={toggleSecurityAnswerVisibility}>
-                  {showSecurityAnswer ? <EyeOff size={18} /> : <Eye size={18} />}
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={toggleSecurityAnswerVisibility}
+                >
+                  {showSecurityAnswer ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
+                  )}
                 </button>
               </div>
-              {errors.security_answer && <p className={styles.error}>{errors.security_answer}</p>}
+              {errors.security_answer && (
+                <p className={styles.error}>{errors.security_answer}</p>
+              )}
             </div>
 
             <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
@@ -501,7 +556,9 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   placeholder="Confirme su respuesta"
                 />
               </div>
-              {errors.confirm_security_answer && <p className={styles.error}>{errors.confirm_security_answer}</p>}
+              {errors.confirm_security_answer && (
+                <p className={styles.error}>{errors.confirm_security_answer}</p>
+              )}
             </div>
           </div>
 
@@ -510,42 +567,61 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
               Especialidades <span className={styles.requiredField}>*</span>
             </label>
             <div className={styles.specialtiesGrid}>
-              {["Manicura", "Pedicura", "Faciales", "Corporales", "Epilaciones", "Extensiones", "Quiropodía"].map(
-                (specialty) => (
-                  <label key={specialty} className={styles.specialtyLabel}>
-                    <input
-                      type="checkbox"
-                      name="specialties"
-                      value={specialty}
-                      checked={formData.specialties.includes(specialty)}
-                      onChange={handleSpecialtyChange}
-                      className={styles.specialtyCheckbox}
-                    />
-                    <span className={styles.specialtyText}>{specialty}</span>
-                  </label>
-                ),
-              )}
+              {[
+                "Manicura",
+                "Pedicura",
+                "Faciales",
+                "Corporales",
+                "Epilaciones",
+                "Extensiones",
+                "Quiropodía",
+              ].map((specialty) => (
+                <label key={specialty} className={styles.specialtyLabel}>
+                  <input
+                    type="checkbox"
+                    name="specialties"
+                    value={specialty}
+                    checked={formData.specialties.includes(specialty)}
+                    onChange={handleSpecialtyChange}
+                    className={styles.specialtyCheckbox}
+                  />
+                  <span className={styles.specialtyText}>{specialty}</span>
+                </label>
+              ))}
             </div>
-            {errors.specialties && <p className={styles.error}>{errors.specialties}</p>}
+            {errors.specialties && (
+              <p className={styles.error}>{errors.specialties}</p>
+            )}
             <div className={styles.specialtySummary}>
-              <span className={styles.specialtySummaryLabel}>Usted se especializa en:</span>
-              <span className={styles.specialtySummaryText}>{formatSelectedSpecialties(formData.specialties)}</span>
+              <span className={styles.specialtySummaryLabel}>
+                Usted se especializa en:
+              </span>
+              <span className={styles.specialtySummaryText}>
+                {formatSelectedSpecialties(formData.specialties)}
+              </span>
             </div>
           </div>
 
           <div className={styles.buttonGroup}>
-            <button type="button" className={`${styles.button} ${styles.cancelButton}`} onClick={onClose}>
+            <button
+              type="button"
+              className={`${styles.button} ${styles.cancelButton}`}
+              onClick={onClose}
+            >
               Cancelar
             </button>
-            <button type="submit" className={`${styles.button} ${styles.submitButton}`} disabled={!isFormValid}>
+            <button
+              type="submit"
+              className={`${styles.button} ${styles.submitButton}`}
+              disabled={!isFormValid}
+            >
               Registrar Cliente
             </button>
           </div>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Registro
-
+export default Registro;

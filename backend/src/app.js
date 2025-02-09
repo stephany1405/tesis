@@ -62,7 +62,15 @@ app.use((req, res, next) => {
   req.wss = app.locals.wss;
   next();
 });
-
+app.use((req, res, next) => {
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate"
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
 app.use("/api/usuario", authRoutes);
 app.use("/api/servicios", appointmentRoutes);
 app.use("/api/orden", orderRouter);

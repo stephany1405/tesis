@@ -52,6 +52,7 @@ export const register = async (req, res) => {
       date_of_birth,
       security_question,
       security_answer,
+      picture_profile: "/uploads/profile-pics/user.webp",
     };
 
     const filteredColumns = columnNames.filter(

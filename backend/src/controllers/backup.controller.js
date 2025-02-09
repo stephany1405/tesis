@@ -4,6 +4,8 @@ import fs from "fs";
 import { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_USER } from "../config.js";
 import { fileURLToPath } from "url";
 import multer from "multer";
+import bcrypt from "bcryptjs";
+import { pool } from "../db.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,3 +95,52 @@ export const restoreDatabase = [
     );
   },
 ];
+
+export const createSecretPassword = async (req, res) => {
+  try {
+    const { secretPassword, userID } = req.body;
+    if (!secretPassword || !userID) {
+      return res.status(400).json({ message: "Data Requerida." });
+    }
+
+    const hashedSecretPassword = await bcrypt.hash(secretPassword, 10);
+
+    const query = {
+      text: `UPDATE public.user SET secret_password = $1 WHERE id = $2`,
+      values: [hashedSecretPassword, userID],
+    };
+
+    await pool.query(query);
+    res.status(200).json({ message: "Contraseña Secreta Creada." });
+  } catch (error) {
+    console.error("Error creating secret password:", error);
+    res.status(500).json({ message: "Error interno en el servidor" });
+  }
+};
+
+export const compareSecretPassword = async (req, res) => {
+  try {
+    const { userID, secretPassword } = req.body;
+    console.log(secretPassword);
+    if (!secretPassword || !userID) {
+      return res.status(401).json({ message: "Data Requerida." });
+    }
+
+    const { rows } = await pool.query(
+      `SELECT secret_password FROM PUBLIC.USER WHERE id = ${userID}`
+    );
+    const secretHashed = rows[0].secret_password;
+    const compareSecrets = await bcrypt.compare(secretPassword, secretHashed);
+    if (compareSecrets) {
+      return res.status(200).json({ message: "Contraseña Secreta Correcta." });
+    } else {
+      return res
+        .status(401)
+        .json({ message: "Contraseña Secreta Incorrecta." });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "error interno en el servidor", error: error });
+  }
+};

@@ -148,8 +148,6 @@ const SubServiceModal = ({ service, onClose }) => {
     setShowForm(false);
     setEditingSubService(null);
   };
-
-  console.log(subServices);
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
