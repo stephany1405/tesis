@@ -1,4 +1,4 @@
-.formOverlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -9,90 +9,227 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.formContainer {
+.modalContent {
   background-color: white;
-  padding: 30px;
-  border-radius: 15px;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  position: relative;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 1.8rem;
+  color: #ff69b4;
+  margin: 0;
+  font-weight: 600;
 }
 
 .closeButton {
-  position: absolute;
-  top: 15px;
-  right: 20px;
   background: none;
   border: none;
-  cursor: pointer;
   color: #666;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
 }
 
-.formTitle {
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 20px;
-  text-align: center;
+.closeButton:hover {
+  color: #ff69b4;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 24px;
 }
 
-.formGroup {
+.formGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .formGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.inputGroup {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .label {
-  margin-bottom: 5px;
+  font-size: 0.9rem;
   font-weight: 500;
   color: #333;
 }
 
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  position: absolute;
+  left: 12px;
+  color: #ff69b4;
+  pointer-events: none;
+}
+
 .input {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #ffc0cb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fff0f5;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #ff69b4;
+  background-color: white;
+  box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2);
+}
+
+.passwordGroup {
+  position: relative;
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #ff69b4;
+  cursor: pointer;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancelButton {
+  background-color: white;
+  border: 1px solid #ff69b4;
+  color: #ff69b4;
+}
+
+.cancelButton:hover {
+  background-color: #fff0f5;
 }
 
 .submitButton {
-  width: 100%;
-  padding: 12px;
-  background-color: #f755ae;
-  color: white;
+  background-color: #ff69b4;
   border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  color: white;
 }
 
 .submitButton:hover {
-  background-color: #9333ea;
+  background-color: #ff1493;
+}
+
+.submitButton:disabled {
+  background-color: #d3d3d3;
+  cursor: not-allowed;
 }
 
 .error {
-  color: #e53e3e;
-  margin-bottom: 10px;
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 4px;
 }
 
 .success {
-  color: #4caf50;
+  color: #27ae60;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   font-size: 0.9rem;
-  font-weight: bold;
-  background-color: #e8f5e9;
-  border: 1px solid #4caf50;
-  padding: 8px;
-  border-radius: 5px;
+  font-weight: 600;
+  background-color: #e8f8f5;
+  border: 1px solid #27ae60;
+  padding: 10px;
+  border-radius: 6px;
 }
+
+.errorContainer {
+  background-color: #fff1f2;
+  border: 1px solid #ff69b4;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  padding: 12px;
+  width: 100%;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Estilos para scrollbar */
+.modalContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background: #ff69b4;
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+  background: #ff1493;
+}
+
