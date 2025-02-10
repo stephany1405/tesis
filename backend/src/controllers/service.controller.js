@@ -674,3 +674,34 @@ export const updateAppointmentSpecialist = async (req, res) => {
     });
   }
 };
+
+export const getSpecialistAppointmentStatus = async (req, res) => {
+  try {
+    const { appointmentId, specialistId } = req.params;
+
+    if (!appointmentId || !specialistId) {
+      return res
+        .status(400)
+        .json({ error: "Se requieren appointmentId y specialistId" });
+    }
+
+    const query = `
+          SELECT status_id
+          FROM appointment_specialists
+          WHERE appointment_id = $1 AND specialist_id = $2;
+      `;
+    const result = await pool.query(query, [appointmentId, specialistId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "No se encontró el estado para esta cita y especialista.",
+      });
+    }
+
+    const statusId = result.rows[0].status_id;
+    res.status(200).json({ status: statusId });
+  } catch (error) {
+    console.error("Error al obtener el estado inicial:", error);
+    res.status(500).json({ error: error.message });
+  }
+};

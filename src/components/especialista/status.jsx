@@ -4,16 +4,13 @@ import { Check, Star } from "lucide-react";
 import axios from "axios";
 import { getJWT } from "../middlewares/getToken.jsx";
 import { jwtDecode } from "jwt-decode";
+import { useWebSocketContext } from "../agenda/WebSocketContext.jsx";
 
 function Status({ data, onStatusUpdate }) {
-  const [currentStep, setCurrentStep] = useState(() => {
-    const storedStep = localStorage.getItem(
-      `currentStep_${data.appointment_id}`
-    );
-    return 0;
-  });
+  const [currentStep, setCurrentStep] = useState(0);
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
+  const { ws, isConnected } = useWebSocketContext();
 
   const steps = [
     { label: "Aceptaste el servicio", status: "Especialista asignado" },
@@ -21,17 +18,126 @@ function Status({ data, onStatusUpdate }) {
     { label: "Inicio del servicio", status: "Inicio del servicio" },
     { label: "Final del servicio", status: "Final del servicio" },
   ];
+
   useEffect(() => {
-    // Reset current step when appointment_id changes
-    setCurrentStep(0);
-    localStorage.removeItem(`currentStep_${data.appointment_id}`);
-  }, [data.appointment_id]);
+    if (isConnected && ws) {
+      const handleMessage = (message) => {
+        if (
+          message.type === "STATUS_UPDATE" &&
+          Number(message.data.appointmentId) === data.appointment_id
+        ) {
+          const stepIndex = steps.findIndex(
+            (step) => step.status === message.data.status
+          );
+          if (stepIndex !== -1) {
+            setCurrentStep(stepIndex);
+            localStorage.setItem(
+              `currentStep_${data.appointment_id}`,
+              stepIndex
+            );
+            if (stepIndex === steps.length - 1) {
+              setShowRating(true);
+            }
+          }
+        }
+      };
+
+      ws.onmessage = (e) => {
+        try {
+          const parsedMessage = JSON.parse(e.data);
+          handleMessage(parsedMessage);
+        } catch (error) {
+          console.error(
+            "Error al analizar el mensaje de WebSocket:",
+            error,
+            e.data
+          );
+        }
+      };
+    }
+
+    return () => {
+      if (ws) {
+        ws.onmessage = null;
+      }
+    };
+  }, [isConnected, ws, data.appointment_id, steps]);
+
+  useEffect(() => {
+    const storedStep = localStorage.getItem(
+      `currentStep_${data.appointment_id}`
+    );
+
+    if (storedStep !== null) {
+      setCurrentStep(Number(storedStep));
+    } else {
+      const fetchInitialStatus = async () => {
+        if (!data.appointment_id) {
+          console.error("Invalido appointment_id:", data.appointment_id);
+          return;
+        }
+
+        try {
+          const token = getJWT("token");
+          const decodedToken = jwtDecode(token);
+          const specialistId = decodedToken.id;
+
+          const response = await axios.get(
+            `http://localhost:3000/api/servicios/especialista-estado/${data.appointment_id}/${specialistId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (response.data && response.data.status) {
+            const initialStatusId = response.data.status;
+
+            const classificationResponse = await axios.get(
+              `http://localhost:3000/api/servicios/classification/${initialStatusId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            const initialStatus =
+              classificationResponse.data.classification_type;
+
+            const stepIndex = steps.findIndex(
+              (step) => step.status === initialStatus
+            );
+            if (stepIndex !== -1) {
+              setCurrentStep(stepIndex);
+              localStorage.setItem(
+                `currentStep_${data.appointment_id}`,
+                stepIndex
+              );
+            }
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            console.log(
+              "Estado no encontrado para esta cita y especialista. Configuración del estado predeterminado."
+            );
+            localStorage.setItem(`currentStep_${data.appointment_id}`, "0");
+          } else {
+            console.error("Error al obtener el estado inicial:", error);
+          }
+        }
+      };
+
+      fetchInitialStatus();
+    }
+  }, [data.appointment_id, steps]);
 
   useEffect(() => {
     if (currentStep === steps.length - 1) {
       setShowRating(true);
     }
-  }, [currentStep]);
+  }, [currentStep, steps.length]);
 
   const handleRatingSubmit = async () => {
     if (!rating) {
@@ -44,14 +150,12 @@ function Status({ data, onStatusUpdate }) {
     try {
       const token = getJWT("token");
       const decodedToken = jwtDecode(token);
-      console.log("Decoded Token:", decodedToken); // Ver el decodedToken
       const payload = {
         appointmentId: data.appointment_id,
         rating: rating,
         role: decodedToken.role_id,
         userId: decodedToken.id,
       };
-      console.log(payload);
 
       await axios.post(
         "http://localhost:3000/api/servicios/calificaciones/crear",
@@ -63,7 +167,6 @@ function Status({ data, onStatusUpdate }) {
         }
       );
 
-      // Send final status update after rating
       await axios.post(
         "http://localhost:3000/api/servicios/actualizar-estado",
         {
@@ -74,6 +177,10 @@ function Status({ data, onStatusUpdate }) {
       );
 
       setCurrentStep(steps.length - 1);
+      localStorage.setItem(
+        `currentStep_${data.appointment_id}`,
+        steps.length - 1
+      );
       setShowRating(false);
       alert("Calificación enviada exitosamente");
     } catch (error) {
@@ -102,6 +209,7 @@ function Status({ data, onStatusUpdate }) {
         );
 
         setCurrentStep(index);
+        localStorage.setItem(`currentStep_${data.appointment_id}`, index);
 
         if (index === steps.length - 1) {
           setShowRating(true);
@@ -119,7 +227,6 @@ function Status({ data, onStatusUpdate }) {
       }
     }
   };
-
   return (
     <div className={styles.statusContainer}>
       {steps.map((step, index) => (

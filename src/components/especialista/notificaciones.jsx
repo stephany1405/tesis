@@ -18,7 +18,6 @@ export default function Notificaciones() {
       const token = getJWT("token");
       const decodedToken = jwtDecode(token);
       const specialistId = decodedToken.id;
-      console.log(specialistId);
       const response = await axios.get(
         "http://localhost:3000/api/servicios/clientes",
         {

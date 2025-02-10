@@ -66,7 +66,8 @@ function ServicesStatus() {
         {services.map((appointment) => {
           const parsedServices = parseJson(appointment.services);
           const parsedScheduledDate = parseJson(appointment.scheduled_date);
-          const parsedPoint = appointment.point;
+          const one_point = appointment.point;
+          const { lat, lng } = JSON.parse(one_point);
 
           return (
             <li key={appointment.appointment_id} className={styles.serviceItem}>
@@ -80,9 +81,7 @@ function ServicesStatus() {
                 <div className={styles.locationInfo}>
                   <p>Ubicación:</p>
                   <button
-                    onClick={() =>
-                      openGoogleMaps(parsedPoint.lat, parsedPoint.lng)
-                    }
+                    onClick={() => openGoogleMaps(lat, lng)}
                     className={styles.gpsButton}
                   >
                     GPS

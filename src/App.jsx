@@ -108,9 +108,11 @@ const App = () => {
           <Route
             path="/especialista"
             element={
-              <ProtectedRoute requiredRole={roles.specialist}>
-                <Bienvenida />
-              </ProtectedRoute>
+              <WebSocketProvider>
+                <ProtectedRoute requiredRole={roles.specialist}>
+                  <Bienvenida />
+                </ProtectedRoute>
+              </WebSocketProvider>
             }
           />
 
