@@ -98,8 +98,6 @@ export default function Historial() {
         {history.map((item) => {
           const services = item.services;
           const scheduledDate = item.scheduled_date;
-          console.log(services);
-          console.log(scheduledDate);
           return (
             <article key={item.id} className={styles.historyCard}>
               <header className={styles.cardHeader}>

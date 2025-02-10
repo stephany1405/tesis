@@ -24,6 +24,7 @@ import {
   historySpecialist,
   addSpecialistToAppointment,
   updateAppointmentSpecialist,
+  getAvailability,
 } from "../controllers/service.controller.js";
 import { upload2, upload3 } from "../middlewares/uploadMiddleware.js";
 
@@ -63,4 +64,5 @@ router.get(
   getStatusService
 );
 router.get("/classification/:statusId", getClassification);
+router.get("/availability", getAvailability);
 export default router;

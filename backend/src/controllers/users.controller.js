@@ -156,88 +156,94 @@ export const getSpecialistsWithHistory = async (req, res) => {
   try {
     const role = await getRoleIdSpecialist();
     if (!role) {
-      return res.status(400).json({ message: "Rol de cliente no encontrado." });
+      return res
+        .status(400)
+        .json({ message: "Rol de especialista no encontrado." });
     }
-
     const RoleID = role.id;
 
     const query = {
-      text: `WITH RankedSpecialists AS (
-    SELECT 
-        u.id AS specialist_id,
-        u.name AS specialist_name,
-        u.lastname AS specialist_lastname,
-        u.identification AS specialist_identification,
-        u.email AS specialist_email,
-        u.telephone_number AS specialist_phone,
-        u.picture_profile AS specialist_image,
-        u.score AS specialist_rating,
-        u.specialization AS specialist_specialty,
-        
-       
-        a.id AS appointment_id,
-        a.services AS appointment_services,
-        a.amount AS service_amount,
-        a.address AS service_address,
-        a.point AS service_point,
-        a.scheduled_date AS service_date,
-        
-        aspec.start_appointment AS service_start_time,
-        aspec.end_appointment AS service_end_time,
-        aspec.sessions_assigned AS service_sessions,
-        aspec.earnings AS specialist_earnings,
-        
-        r.rating AS client_rating,
-        r.rated_by AS rating_source,
-        
-        ROW_NUMBER() OVER (PARTITION BY u.id ORDER BY a.scheduled_date DESC) AS rn
-    FROM 
-        "user" u
-    LEFT JOIN 
-        appointment_specialists aspec ON u.id = aspec.specialist_id
-    LEFT JOIN 
-        appointment a ON aspec.appointment_id = a.id
-    LEFT JOIN 
-        ratings r ON r.user_id = u.id AND r.appointment_id = a.id
-    WHERE 
-        u.role_id = $1
-)
-SELECT 
-    specialist_id,
-    specialist_name,
-    specialist_lastname,
-    specialist_identification,
-    specialist_email,
-    specialist_phone,
-    specialist_image,
-    specialist_rating,
-    specialist_specialty,
-    appointment_id,
-    appointment_services,
-    service_amount,
-    service_address,
-    service_point,
-    service_date,
-    service_start_time,
-    service_end_time,
-    service_sessions,
-    specialist_earnings,
-    client_rating,
-    rating_source
-FROM 
-    RankedSpecialists
-WHERE 
-    rn = 1
-ORDER BY 
-    specialist_name ASC;`,
+      text: `
+              SELECT
+                  u.id AS specialist_id,
+                  u.name AS specialist_name,
+                  u.lastname AS specialist_lastname,
+                  u.identification AS specialist_identification,
+                  u.email AS specialist_email,
+                  u.telephone_number AS specialist_phone,
+                  u.picture_profile AS specialist_image,
+                  u.score AS specialist_rating,
+                  u.specialization AS specialist_specialty,
+                  u.status as status_user,
+                  a.id AS appointment_id,
+                  a.services AS appointment_services,
+                  a.amount AS service_amount,
+                  a.address AS service_address,
+                  a.point AS service_point,
+                  a.scheduled_date AS service_date,
+                  aspec.start_appointment AS service_start_time,
+                  aspec.end_appointment AS service_end_time,
+                  aspec.sessions_assigned AS service_sessions,
+                  aspec.earnings AS specialist_earnings,
+                  r.rating AS client_rating,
+                  r.rated_by AS rating_source
+              FROM "user" u
+              LEFT JOIN appointment_specialists aspec ON u.id = aspec.specialist_id
+              LEFT JOIN appointment a ON aspec.appointment_id = a.id
+              LEFT JOIN ratings r ON r.user_id = u.id AND r.appointment_id = a.id  -- Join con ratings
+              WHERE u.role_id = $1
+              ORDER BY specialist_name ASC, a.scheduled_date DESC;  -- Ordena por nombre y fecha
+          `,
       values: [RoleID],
     };
+    const { rows } = await pool.query(query.text, query.values);
 
-    const { rows } = await pool.query(query);
+    const specialists = [];
+    rows.forEach((row) => {
+      let specialist = specialists.find(
+        (s) => s.specialist_id === row.specialist_id
+      );
+      if (!specialist) {
+        specialist = {
+          specialist_id: row.specialist_id,
+          specialist_name: row.specialist_name,
+          specialist_lastname: row.specialist_lastname,
+          specialist_identification: row.specialist_identification,
+          specialist_email: row.specialist_email,
+          specialist_phone: row.specialist_phone,
+          specialist_image: row.specialist_image,
+          specialist_rating: row.specialist_rating,
+          specialist_specialty: row.specialist_specialty,
+          status_user: row.status_user,
+          appointments: [], 
+        };
+        specialists.push(specialist);
+      }
 
-    res.status(200).json(rows);
+      if (row.appointment_id) {
+        specialist.appointments.push({
+          appointment_id: row.appointment_id,
+          appointment_services: row.appointment_services,
+          service_amount: row.service_amount,
+          service_address: row.service_address,
+          service_point: row.service_point,
+          service_date: row.service_date,
+          service_start_time: row.service_start_time,
+          service_end_time: row.service_end_time,
+          service_sessions: row.service_sessions,
+          specialist_earnings: row.specialist_earnings,
+          client_rating: row.client_rating,
+          rating_source: row.rating_source,
+        });
+      }
+    });
+
+    res.status(200).json(specialists);
   } catch (err) {
     console.error(err);
+    res
+      .status(500)
+      .json({ error: "Error al obtener el historial de especialistas" }); 
   }
 };
 
@@ -261,6 +267,7 @@ export const getClientsWithHistory = async (req, res) => {
           u.email,
           u.picture_profile,
           u.score,
+          u.status AS status_user,
           a.scheduled_date,
           a.services,
           a.amount AS service_amount,
@@ -293,7 +300,6 @@ export const getClientsWithHistory = async (req, res) => {
     };
 
     const { rows } = await pool.query(query);
-
     const clients = rows.reduce((acc, row) => {
       const client = acc.find((c) => c.id === row.user_id);
       const serviceHistory = {
@@ -325,6 +331,7 @@ export const getClientsWithHistory = async (req, res) => {
           picture_profile: row.picture_profile,
           score: row.score,
           serviceHistory: [serviceHistory],
+          status_user: row.status_user,
         });
       }
       return acc;

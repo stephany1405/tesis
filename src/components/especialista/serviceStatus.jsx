@@ -48,7 +48,27 @@ function ServicesStatus() {
       return [];
     }
   };
+  const parsePoint = (pointString) => {
+    try {
+      if (!pointString) return { lat: 0, lng: 0 };
 
+      if (typeof pointString === "object") return pointString;
+
+      const cleanString = pointString
+        .replace(/'/g, '"')
+        .replace(/(\w+):/g, '"$1":');
+
+      const pointData = JSON.parse(cleanString);
+
+      return {
+        lat: pointData.lat || pointData.latitud || 0,
+        lng: pointData.lng || pointData.longitud || 0,
+      };
+    } catch (error) {
+      console.error("Error parsing point data:", error);
+      return { lat: 0, lng: 0 };
+    }
+  };
   if (loading) return <div>Cargando servicios...</div>;
   if (!services.length) {
     return (
@@ -66,8 +86,7 @@ function ServicesStatus() {
         {services.map((appointment) => {
           const parsedServices = parseJson(appointment.services);
           const parsedScheduledDate = parseJson(appointment.scheduled_date);
-          const one_point = appointment.point;
-          const { lat, lng } = JSON.parse(one_point);
+          const { lat, lng } = parsePoint(appointment.point);
 
           return (
             <li key={appointment.appointment_id} className={styles.serviceItem}>

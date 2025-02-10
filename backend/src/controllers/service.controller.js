@@ -11,6 +11,14 @@ import {
 } from "../models/service.model.js";
 import { pool } from "../db.js";
 import moment from "moment";
+import {
+  parseISO,
+  addHours,
+  addMinutes,
+  areIntervalsOverlapping,
+  formatISO,
+} from "date-fns";
+import { es } from "date-fns/locale";
 export const getActiveAppointment = async (req, res) => {
   try {
     const { userID } = req.query;
@@ -354,7 +362,6 @@ export const assignSpecialist = async (req, res, next) => {
   }
 };
 
-//En tu controlador, no uses app.locals.  Usa el parametro req que ya tienes!
 export const updateStatus = async (req, res, next) => {
   try {
     const { appointmentId, status, specialistId } = req.body;
@@ -368,13 +375,10 @@ export const updateStatus = async (req, res, next) => {
       specialistId
     );
 
-    // Use req.wss (which is set in your middleware)
     if (req.wss) {
       req.wss.broadcastStatusUpdate(appointmentId, specialistId, status);
     } else {
-      console.error("WebSocket server not available on req.wss"); // More specific error
-      // Consider *not* throwing an error here.  The database update
-      // still happened.  Just log the error and continue.
+      console.error("WebSocket server not available on req.wss");
     }
 
     res.status(200).json({
@@ -703,5 +707,71 @@ export const getSpecialistAppointmentStatus = async (req, res) => {
   } catch (error) {
     console.error("Error al obtener el estado inicial:", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const getAvailability = async (req, res) => {
+  try {
+    const { start, duration } = req.query;
+
+    if (!start || !duration) {
+      return res.status(400).json({
+        error: "Se requieren start (fecha y hora) y duration (en horas).",
+      });
+    }
+
+    const startDate = new Date(start);
+    const durationInHours = parseFloat(duration);
+
+    if (isNaN(durationInHours)) {
+      return res
+        .status(400)
+        .json({ error: "duration debe ser un número válido." });
+    }
+
+    const query = `
+      WITH parsed_appointments AS (
+        SELECT 
+          id,
+          (scheduled_date->>'start')::timestamp as start_time,
+          CASE 
+            WHEN scheduled_date->>'duration' LIKE '%hora%' THEN
+              (regexp_replace(scheduled_date->>'duration', '[^0-9.]', '', 'g'))::float * interval '1 hour'
+            WHEN scheduled_date->>'duration' LIKE '%minuto%' THEN
+              (regexp_replace(scheduled_date->>'duration', '[^0-9.]', '', 'g'))::float * interval '1 minute'
+          END as duration_interval
+        FROM appointment
+        WHERE status_id NOT IN (69, 71) -- Excluir citas canceladas o completadas
+      )
+      SELECT COUNT(DISTINCT id) as count
+      FROM parsed_appointments
+      WHERE (
+        start_time,
+        start_time + duration_interval
+      ) OVERLAPS (
+        $1::timestamp,
+        $1::timestamp + ($2 || ' hours')::interval
+      );
+    `;
+
+    const result = await pool.query(query, [startDate, durationInHours]);
+    const overlappingAppointments = parseInt(result.rows[0].count, 10);
+    const maxAppointmentsPerHour = 10;
+    const availableSlots = Math.max(
+      0,
+      maxAppointmentsPerHour - overlappingAppointments
+    );
+
+    res.status(200).json({
+      available: availableSlots,
+      overlapping: overlappingAppointments,
+    });
+  } catch (error) {
+    console.error("Error al obtener la disponibilidad:", error);
+    let errorMessage = "Error al obtener la disponibilidad";
+    if (error.code === "22007") {
+      errorMessage += ". Formato de fecha inválido en la base de datos.";
+    }
+    res.status(500).json({ error: errorMessage, details: error.message });
   }
 };

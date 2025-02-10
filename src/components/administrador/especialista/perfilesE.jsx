@@ -1,94 +1,106 @@
-"use client"
-
-import { useState, useMemo, useEffect } from "react"
-import styles from "./PerfilesE.module.css"
-import Modal from "./modal"
-import Registro from "./registro"
-import { Search, UserPlus, UserCog, Lock } from "lucide-react"
-import axios from "axios"
+import { useState, useMemo, useEffect } from "react";
+import styles from "./PerfilesE.module.css";
+import Modal from "./modal";
+import Registro from "./registro";
+import { Search, UserPlus, UserCog, Lock } from "lucide-react";
+import axios from "axios";
 
 const SpecialistProfiles = () => {
-  const [selectedClient, setSelectedClient] = useState(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false)
-  const [clients, setClients] = useState([])
-  const [error, setError] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filteredClients = useMemo(() => {
     return clients.filter((client) =>
-      `${client.specialist_name} ${client.specialist_lastname}`.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-  }, [clients, searchTerm])
+      `${client.specialist_name} ${client.specialist_lastname}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
+  }, [clients, searchTerm]);
 
   const handleClientClick = (client) => {
-    setSelectedClient(client)
-  }
+    setSelectedClient(client);
+  };
 
   const closeModal = () => {
-    setSelectedClient(null)
-  }
+    setSelectedClient(null);
+  };
 
   const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value)
-  }
+    setSearchTerm(event.target.value);
+  };
 
   const handleAddClient = () => {
-    setIsRegistrationModalOpen(true)
-  }
+    setIsRegistrationModalOpen(true);
+  };
 
   const fetchClients = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/consulta-especialista")
+      const response = await axios.get(
+        "http://localhost:3000/api/consulta-especialista"
+      );
+      console.log(response.data)
       const transformedClients = response.data.map((specialist) => ({
         ...specialist,
         name: `${specialist.specialist_name} ${specialist.specialist_lastname}`,
-      }))
-      setClients(transformedClients)
-      setIsLoading(false)
+      }));
+      setClients(transformedClients);
+      setIsLoading(false);
     } catch (error) {
-      setError(error.message)
-      setIsLoading(false)
+      setError(error.message);
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchClients()
-  }, [])
+    fetchClients();
+  }, []);
 
   const handleBlockStatusChange = async (clientId, isBlocked) => {
     setClients((prevClients) =>
-      prevClients.map((client) => (client.id === clientId ? { ...client, is_blocked: isBlocked } : client)),
-    )
-  }
+      prevClients.map((client) =>
+        client.id === clientId ? { ...client, is_blocked: isBlocked } : client
+      )
+    );
+  };
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const handleSidebarChange = () => {
-      setIsSidebarCollapsed(document.body.classList.contains("sidebar-collapsed"))
-    }
-    handleSidebarChange()
-    const observer = new MutationObserver(handleSidebarChange)
+      setIsSidebarCollapsed(
+        document.body.classList.contains("sidebar-collapsed")
+      );
+    };
+    handleSidebarChange();
+    const observer = new MutationObserver(handleSidebarChange);
     observer.observe(document.body, {
       attributes: true,
       attributeFilter: ["class"],
-    })
+    });
 
-    return () => observer.disconnect()
-  }, [])
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubmitRegistrationForm = (data) => {
-    console.log("Form data submitted:", data)
-    setIsRegistrationModalOpen(false)
-    fetchClients() // Refresh client list after successful registration
-  }
+    console.log("Form data submitted:", data);
+    setIsRegistrationModalOpen(false);
+    fetchClients();
+  };
 
-  if (isLoading) return <div className={styles.loading}>Cargando especialistas...</div>
-  if (error) return <div className={styles.error}>Error: {error}</div>
+  if (isLoading)
+    return <div className={styles.loading}>Cargando especialistas...</div>;
+  if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
-    <div className={`${styles.pageWrapper} ${isSidebarCollapsed ? styles.pageWrapperCollapsed : ""}`}>
+    <div
+      className={`${styles.pageWrapper} ${
+        isSidebarCollapsed ? styles.pageWrapperCollapsed : ""
+      }`}
+    >
       <div className={styles.clientProfilesContainer}>
         <h1 className={styles.title}>
           <UserCog size={35} /> Especialistas
@@ -111,7 +123,9 @@ const SpecialistProfiles = () => {
           {filteredClients.map((client) => (
             <div
               key={client.id}
-              className={`${styles.clientProfile} ${client.is_blocked ? styles.blocked : ""}`}
+              className={`${styles.clientProfile} ${
+                client.is_blocked ? styles.blocked : ""
+              }`}
               onClick={() => handleClientClick(client)}
             >
               {client.is_blocked && (
@@ -129,7 +143,11 @@ const SpecialistProfiles = () => {
           ))}
         </div>
         {selectedClient && (
-          <Modal client={selectedClient} onClose={closeModal} onBlockStatusChange={handleBlockStatusChange} />
+          <Modal
+            client={selectedClient}
+            onClose={closeModal}
+            onBlockStatusChange={handleBlockStatusChange}
+          />
         )}
         {isRegistrationModalOpen && (
           <Registro
@@ -140,8 +158,7 @@ const SpecialistProfiles = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SpecialistProfiles
-
+export default SpecialistProfiles;

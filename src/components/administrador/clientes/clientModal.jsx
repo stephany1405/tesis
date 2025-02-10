@@ -1,32 +1,36 @@
-import React, { useState } from "react"
-import styles from "./clientModal.module.css"
-import { Star, Lock, Unlock, CloudCog } from "lucide-react"
-import axios from "axios"
+import React, { useState, useEffect } from "react";
+import styles from "./clientModal.module.css";
+import { Star, Lock, Unlock, CloudCog } from "lucide-react";
+import axios from "axios";
 
 const ClientModal = ({ client, onClose }) => {
-  const [isBlocked, setIsBlocked] = useState(false)
+  const [isBlocked, setIsBlocked] = useState(client.status_user === false);
+
+  useEffect(() => {
+    setIsBlocked(client.status_user === false);
+  }, [client.status_user]);
 
   const blockClient = async () => {
     try {
       await axios.put("http://localhost:3000/api/bloqueo-usuario", {
-        id: client.id
+        id: client.id,
       });
       setIsBlocked(true);
     } catch (error) {
-      console.error("Error bloqueando cliente", error)
+      console.error("Error bloqueando cliente", error);
     }
-  }
+  };
 
   const unblockClient = async () => {
     try {
       await axios.put("http://localhost:3000/api/desbloqueo-usuario", {
-        id: client.id
+        id: client.id,
       });
       setIsBlocked(false);
     } catch (error) {
-      console.error("Error desbloqueando cliente", error)
+      console.error("Error desbloqueando cliente", error);
     }
-  }
+  };
 
   const handleLocationClick = (service) => {
     try {
@@ -36,7 +40,7 @@ const ClientModal = ({ client, onClose }) => {
         window.open(url, "_blank");
       }
     } catch (error) {
-      console.error("Error parsing location", error);
+      console.error("Error localización", error);
     }
   };
 
@@ -44,10 +48,12 @@ const ClientModal = ({ client, onClose }) => {
     const date = new Date(dateString);
     let hours = date.getHours();
     const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12;
-    const formattedTime = `${hours}:${minutes < 10 ? '0' + minutes : minutes} ${ampm}`;
+    const formattedTime = `${hours}:${
+      minutes < 10 ? "0" + minutes : minutes
+    } ${ampm}`;
     return formattedTime;
   };
 
@@ -82,7 +88,9 @@ const ClientModal = ({ client, onClose }) => {
                 />
               ))}
             </span>
-            {isBlocked && <span className={styles.blockedStatus}>Bloqueado</span>}
+            {isBlocked && (
+              <span className={styles.blockedStatus}>Bloqueado</span>
+            )}
           </h2>
         </div>
         <div className={styles.modalScrollContent}>
@@ -131,7 +139,9 @@ const ClientModal = ({ client, onClose }) => {
                 </tr>
               </thead>
               <tbody>
-                {client.serviceHistory && client.serviceHistory.length > 0 && client.serviceHistory[0].service !== "N/A" ? (
+                {client.serviceHistory &&
+                client.serviceHistory.length > 0 &&
+                client.serviceHistory[0].service !== "N/A" ? (
                   client.serviceHistory.map((service, index) => {
                     let parsedDate = service.date;
                     try {
@@ -143,14 +153,14 @@ const ClientModal = ({ client, onClose }) => {
 
                     return (
                       <tr key={index}>
-                        <td>{parsedDate || 'N/A'}</td>
+                        <td>{parsedDate || "N/A"}</td>
                         <td>{service.service}</td>
-                        <td>{service.price || 'N/A'}</td>
+                        <td>{service.price || "N/A"}</td>
                         <td>{service.especialista}</td>
-                        <td>{formatTime(service.startTime) || 'N/A'}</td>
-                        <td>{formatTime(service.endTime) || 'N/A'}</td>
-                        <td>{service.paymentMethod || 'N/A'}</td>
-                        <td>{service.sessions || 'N/A'}</td>
+                        <td>{formatTime(service.startTime) || "N/A"}</td>
+                        <td>{formatTime(service.endTime) || "N/A"}</td>
+                        <td>{service.paymentMethod || "N/A"}</td>
+                        <td>{service.sessions || "N/A"}</td>
                         <td>
                           <button
                             onClick={() => handleLocationClick(service)}
@@ -160,11 +170,13 @@ const ClientModal = ({ client, onClose }) => {
                           </button>
                         </td>
                       </tr>
-                    )
+                    );
                   })
                 ) : (
                   <tr>
-                    <td colSpan="9" className="text-center">Sin historial de servicios</td>
+                    <td colSpan="9" className="text-center">
+                      Sin historial de servicios
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -173,7 +185,7 @@ const ClientModal = ({ client, onClose }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ClientModal
+export default ClientModal;
