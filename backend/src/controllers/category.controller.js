@@ -15,7 +15,9 @@ export const getServicesByCategory = async (req, res, next) => {
   try {
     const rows = await getServices(req.params.categoryID);
     if (!rows || rows.length === 0) {
-      return res.json({ message: "No se encontraron servicios para esta categoría." });
+      return res.json({
+        message: "No se encontraron servicios para esta categoría.",
+      });
     }
     res.json(rows);
   } catch (error) {
@@ -114,8 +116,6 @@ export const updateServiceOfCategory = async (req, res, next) => {
     };
 
     const result = await pool.query(query);
-
-    console.log("Resultado de la actualización:", result.rows[0]);
     res.json(result.rows[0]);
   } catch (error) {
     console.error(error);

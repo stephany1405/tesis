@@ -104,7 +104,6 @@ export const changePassword = async (req, res) => {
 };
 
 export const uploadSecurityQuestions = async (req, res) => {
-  const client = await pool.connect();
   try {
     const { userID } = req.params;
     const { securityQuestion, securityAnswer } = req.body;
@@ -119,7 +118,7 @@ export const uploadSecurityQuestions = async (req, res) => {
       values: [securityQuestion, securityAnswer, userID],
     };
 
-    const result = await client.query(query);
+    const result = await pool.query(query);
 
     if (result.rowCount === 1) {
       return res
@@ -133,7 +132,5 @@ export const uploadSecurityQuestions = async (req, res) => {
   } catch (error) {
     console.error("Error al actualizar las preguntas de seguridad:", error);
     res.status(500).json({ message: "Error interno del servidor." });
-  } finally {
-    client.release();
   }
 };

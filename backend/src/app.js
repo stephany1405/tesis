@@ -22,17 +22,7 @@ const app = express();
 const __dirname = path.dirname("uploads");
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    const allowedOrigins = ["http://localhost:3000", "http://localhost:5173"];
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg =
-        "La política CORS para este sitio no permite el acceso desde el Origen especificado.";
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
+  origin: ["http://localhost:3000", "http://localhost:5173"],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 204,

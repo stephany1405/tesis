@@ -50,15 +50,13 @@ export const getAppointmentStatistics = async (req, res) => {
 
 export const getClientStatistics = async (req, res) => {
   try {
-    const client = await pool.connect();
-
-    const totalClientsResult = await client.query(`
+    const totalClientsResult = await pool.query(`
       SELECT COUNT(*) as total
       FROM public.USER
       WHERE role_id = 57 AND status = true
     `);
 
-    const newClientsResult = await client.query(`
+    const newClientsResult = await pool.query(`
       SELECT COUNT(*) as new_clients
       FROM public.USER
       WHERE role_id = 57 
@@ -66,7 +64,7 @@ export const getClientStatistics = async (req, res) => {
       AND DATE(created_at) = CURRENT_DATE
     `);
 
-    const ageGroupsResult = await client.query(`
+    const ageGroupsResult = await pool.query(`
       WITH age_calc AS (
         SELECT 
           EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth::date)) as age
@@ -86,7 +84,7 @@ export const getClientStatistics = async (req, res) => {
       ORDER BY name
     `);
 
-    const genderGroupsResult = await client.query(`
+    const genderGroupsResult = await pool.query(`
     SELECT 
     CASE 
         WHEN gender = 'femenino' THEN 'Femenino'
@@ -99,8 +97,6 @@ export const getClientStatistics = async (req, res) => {
     GROUP BY gender  -- Incluir "gender" aquí
     ORDER BY name;
     `);
-
-    client.release();
 
     res.json({
       totalClients: totalClientsResult.rows[0].total,
@@ -151,14 +147,12 @@ export const getSpecialistStatistics = async (req, res) => {
 
 export const dashboardConnect = async (req, res) => {
   try {
-    const client = await pool.connect();
-
-    const { rows } = await client.query(
+    const { rows } = await pool.query(
       `SELECT ID FROM classification WHERE classification_type = 'Asignando especialista'`
     );
 
     const status_id = parseInt(rows[0].id);
-    const newClientsResult = await client.query(`
+    const newClientsResult = await pool.query(`
    SELECT COUNT(*) as new_clients
    FROM public.USER
    WHERE role_id = 57
@@ -167,16 +161,14 @@ export const dashboardConnect = async (req, res) => {
  `);
 
     const services =
-      await client.query(`SELECT COUNT(*) as service from PUBLIC.APPOINTMENT
+      await pool.query(`SELECT COUNT(*) as service from PUBLIC.APPOINTMENT
  `);
 
-    const pendingQuotes = await client.query(
+    const pendingQuotes = await pool.query(
       `SELECT COUNT(*) as pendingQuotes from PUBLIC.APPOINTMENT WHERE status_id = $1
  `,
       [status_id]
     );
-
-    client.release();
 
     res.status(200).json({
       newClientsResult: newClientsResult.rows[0].new_clients || 0,

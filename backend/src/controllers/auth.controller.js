@@ -5,7 +5,6 @@ import { createAccessToken } from "../libs/jwt.lib.js";
 import { getRoleId, getUser } from "../models/user.model.js";
 import { transporter } from "../config.js";
 export const register = async (req, res) => {
-  const client = await pool.connect();
   try {
     const role = await getRoleId();
 
@@ -33,7 +32,7 @@ export const register = async (req, res) => {
     const tableName = "user";
     const schemaName = "public";
 
-    const { rows: columns } = await client.query(
+    const { rows: columns } = await pool.query(
       "SELECT column_name FROM information_schema.columns WHERE table_name = $1 AND table_schema = $2",
       [tableName, schemaName]
     );
@@ -67,7 +66,7 @@ export const register = async (req, res) => {
       ", "
     )}) VALUES (${placeholders}) RETURNING *`;
 
-    const { rows: createdUser } = await client.query(query, filteredValues);
+    const { rows: createdUser } = await pool.query(query, filteredValues);
 
     const token = await createAccessToken({
       email: createdUser[0].email,
@@ -88,8 +87,6 @@ export const register = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err });
-  } finally {
-    if (client) client.release();
   }
 };
 
@@ -303,5 +300,63 @@ export const verifyAnswer = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error interno en el servidor.", error: error });
+  }
+};
+
+export const SecretforgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await pool.query(
+      "SELECT name, lastname FROM PUBLIC.USER WHERE EMAIL = $1",
+      [email]
+    );
+
+    if (user.rows.length === 0) {
+      return res
+        .status(200)
+        .json({ valid: false, message: "Usuario no encontrado" });
+    }
+    const { name, lastname } = user.rows[0];
+
+    const code = crypto.randomBytes(3).toString("hex");
+
+    await pool.query(
+      "UPDATE public.user SET reset_code = $1 WHERE email = $2",
+      [code, email]
+    );
+
+    const mailOptions = {
+      from: '"Equipo de Soporte de UÑIMAS" <unimas304@gmail.com',
+      to: email,
+      subject: "UÑIMAS - Código de recuperación de contraseña Secreta 👨‍💻",
+      text: `Hola Administrador! ${name} ${lastname} hemos recibido la notificación de que intentas recuperar tu contraseña secreta, el código es el siguiente. ¡Recuerda no compartirlo con nadie!: ${code}`,
+    };
+
+    try {
+      await new Promise((resolve, reject) => {
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(info);
+          }
+        });
+      });
+
+      return res.status(200).json({
+        valid: true,
+        message: "Código enviado al correo",
+      });
+    } catch (error) {
+      console.error("Error al enviar el correo:", error);
+      return res.status(500).json({
+        message: "Error al enviar el correo",
+        error: error.message || "Error desconocido",
+      });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ text: "Error en el servidor", message: error.message });
   }
 };

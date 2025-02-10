@@ -3,26 +3,58 @@ import styles from "./infoAgenda.module.css";
 import axios from "axios";
 import { getJWT } from "../middlewares/getToken.jsx";
 import { jwtDecode } from "jwt-decode";
-import { useWebSocket } from "../hooks/useWebSocket";
+import { useWebSocketContext } from "./WebSocketContext.jsx";
 
 function InfoAgenda({ data }) {
   const [specialistStatuses, setSpecialistStatuses] = useState({});
   const [ratingMessages, setRatingMessages] = useState({});
   const [openIndex, setOpenIndex] = useState(null);
 
-  useWebSocket("ws://localhost:3000", (message) => {
+  const { ws, isConnected } = useWebSocketContext();
+
+  // console.log("InfoAgenda renderizando.  isConnected:", isConnected, "ws:", ws);
+
+  const handleMessage = (message) => {
+    console.log("handleMessage llamado con:", message);
     if (message.type === "STATUS_UPDATE") {
       const appointmentId = Number(message.data.appointmentId);
       const specialistId = Number(message.data.specialistId);
+      console.log(
+        "Updating status:",
+        appointmentId,
+        specialistId,
+        message.data.status
+      );
       setSpecialistStatuses((prev) => {
+        console.log("Previous specialistStatuses:", prev);
         const newState = {
           ...prev,
           [`${appointmentId}_${specialistId}`]: message.data.status,
         };
+        console.log("New specialistStatuses:", newState);
         return newState;
       });
     }
-  });
+  };
+
+  useEffect(() => {
+    if (isConnected && ws) {
+      ws.onmessage = (e) => {
+        try {
+          const parsedMessage = JSON.parse(e.data);
+          handleMessage(parsedMessage);
+        } catch (error) {
+          console.error("Error parsing WebSocket message:", error, e.data);
+        }
+      };
+    }
+
+    return () => {
+      if (ws) {
+        ws.onmessage = null;
+      }
+    };
+  }, [isConnected, ws]);
 
   useEffect(() => {
     const fetchInitialStatuses = async () => {
@@ -142,13 +174,8 @@ function InfoAgenda({ data }) {
     }
   });
 
-  const specialistStatusKey = Object.entries(specialistStatuses)
-    .sort()
-    .map(([key, value]) => `${key}:${value}`)
-    .join(";");
-
   return (
-    <div className={styles.mainContainer} key={specialistStatusKey}>
+    <div className={styles.mainContainer}>
       {data.map((servicio, serviceIndex) => (
         <div key={servicio.id} className={styles.contentLayout}>
           <div className={styles.section}>
@@ -211,10 +238,7 @@ function InfoAgenda({ data }) {
                       const currentStatus =
                         specialistStatuses[specialistKey] ||
                         "Especialista asignado";
-                      console.log(
-                        "Renderizando InfoAgenda con estado:",
-                        specialistStatuses
-                      );
+
                       return (
                         <div key={index} className={styles.specialistInfo}>
                           <img

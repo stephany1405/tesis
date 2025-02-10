@@ -265,10 +265,8 @@ export const services = async (req, res, next) => {
 
 export const assignSpecialist = async (req, res, next) => {
   const { appointmentId, specialistId, serviceId, sessions } = req.body;
-  const client = await pool.connect();
-
   try {
-    await client.query("BEGIN");
+    await pool.query("BEGIN");
 
     const checkQuery = `
       SELECT 
@@ -279,7 +277,7 @@ export const assignSpecialist = async (req, res, next) => {
     `;
     const {
       rows: [checkResult],
-    } = await client.query(checkQuery, [appointmentId, serviceId]);
+    } = await pool.query(checkQuery, [appointmentId, serviceId]);
 
     const totalAssigned = parseInt(checkResult.total_assigned);
     const specialistsCount = parseInt(checkResult.specialists_count);
@@ -291,7 +289,7 @@ export const assignSpecialist = async (req, res, next) => {
     `;
     const {
       rows: [appointmentData],
-    } = await client.query(serviceQuery, [appointmentId]);
+    } = await pool.query(serviceQuery, [appointmentId]);
     const services = JSON.parse(appointmentData.services);
     const service = services.find((s) => s.id === serviceId);
 
@@ -313,7 +311,7 @@ export const assignSpecialist = async (req, res, next) => {
       VALUES ($1, $2, $3, $4)
       RETURNING *
     `;
-    const { rows: result } = await client.query(insertQuery, [
+    const { rows: result } = await pool.query(insertQuery, [
       appointmentId,
       specialistId,
       serviceId,
@@ -327,10 +325,10 @@ export const assignSpecialist = async (req, res, next) => {
       `;
       const {
         rows: [statusRow],
-      } = await client.query(statusQuery);
+      } = await pool.query(statusQuery);
 
       if (statusRow) {
-        await client.query(
+        await pool.query(
           `
           UPDATE appointment 
           SET status_id = $1 
@@ -341,7 +339,7 @@ export const assignSpecialist = async (req, res, next) => {
       }
     }
 
-    await client.query("COMMIT");
+    await pool.query("COMMIT");
     req.wss.broadcastStatusUpdate(
       appointmentId,
       specialistId,
@@ -350,14 +348,13 @@ export const assignSpecialist = async (req, res, next) => {
 
     res.status(200).json(result[0]);
   } catch (error) {
-    await client.query("ROLLBACK");
+    await pool.query("ROLLBACK");
     console.error("Error al asignar especialista:", error.message);
     res.status(500).json({ error: error.message });
-  } finally {
-    client.release();
   }
 };
 
+//En tu controlador, no uses app.locals.  Usa el parametro req que ya tienes!
 export const updateStatus = async (req, res, next) => {
   try {
     const { appointmentId, status, specialistId } = req.body;
@@ -365,23 +362,20 @@ export const updateStatus = async (req, res, next) => {
     if (!specialistId) {
       return res.status(400).json({ error: "specialistId es requerido" });
     }
-
     const updatedStatus = await updateAppointmentStatus(
       appointmentId,
       status,
       specialistId
     );
-    console.log("WebSocket en req.app.locals:", req.app.locals.wss);
 
-    if (!req.app.locals.wss) {
-      throw new Error("WebSocket Server no está disponible");
+    // Use req.wss (which is set in your middleware)
+    if (req.wss) {
+      req.wss.broadcastStatusUpdate(appointmentId, specialistId, status);
+    } else {
+      console.error("WebSocket server not available on req.wss"); // More specific error
+      // Consider *not* throwing an error here.  The database update
+      // still happened.  Just log the error and continue.
     }
-
-    req.app.locals.wss.broadcastStatusUpdate(
-      appointmentId,
-      specialistId,
-      status
-    );
 
     res.status(200).json({
       status: updatedStatus,
@@ -413,8 +407,6 @@ export const createRatingController = async (req, res) => {
     if (role === "57") ratedBy = "cliente";
     else if (role === "58") ratedBy = "especialista";
     else return res.status(400).json({ error: "Rol inválido" });
-
-    console.log(`Rol del usuario: ${ratedBy}`);
 
     const newRating = await createRating(
       userId,
@@ -549,7 +541,6 @@ export const cancelAppointment = async (req, res) => {
 export const historySpecialist = async (req, res) => {
   try {
     const { roleID, specialistID } = req.query;
-    console.log(roleID, specialistID);
     if (!roleID || !specialistID) {
       return res.status(400).json({ message: "Falta parámetros requeridos." });
     }
@@ -646,12 +637,11 @@ export const addSpecialistToAppointment = async (req, res) => {
 };
 
 export const updateAppointmentSpecialist = async (req, res) => {
-  const client = await pool.connect();
   try {
     const { appointmentId } = req.params;
     const { newSpecialistId } = req.body;
 
-    await client.query("BEGIN");
+    await pool.query("BEGIN");
 
     const updateQuery = `
       UPDATE appointment_specialists 
@@ -660,7 +650,7 @@ export const updateAppointmentSpecialist = async (req, res) => {
       RETURNING *
     `;
 
-    const result = await client.query(updateQuery, [
+    const result = await pool.query(updateQuery, [
       newSpecialistId,
       appointmentId,
     ]);
@@ -669,20 +659,18 @@ export const updateAppointmentSpecialist = async (req, res) => {
       throw new Error("No se encontró la cita especificada");
     }
 
-    await client.query("COMMIT");
+    await pool.query("COMMIT");
 
     res.json({
       message: "Especialista actualizado exitosamente",
       data: result.rows[0],
     });
   } catch (error) {
-    await client.query("ROLLBACK");
+    await pool.query("ROLLBACK");
     console.error("Error al actualizar especialista:", error);
     res.status(500).json({
       error: "Error al actualizar el especialista",
       details: error.message,
     });
-  } finally {
-    client.release();
   }
 };

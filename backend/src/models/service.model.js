@@ -1,8 +1,6 @@
 import { pool } from "../db.js";
 
 export const getServiceActiveClient = async (userID) => {
-  const client = await pool.connect();
-
   try {
     const query = {
       text: `
@@ -59,19 +57,15 @@ ORDER BY a.scheduled_date DESC
       values: [parseInt(userID, 10)],
     };
 
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
     return rows.length > 0 ? rows : null;
   } catch (error) {
     console.log({ error: error.message });
     throw error;
-  } finally {
-    client.release();
   }
 };
 
 export const ObtainNonActiveCustomerService = async (userID) => {
-  const client = await pool.connect();
-
   try {
     const query = {
       text: `SELECT 
@@ -143,19 +137,15 @@ LIMIT 10;
       values: [parseInt(userID, 10)],
     };
 
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
     return rows.length > 0 ? rows : null;
   } catch (error) {
     console.log({ error: error.message });
     throw error;
-  } finally {
-    client.release();
   }
 };
 
 export const getServices = async (specialistID) => {
-  const client = await pool.connect();
-
   try {
     const query = {
       text: `
@@ -248,19 +238,15 @@ ORDER BY a.scheduled_date DESC;
       `,
       values: [specialistID],
     };
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
     return rows.length > 0 ? rows : null;
   } catch (error) {
     console.log({ error: error.message });
     throw error;
-  } finally {
-    client.release();
   }
 };
 
 export const getSpecialistAssignedServices = async (specialistId) => {
-  const client = await pool.connect();
-
   try {
     const query = {
       text: `
@@ -322,7 +308,7 @@ ORDER BY
       values: [specialistId],
     };
 
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
 
     const processedRows = rows.map((row) => {
       const services = JSON.parse(row.services);
@@ -345,8 +331,6 @@ ORDER BY
   } catch (error) {
     console.log("Error en getSpecialistAssignedServices:", error);
     throw error;
-  } finally {
-    client.release();
   }
 };
 
@@ -355,10 +339,8 @@ export const updateAppointmentStatus = async (
   status,
   specialistId
 ) => {
-  const client = await pool.connect();
-
   try {
-    await client.query("BEGIN");
+    await pool.query("BEGIN");
 
     const appointmentQuery = `
       SELECT amount, services
@@ -367,7 +349,7 @@ export const updateAppointmentStatus = async (
     `;
     const {
       rows: [appointmentDetails],
-    } = await client.query(appointmentQuery, [appointmentId]);
+    } = await pool.query(appointmentQuery, [appointmentId]);
 
     const totalAmount = parseFloat(
       appointmentDetails.amount.replace("$", "").trim()
@@ -381,7 +363,7 @@ export const updateAppointmentStatus = async (
       FROM appointment_specialists
       WHERE appointment_id = $1
     `;
-    const { rows: specialistsRows } = await client.query(specialistsQuery, [
+    const { rows: specialistsRows } = await pool.query(specialistsQuery, [
       appointmentId,
     ]);
     const totalSpecialists = specialistsRows.length;
@@ -398,14 +380,14 @@ export const updateAppointmentStatus = async (
     `;
     const {
       rows: [statusRow],
-    } = await client.query(statusQuery, [status]);
+    } = await pool.query(statusQuery, [status]);
 
     if (!statusRow) {
       throw new Error("Estado no válido");
     }
 
     if (status === "Inicio del servicio") {
-      await client.query(
+      await pool.query(
         `UPDATE appointment_specialists
          SET start_appointment = CURRENT_TIMESTAMP
          WHERE appointment_id = $1 AND specialist_id = $2`,
@@ -423,7 +405,7 @@ export const updateAppointmentStatus = async (
     `;
     const {
       rows: [updatedRow],
-    } = await client.query(updateQuery, [
+    } = await pool.query(updateQuery, [
       statusRow.id,
       individualSpecialistEarnings,
       appointmentId,
@@ -437,7 +419,7 @@ export const updateAppointmentStatus = async (
     }
 
     if (status === "Final del servicio") {
-      await client.query(
+      await pool.query(
         `
           UPDATE appointment_specialists
           SET 
@@ -449,19 +431,15 @@ export const updateAppointmentStatus = async (
       );
     }
 
-    await client.query("COMMIT");
+    await pool.query("COMMIT");
     return updatedRow;
   } catch (error) {
-    await client.query("ROLLBACK");
+    await pool.query("ROLLBACK");
     throw error;
-  } finally {
-    client.release();
   }
 };
 
 export const createRating = async (userId, appointmentId, rating, ratedBy) => {
-  const client = await pool.connect();
-
   try {
     const query = `
       INSERT INTO ratings (
@@ -473,7 +451,7 @@ export const createRating = async (userId, appointmentId, rating, ratedBy) => {
       RETURNING *
     `;
 
-    const { rows } = await client.query(query, [
+    const { rows } = await pool.query(query, [
       userId,
       appointmentId,
       rating,
@@ -486,14 +464,10 @@ export const createRating = async (userId, appointmentId, rating, ratedBy) => {
   } catch (error) {
     console.error("Error creating rating:", error);
     throw error;
-  } finally {
-    client.release();
   }
 };
 
 const updateUserScore = async (userId) => {
-  const client = await pool.connect();
-
   try {
     const query = `
       UPDATE "user" u
@@ -505,17 +479,13 @@ const updateUserScore = async (userId) => {
       WHERE id = $1
     `;
 
-    await client.query(query, [userId]);
+    await pool.query(query, [userId]);
   } catch (error) {
     console.error("Error updating user score:", error);
-  } finally {
-    client.release();
   }
 };
 
 export const checkAppointmentStatus = async (appointmentId) => {
-  const client = await pool.connect();
-
   try {
     const query = `
       SELECT 1 
@@ -523,13 +493,11 @@ export const checkAppointmentStatus = async (appointmentId) => {
       WHERE appointment_id = $1 AND status_id = 73
     `;
 
-    const { rows } = await client.query(query, [appointmentId]);
+    const { rows } = await pool.query(query, [appointmentId]);
     return rows.length > 0;
   } catch (error) {
-    console.error("Error checking appointment status:", error);
+    console.error("Error chequeando appointment status:", error);
     throw error;
-  } finally {
-    client.release();
   }
 };
 
@@ -539,10 +507,8 @@ export const createRatingAndUpdateAppointment = async (
   rating,
   ratedBy
 ) => {
-  const client = await pool.connect();
-
   try {
-    await client.query("BEGIN");
+    await pool.query("BEGIN");
 
     const ratingQuery = `
       INSERT INTO ratings (
@@ -554,7 +520,7 @@ export const createRatingAndUpdateAppointment = async (
       RETURNING *
     `;
 
-    const { rows: ratingRows } = await client.query(ratingQuery, [
+    const { rows: ratingRows } = await pool.query(ratingQuery, [
       userId,
       appointmentId,
       rating,
@@ -567,19 +533,17 @@ export const createRatingAndUpdateAppointment = async (
       WHERE id = $1
     `;
 
-    await client.query(updateAppointmentQuery, [appointmentId]);
+    await pool.query(updateAppointmentQuery, [appointmentId]);
 
     await updateUserScore(userId);
 
-    await client.query("COMMIT");
+    await pool.query("COMMIT");
 
     return ratingRows[0];
   } catch (error) {
-    await client.query("ROLLBACK");
+    await pool.query("ROLLBACK");
     console.error("Error creando la evaluación.:", error);
     throw error;
-  } finally {
-    client.release();
   }
 };
 

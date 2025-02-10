@@ -67,6 +67,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 500;
+  margin-top: 20px;
 }
 
 .button:hover {
@@ -201,6 +202,7 @@
     width: 95%;
   }
 }
+
 .errorMessage {
   color: #dc2626;
   font-size: 0.875rem;
@@ -219,4 +221,48 @@
 .errorInput:focus {
   border-color: #dc2626;
   box-shadow: 0 0 0 1px #dc2626;
+}
+
+.recoveryStep {
+  background-color: var(--custom-pink-100);
+  border: 1px solid var(--custom-pink-200);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.recoveryStep p {
+  margin-bottom: 1rem;
+  color: var(--custom-pink-700);
+}
+
+.inputGroup {
+  margin-bottom: 1rem;
+  margin-top: 20px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+  margin-top: 1, 5rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--custom-pink-200);
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--custom-pink-500);
+}
+
+.forgotPasswordButton {
+  margin-top: 2rem;
 }

@@ -10,7 +10,6 @@ export const InsertCard = async ({
   referencePayment,
   coordenadas,
 }) => {
-  const client = await pool.connect();
   try {
     const query = {
       text: `
@@ -46,13 +45,11 @@ export const InsertCard = async ({
       ],
     };
 
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
     return rows[0];
   } catch (error) {
     console.error("Error al crear la cita a domicilio:", error);
     throw error;
-  } finally {
-    client.release();
   }
 };
 
@@ -67,7 +64,6 @@ export const InsertCash = async ({
   referencePayment,
   coordenadas,
 }) => {
-  const client = await pool.connect();
   try {
     const query = {
       text: `
@@ -105,13 +101,11 @@ export const InsertCash = async ({
       ],
     };
 
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
     return rows[0];
   } catch (error) {
     console.error("Error al crear la cita a domicilio:", error);
     throw error;
-  } finally {
-    client.release();
   }
 };
 
@@ -126,7 +120,6 @@ export const InsertMobilePayment = async ({
   referencePayment,
   coordenadas,
 }) => {
-  const client = await pool.connect();
   try {
     const query = {
       text: `
@@ -164,12 +157,10 @@ export const InsertMobilePayment = async ({
       ],
     };
 
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
     return rows[0];
   } catch (error) {
     console.error("Error al crear la cita a domicilio:", error);
     throw error;
-  } finally {
-    client.release();
   }
 };

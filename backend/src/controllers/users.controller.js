@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import { getRoleId, getRoleIdSpecialist } from "../models/user.model.js";
 
 export const insertClient = async (req, res) => {
-  const client = await pool.connect();
   try {
     const role = await getRoleId();
 
@@ -31,7 +30,7 @@ export const insertClient = async (req, res) => {
     const tableName = "user";
     const schemaName = "public";
 
-    const { rows: columns } = await client.query(
+    const { rows: columns } = await pool.query(
       "SELECT column_name FROM information_schema.columns WHERE table_name = $1 AND table_schema = $2",
       [tableName, schemaName]
     );
@@ -65,7 +64,7 @@ export const insertClient = async (req, res) => {
       ", "
     )}) VALUES (${placeholders}) RETURNING *`;
 
-    const { rows: createdUser } = await client.query(query, filteredValues);
+    const { rows: createdUser } = await pool.query(query, filteredValues);
 
     // eslint-disable-next-line no-unused-vars
     const { password: _, ...userWithoutPassword } = createdUser[0];
@@ -75,13 +74,10 @@ export const insertClient = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err });
-  } finally {
-    if (client) client.release();
   }
 };
 
 export const insertSpecialist = async (req, res) => {
-  const client = await pool.connect();
   try {
     const role = await getRoleIdSpecialist();
 
@@ -108,7 +104,7 @@ export const insertSpecialist = async (req, res) => {
     const tableName = "user";
     const schemaName = "public";
 
-    const { rows: columns } = await client.query(
+    const { rows: columns } = await pool.query(
       "SELECT column_name FROM information_schema.columns WHERE table_name = $1 AND table_schema = $2",
       [tableName, schemaName]
     );
@@ -142,7 +138,7 @@ export const insertSpecialist = async (req, res) => {
       ", "
     )}) VALUES (${placeholders}) RETURNING *`;
 
-    const { rows: createdUser } = await client.query(query, filteredValues);
+    const { rows: createdUser } = await pool.query(query, filteredValues);
 
     // eslint-disable-next-line no-unused-vars
     const { password: _, ...userWithoutPassword } = createdUser[0];
@@ -153,8 +149,6 @@ export const insertSpecialist = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err });
-  } finally {
-    if (client) client.release();
   }
 };
 
@@ -167,7 +161,6 @@ export const getSpecialistsWithHistory = async (req, res) => {
 
     const RoleID = role.id;
 
-    const client = await pool.connect();
     const query = {
       text: `WITH RankedSpecialists AS (
     SELECT 
@@ -240,7 +233,7 @@ ORDER BY
       values: [RoleID],
     };
 
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
 
     res.status(200).json(rows);
   } catch (err) {
@@ -257,7 +250,6 @@ export const getClientsWithHistory = async (req, res) => {
 
     const RoleID = role.id;
 
-    const client = await pool.connect();
     const query = {
       text: `
         SELECT 
@@ -300,7 +292,7 @@ export const getClientsWithHistory = async (req, res) => {
       values: [RoleID],
     };
 
-    const { rows } = await client.query(query);
+    const { rows } = await pool.query(query);
 
     const clients = rows.reduce((acc, row) => {
       const client = acc.find((c) => c.id === row.user_id);
@@ -349,11 +341,10 @@ export const getClientsWithHistory = async (req, res) => {
 
 export const blockUser = async (req, res) => {
   try {
-    const client = await pool.connect();
     const { id } = req.body;
     const query = `UPDATE public.user SET status = false WHERE id = $1`,
       values = [id];
-    const result = await client.query(query, values);
+    const result = await pool.query(query, values);
     res.status(200).json({ message: "Usuario bloqueado exitosamente." });
   } catch (error) {
     console.log(error);
@@ -362,11 +353,10 @@ export const blockUser = async (req, res) => {
 
 export const unlockUser = async (req, res) => {
   try {
-    const client = await pool.connect();
     const { id } = req.body;
     const query = `UPDATE public.user SET status = true WHERE id = $1`,
       values = [id];
-    const result = await client.query(query, values);
+    const result = await pool.query(query, values);
     res.status(200).json({ message: "Usuario desbloqueado exitosamente." });
   } catch (error) {
     console.log(error);

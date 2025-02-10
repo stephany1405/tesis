@@ -11,6 +11,7 @@ import Agenda from "./components/agenda/agenda.jsx";
 import Perfil from "./components/Perfil/perfil.jsx";
 import { useRoles } from "./components/inicio/hooks/useRoles.js";
 import { PublicRoutes } from "./components/routes/PublicRoutes.jsx";
+import { WebSocketProvider } from "./components/agenda/WebSocketContext.jsx";
 
 // Rutas para especialista
 import Bienvenida from "./components/especialista/dashboard.jsx";
@@ -83,9 +84,11 @@ const App = () => {
             path="/agenda"
             element={
               <ProtectedRoute requiredRole={roles.cliente}>
-                <Layout>
-                  <Agenda />
-                </Layout>
+                <WebSocketProvider>
+                  <Layout>
+                    <Agenda />
+                  </Layout>
+                </WebSocketProvider>
               </ProtectedRoute>
             }
           />
