@@ -57,14 +57,6 @@ const Home = () => {
       <main className={styles.mainContent}>
         <header className={styles.header}>
           <h1>Panel de Administración</h1>
-          <div className={styles.userInfo}>
-            <img
-              src="https://i.pravatar.cc/40"
-              alt="Admin"
-              className={styles.avatar}
-            />
-            <span>Admin</span>
-          </div>
         </header>
         <div className={styles.dashboardContent}>
           <div className={styles.welcomeCard}>
