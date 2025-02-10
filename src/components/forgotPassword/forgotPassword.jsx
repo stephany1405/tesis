@@ -1,152 +1,143 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import styles from "./PasswordRecovery.module.css";
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import axios from "axios"
+import { toast, ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+import styles from "./PasswordRecovery.module.css"
+
+const validatePassword = (password) => {
+  const regex = /^[a-zA-Z0-9]{1,8}$/
+  return regex.test(password)
+}
 
 const ForgotPassword = () => {
-  const [recoveryMethod, setRecoveryMethod] = useState("");
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [securityQuestion, setSecurityQuestion] = useState("");
-  const [securityAnswer, setSecurityAnswer] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [recoveryMethod, setRecoveryMethod] = useState("")
+  const [email, setEmail] = useState("")
+  const [code, setCode] = useState("")
+  const [securityQuestion, setSecurityQuestion] = useState("")
+  const [securityAnswer, setSecurityAnswer] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
 
     try {
       if (recoveryMethod === "email") {
         if (step === 1) {
-          const response = await axios.post(
-            "http://localhost:3000/api/usuario/forgot-password",
-            { email: email }
-          );
+          const response = await axios.post("http://localhost:3000/api/usuario/forgot-password", { email: email })
           if (response.data.valid) {
-            toast.success("Código enviado al correo electrónico!");
+            toast.success("Código enviado al correo electrónico!")
             setTimeout(() => {
-              setStep(2);
-            }, 1500);
+              setStep(2)
+            }, 1500)
           } else {
-            toast.error(response.data.message || "Usuario no encontrado!");
+            toast.error(response.data.message || "Usuario no encontrado!")
           }
         } else if (step === 2) {
-          const response = await axios.post(
-            "http://localhost:3000/api/usuario/verify-code",
-            {
-              email: email,
-              code: code,
-            }
-          );
+          const response = await axios.post("http://localhost:3000/api/usuario/verify-code", {
+            email: email,
+            code: code,
+          })
           if (response.data.valid) {
-            toast.success("Código Correcto!");
+            toast.success("Código Correcto!")
             setTimeout(() => {
-              setStep(3);
-            }, 1500);
+              setStep(3)
+            }, 1500)
           } else {
-            toast.error(response.data.message || "Código incorrecto!");
+            toast.error(response.data.message || "Código incorrecto!")
           }
         } else if (step === 3) {
-          if (newPassword === confirmPassword) {
-            const response = await axios.post(
-              "http://localhost:3000/api/usuario/change-password",
-              {
-                email: email,
-                password: newPassword,
-              }
-            );
-            if (response.data.valid) {
-              toast.success("Contraseña cambiada con éxito. Redirigiendo...");
-              setTimeout(() => {
-                navigate("/login");
-              }, 1500);
-            } else {
-              toast.error(
-                response.data.message || "Error al cambiar contraseña."
-              );
-            }
+          if (newPassword !== confirmPassword) {
+            toast.error("Las contraseñas no coinciden!")
+            return
+          }
+          if (!validatePassword(newPassword)) {
+            toast.error("La contraseña debe tener máximo 8 caracteres y no debe contener caracteres especiales.")
+            return
+          }
+          const response = await axios.post("http://localhost:3000/api/usuario/change-password", {
+            email: email,
+            password: newPassword,
+          })
+          if (response.data.valid) {
+            toast.success("Contraseña cambiada con éxito. Redirigiendo...")
+            setTimeout(() => {
+              navigate("/")
+            }, 1500)
           } else {
-            toast.error("Las contraseñas no coinciden!");
+            toast.error(response.data.message || "Error al cambiar contraseña.")
           }
         }
       } else if (recoveryMethod === "security") {
         if (step === 1) {
-          const response = await axios.post(
-            "http://localhost:3000/api/usuario/security-question",
-            {
-              email: email,
-            }
-          );
+          const response = await axios.post("http://localhost:3000/api/usuario/security-question", {
+            email: email,
+          })
           if (response.data.security_question) {
-            setSecurityQuestion(response.data.security_question);
-            toast.success("Usuario Encontrado!");
+            setSecurityQuestion(response.data.security_question)
+            toast.success("Usuario Encontrado!")
             setTimeout(() => {
-              setStep(2);
-            }, 1500);
+              setStep(2)
+            }, 1500)
           } else {
-            toast.error(response.data.message || "Usuario no encontrado!");
+            toast.error(response.data.message || "Usuario no encontrado!")
           }
         } else if (step === 2) {
-          const response = await axios.post(
-            "http://localhost:3000/api/usuario/answer-security-question",
-            {
-              email: email,
-              securityAnswer: securityAnswer,
-            }
-          );
+          const response = await axios.post("http://localhost:3000/api/usuario/answer-security-question", {
+            email: email,
+            securityAnswer: securityAnswer,
+          })
           if (response.data.valid) {
-            toast.success("Respuesta Correcta!");
+            toast.success("Respuesta Correcta!")
             setTimeout(() => {
-              setStep(3);
-            }, 1500);
+              setStep(3)
+            }, 1500)
           } else {
-            toast.error("Respuesta incorrecta!");
+            toast.error("Respuesta incorrecta!")
           }
         } else if (step === 3) {
-          if (newPassword === confirmPassword) {
-            const response = await axios.post(
-              "http://localhost:3000/api/usuario/change-password",
-              {
-                email: email,
-                password: newPassword,
-              }
-            );
-            if (response.data.valid) {
-              toast.success("Contraseña cambiada con éxito. Redirigiendo...");
-              setTimeout(() => {
-                navigate("/login");
-              }, 1500);
-            } else {
-              toast.error(
-                response.data.message || "Error al cambiar contraseña."
-              );
-            }
+          if (newPassword !== confirmPassword) {
+            toast.error("Las contraseñas no coinciden!")
+            return
+          }
+          if (!validatePassword(newPassword)) {
+            toast.error("La contraseña debe tener máximo 8 caracteres y no debe contener caracteres especiales.")
+            return
+          }
+          const response = await axios.post("http://localhost:3000/api/usuario/change-password", {
+            email: email,
+            password: newPassword,
+          })
+          if (response.data.valid) {
+            toast.success("Contraseña cambiada con éxito. Redirigiendo...")
+            setTimeout(() => {
+              navigate("/")
+            }, 1500)
           } else {
-            toast.error("Las contraseñas no coinciden!");
+            toast.error(response.data.message || "Error al cambiar contraseña.")
           }
         }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Ocurrió un error");
+      toast.error(error.response?.data?.message || "Ocurrió un error")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleBack = () => {
-    setStep(1);
-    setRecoveryMethod("");
-    setCode("");
-    setSecurityQuestion("");
-    setSecurityAnswer("");
-    setNewPassword("");
-    setConfirmPassword("");
-  };
+    setStep(1)
+    setRecoveryMethod("")
+    setCode("")
+    setSecurityQuestion("")
+    setSecurityAnswer("")
+    setNewPassword("")
+    setConfirmPassword("")
+  }
 
   return (
     <div className={styles.container}>
@@ -240,8 +231,11 @@ const ForgotPassword = () => {
                 className={styles.input}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
+                maxLength={8}
+                pattern="[a-zA-Z0-9]{1,8}"
                 required
               />
+              <p className={styles.passwordHint}>(máx. 8 caracteres, sin caracteres especiales)</p>
             </div>
             <div className={styles.inputGroup}>
               <label htmlFor="confirmPassword" className={styles.label}>
@@ -253,6 +247,8 @@ const ForgotPassword = () => {
                 className={styles.input}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                maxLength={8}
+                pattern="[a-zA-Z0-9]{1,8}"
                 required
               />
             </div>
@@ -260,32 +256,22 @@ const ForgotPassword = () => {
         )}
 
         <button type="submit" className={styles.button} disabled={loading}>
-          {loading
-            ? "Cargando..."
-            : step === 1
-            ? "Continuar"
-            : step === 2
-            ? "Verificar"
-            : "Cambiar Contraseña"}
+          {loading ? "Cargando..." : step === 1 ? "Continuar" : step === 2 ? "Verificar" : "Cambiar Contraseña"}
         </button>
 
         {step > 1 && (
-          <button
-            type="button"
-            className={styles.backButton}
-            onClick={handleBack}
-          >
+          <button type="button" className={styles.backButton} onClick={handleBack}>
             Cambiar método de recuperación
           </button>
         )}
         <div className={styles.loginLinkContainer}>
-          <a href="/login" className={styles.loginLink}>
+          <a href="/" className={styles.loginLink}>
             ¿Ya te acordaste de la contraseña? ¡Ir a iniciar sesión!
           </a>
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default ForgotPassword;
+export default ForgotPassword

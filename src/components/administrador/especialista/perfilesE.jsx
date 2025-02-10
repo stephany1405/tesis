@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from "react"
 import styles from "./PerfilesE.module.css"
 import Modal from "./modal"
 import Registro from "./registro"
-import { Search, UserPlus, UserCog } from "lucide-react"
+import { Search, UserPlus, UserCog, Lock } from "lucide-react"
 import axios from "axios"
 
 const SpecialistProfiles = () => {
@@ -37,10 +37,29 @@ const SpecialistProfiles = () => {
     setIsRegistrationModalOpen(true)
   }
 
-  const handleSubmitRegistrationForm = (newClient) => {
-    const newId = Math.max(...clients.map((c) => c.id)) + 1
-    setClients([...clients, { ...newClient, id: newId, image: `/uploads/profile-pics/user.webp` }])
-    setIsRegistrationModalOpen(false)
+  const fetchClients = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/consulta-especialista")
+      const transformedClients = response.data.map((specialist) => ({
+        ...specialist,
+        name: `${specialist.specialist_name} ${specialist.specialist_lastname}`,
+      }))
+      setClients(transformedClients)
+      setIsLoading(false)
+    } catch (error) {
+      setError(error.message)
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchClients()
+  }, [])
+
+  const handleBlockStatusChange = async (clientId, isBlocked) => {
+    setClients((prevClients) =>
+      prevClients.map((client) => (client.id === clientId ? { ...client, is_blocked: isBlocked } : client)),
+    )
   }
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -59,23 +78,11 @@ const SpecialistProfiles = () => {
     return () => observer.disconnect()
   }, [])
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/consulta-especialista")
-        const transformedClients = response.data.map((specialist) => ({
-          ...specialist,
-          name: `${specialist.specialist_name} ${specialist.specialist_lastname}`,
-        }))
-        setClients(transformedClients)
-        setIsLoading(false)
-      } catch (error) {
-        setError(error.message)
-        setIsLoading(false)
-      }
-    }
-    fetchClients()
-  }, [])
+  const handleSubmitRegistrationForm = (data) => {
+    console.log("Form data submitted:", data)
+    setIsRegistrationModalOpen(false)
+    fetchClients() // Refresh client list after successful registration
+  }
 
   if (isLoading) return <div className={styles.loading}>Cargando especialistas...</div>
   if (error) return <div className={styles.error}>Error: {error}</div>
@@ -102,7 +109,16 @@ const SpecialistProfiles = () => {
             <span>Agregar especialista</span>
           </div>
           {filteredClients.map((client) => (
-            <div key={client.id} className={styles.clientProfile} onClick={() => handleClientClick(client)}>
+            <div
+              key={client.id}
+              className={`${styles.clientProfile} ${client.is_blocked ? styles.blocked : ""}`}
+              onClick={() => handleClientClick(client)}
+            >
+              {client.is_blocked && (
+                <span className={styles.blockedIndicator}>
+                  <Lock size={12} /> Bloqueado
+                </span>
+              )}
               <img
                 src={`http://localhost:3000${client.specialist_image}`}
                 alt={`${client.name} ${client.lastname}`}
@@ -112,7 +128,9 @@ const SpecialistProfiles = () => {
             </div>
           ))}
         </div>
-        {selectedClient && <Modal client={selectedClient} onClose={closeModal} />}
+        {selectedClient && (
+          <Modal client={selectedClient} onClose={closeModal} onBlockStatusChange={handleBlockStatusChange} />
+        )}
         {isRegistrationModalOpen && (
           <Registro
             isOpen={isRegistrationModalOpen}

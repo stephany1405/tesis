@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { IMaskInput } from "react-imask";
+"use client"
+
+import React, { useState, useEffect } from "react"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
+import { IMaskInput } from "react-imask"
 import {
   User,
   UserPlus,
@@ -15,25 +17,23 @@ import {
   Shield,
   HelpCircle,
   UserRoundSearch,
-} from "lucide-react";
-import styles from "./registro.module.css";
-import Telefono from "../Mascaras/telefono";
+} from "lucide-react"
+import styles from "./registro.module.css"
+import TelefonoMask from "../Mascaras/telefono"
 
 const TextMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) {
-  const { onChange, ...other } = props;
+  const { onChange, ...other } = props
   return (
     <IMaskInput
       {...other}
       mask="00000000"
       inputRef={ref}
-      onAccept={(value, mask) =>
-        onChange({ target: { name: props.name, value: mask._unmaskedValue } })
-      }
+      onAccept={(value, mask) => onChange({ target: { name: props.name, value: mask._unmaskedValue } })}
       overwrite
       className={styles.input}
     />
-  );
-});
+  )
+})
 
 const securityQuestions = [
   "¿Cuál es el nombre de tu primera mascota?",
@@ -41,7 +41,8 @@ const securityQuestions = [
   "¿Cuál es el nombre de tu mejor amigo de la infancia?",
   "¿Cuál es tu película favorita?",
   "¿Cuál es el nombre de tu escuela primaria?",
-];
+]
+
 const Registro = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -56,137 +57,146 @@ const Registro = () => {
     security_question: "",
     security_answer: "",
     confirm_security_answer: "",
-  });
-  const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showSecurityAnswer, setShowSecurityAnswer] = useState(false);
-  const [isFormValid, setIsFormValid] = useState(false);
-  const navigate = useNavigate();
+  })
+  const [errors, setErrors] = useState({})
+  const [success, setSuccess] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showSecurityAnswer, setShowSecurityAnswer] = useState(false)
+  const [isFormValid, setIsFormValid] = useState(false)
+  const navigate = useNavigate()
 
   const validateName = (name) => {
-    if (name.length < 3 || name.length > 12 || /\d/.test(name)) {
-      return "Debe tener entre 3 y 12 caracteres y no contener números";
+    if (name.length < 3 || name.length > 12 || /[^a-zA-Z]/.test(name)) {
+      return "Debe tener entre 3 y 12 caracteres y solo contener letras"
     }
-    return "";
-  };
+    return ""
+  }
 
   const validatePassword = (password) => {
-    if (
-      password.length !== 8 ||
-      !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8}$/.test(password)
-    ) {
-      return "Debe tener exactamente 8 caracteres alfanuméricos";
+    if (password.length !== 8 || !/^[A-Za-z0-9]{8}$/.test(password)) {
+      return "Debe tener exactamente 8 caracteres alfanuméricos"
     }
-    return "";
-  };
+    return ""
+  }
 
   const validateConfirmPassword = (confirmPassword) => {
     if (confirmPassword !== formData.password) {
-      return "Las contraseñas no coinciden";
+      return "Las contraseñas no coinciden"
     }
-    return "";
-  };
+    return ""
+  }
 
   const validateDateOfBirth = (date) => {
-    const birthDate = new Date(date);
-    const now = new Date();
-    const hundredYearsAgo = new Date(
-      now.getFullYear() - 100,
-      now.getMonth(),
-      now.getDate()
-    );
+    const birthDate = new Date(date)
+    const now = new Date()
+    const hundredYearsAgo = new Date(now.getFullYear() - 100, now.getMonth(), now.getDate())
 
     if (birthDate > now) {
-      return "No es valida esa fecha";
+      return "No es válida esa fecha"
     }
     if (birthDate < hundredYearsAgo) {
-      return "La fecha no puede ser más de 100 años atrás";
+      return "La fecha no puede ser más de 100 años atrás"
     }
-    return "";
-  };
+    return ""
+  }
 
   const validateSecurityAnswer = (answer) => {
-    if (answer.length < 3) {
-      return "La respuesta debe tener al menos 3 caracteres";
+    if (answer.length < 3 || /[^a-zA-Z0-9\s]/.test(answer)) {
+      return "La respuesta debe tener al menos 3 caracteres y solo puede contener letras, números y espacios"
     }
-    return "";
-  };
+    return ""
+  }
 
   const validateConfirmSecurityAnswer = (confirmAnswer) => {
     if (confirmAnswer !== formData.security_answer) {
-      return "Las respuestas no coinciden";
+      return "Las respuestas no coinciden"
     }
-    return "";
-  };
+    return ""
+  }
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    let newValue = value;
+    const { name, value } = e.target
+    let newValue = value
 
-    if (name === "name" || name === "lastname") {
-      newValue = value.replace(/[0-9]/g, "").slice(0, 12);
+    switch (name) {
+      case "name":
+      case "lastname":
+        newValue = value.replace(/[^a-zA-Z]/g, "").slice(0, 12)
+        break
+      case "identification":
+        newValue = value.replace(/\D/g, "").slice(0, 8)
+        break
+      case "email":
+        newValue = value 
+        break
+      case "password":
+      case "confirmPassword":
+        newValue = value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8)
+        break
+      case "security_answer":
+      case "confirm_security_answer":
+        newValue = value.replace(/[^a-zA-Z0-9\s]/g, "")
+        break
+      default:
+        newValue = value
     }
 
-    setFormData({ ...formData, [name]: newValue });
+    setFormData({ ...formData, [name]: newValue })
 
-    let error = "";
+    let error = ""
     if (name === "name" || name === "lastname") {
-      error = validateName(newValue);
+      error = validateName(newValue)
     } else if (name === "password") {
-      error = validatePassword(newValue);
+      error = validatePassword(newValue)
     } else if (name === "confirmPassword") {
-      error = validateConfirmPassword(newValue);
+      error = validateConfirmPassword(newValue)
     } else if (name === "date_of_birth") {
-      error = validateDateOfBirth(newValue);
+      error = validateDateOfBirth(newValue)
     } else if (name === "security_answer") {
-      error = validateSecurityAnswer(newValue);
+      error = validateSecurityAnswer(newValue)
     } else if (name === "confirm_security_answer") {
-      error = validateConfirmSecurityAnswer(newValue);
+      error = validateConfirmSecurityAnswer(newValue)
     }
 
-    setErrors({ ...errors, [name]: error });
-  };
+    setErrors({ ...errors, [name]: error })
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!isFormValid) return;
+    e.preventDefault()
+    if (!isFormValid) return
 
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/usuario/register",
-        formData
-      );
-      setSuccess(true);
-      setTimeout(() => navigate("/login"), 2000);
+      const response = await axios.post("http://localhost:3000/api/usuario/register", formData)
+      setSuccess(true)
+      setTimeout(() => navigate(""), 2000)
     } catch (error) {
-      console.error("Error al registrar:", error);
+      console.error("Error al registrar:", error)
 
       if (error.response?.data?.errors) {
         const backendErrors = Array.isArray(error.response.data.errors)
           ? error.response.data.errors
-          : [error.response.data.errors];
+          : [error.response.data.errors]
 
         setErrors((prev) => ({
           ...prev,
           backend: backendErrors,
-        }));
+        }))
       } else {
         setErrors((prev) => ({
           ...prev,
           backend: ["Error al registrar. Por favor, inténtelo de nuevo."],
-        }));
+        }))
       }
     }
-  };
+  }
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+    setShowPassword(!showPassword)
+  }
 
   const toggleSecurityAnswerVisibility = () => {
-    setShowSecurityAnswer(!showSecurityAnswer);
-  };
+    setShowSecurityAnswer(!showSecurityAnswer)
+  }
 
   useEffect(() => {
     const formErrors = {
@@ -196,33 +206,29 @@ const Registro = () => {
       confirmPassword: validateConfirmPassword(formData.confirmPassword),
       date_of_birth: validateDateOfBirth(formData.date_of_birth),
       security_answer: validateSecurityAnswer(formData.security_answer),
-      confirm_security_answer: validateConfirmSecurityAnswer(
-        formData.confirm_security_answer
-      ),
-    };
+      confirm_security_answer: validateConfirmSecurityAnswer(formData.confirm_security_answer),
+    }
 
     const isValid =
-      Object.values(formErrors).every((error) => error === "") &&
-      Object.values(formData).every((value) => value !== "");
+      Object.values(formErrors).every((error) => error === "") && Object.values(formData).every((value) => value !== "")
 
-    setIsFormValid(isValid);
-  }, [formData, validateConfirmPassword]);
+    setIsFormValid(isValid)
+  }, [formData, validateName, validateConfirmPassword, validateConfirmSecurityAnswer, validateDateOfBirth]) // Added validateName to dependencies
+
   const renderErrors = () => {
-    const errorMessages = [];
+    const errorMessages = []
 
     Object.entries(errors).forEach(([key, value]) => {
       if (value && key !== "backend") {
-        errorMessages.push(value);
+        errorMessages.push(value)
       }
-    });
+    })
     if (errors.backend) {
-      const backendErrors = Array.isArray(errors.backend)
-        ? errors.backend
-        : [errors.backend];
-      errorMessages.push(...backendErrors);
+      const backendErrors = Array.isArray(errors.backend) ? errors.backend : [errors.backend]
+      errorMessages.push(...backendErrors)
     }
 
-    if (errorMessages.length === 0) return null;
+    if (errorMessages.length === 0) return null
 
     return (
       <div className={styles.errorContainer}>
@@ -232,16 +238,15 @@ const Registro = () => {
           </div>
         ))}
       </div>
-    );
-  };
+    )
+  }
+
   return (
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit}>
         <h2 className={styles.title}>Regístrate</h2>
         {renderErrors()}
-        {success && (
-          <p className={styles.success}>¡Registro exitoso! Redirigiendo...</p>
-        )}
+        {success && <p className={styles.success}>¡Registro exitoso! Redirigiendo...</p>}
 
         <div className={styles.formGrid}>
           <div className={styles.inputGroup}>
@@ -279,9 +284,7 @@ const Registro = () => {
               placeholder="Ingrese su apellido"
               maxLength={12}
             />
-            {errors.lastname && (
-              <p className={styles.error}>{errors.lastname}</p>
-            )}
+            {errors.lastname && <p className={styles.error}>{errors.lastname}</p>}
           </div>
 
           <div className={styles.inputGroup}>
@@ -340,14 +343,14 @@ const Registro = () => {
               Número de Teléfono
             </label>
             <Phone className={styles.icon} size={18} />
-            <Telefono
+            <TelefonoMask
               id="telephone_number"
               name="telephone_number"
               value={formData.telephone_number}
               onChange={handleChange}
               required
               placeholder="Ingrese su número de teléfono"
-              className={styles.phoneInput}
+              className={styles.input}
             />
           </div>
 
@@ -366,9 +369,7 @@ const Registro = () => {
               required
               max={new Date().toISOString().split("T")[0]}
             />
-            {errors.date_of_birth && (
-              <p className={styles.error}>{errors.date_of_birth}</p>
-            )}
+            {errors.date_of_birth && <p className={styles.error}>{errors.date_of_birth}</p>}
           </div>
 
           <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
@@ -387,16 +388,10 @@ const Registro = () => {
               placeholder="Ingrese su contraseña"
               maxLength={8}
             />
-            <button
-              type="button"
-              className={styles.passwordToggle}
-              onClick={togglePasswordVisibility}
-            >
+            <button type="button" className={styles.passwordToggle} onClick={togglePasswordVisibility}>
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
-            {errors.password && (
-              <p className={styles.error}>{errors.password}</p>
-            )}
+            {errors.password && <p className={styles.error}>{errors.password}</p>}
           </div>
 
           <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
@@ -415,9 +410,7 @@ const Registro = () => {
               placeholder="Confirme su contraseña"
               maxLength={8}
             />
-            {errors.confirmPassword && (
-              <p className={styles.error}>{errors.confirmPassword}</p>
-            )}
+            {errors.confirmPassword && <p className={styles.error}>{errors.confirmPassword}</p>}
           </div>
 
           <div className={styles.inputGroup}>
@@ -440,9 +433,7 @@ const Registro = () => {
                 </option>
               ))}
             </select>
-            {errors.security_question && (
-              <p className={styles.error}>{errors.security_question}</p>
-            )}
+            {errors.security_question && <p className={styles.error}>{errors.security_question}</p>}
           </div>
 
           <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
@@ -460,16 +451,10 @@ const Registro = () => {
               required
               placeholder="Ingrese su respuesta"
             />
-            <button
-              type="button"
-              className={styles.passwordToggle}
-              onClick={toggleSecurityAnswerVisibility}
-            >
+            <button type="button" className={styles.passwordToggle} onClick={toggleSecurityAnswerVisibility}>
               {showSecurityAnswer ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
-            {errors.security_answer && (
-              <p className={styles.error}>{errors.security_answer}</p>
-            )}
+            {errors.security_answer && <p className={styles.error}>{errors.security_answer}</p>}
           </div>
 
           <div className={`${styles.inputGroup} ${styles.passwordGroup}`}>
@@ -487,9 +472,7 @@ const Registro = () => {
               required
               placeholder="Confirme su respuesta"
             />
-            {errors.confirm_security_answer && (
-              <p className={styles.error}>{errors.confirm_security_answer}</p>
-            )}
+            {errors.confirm_security_answer && <p className={styles.error}>{errors.confirm_security_answer}</p>}
           </div>
         </div>
 
@@ -497,13 +480,14 @@ const Registro = () => {
           Registrarse
         </button>
         <div className={styles.loginLinkContainer}>
-          <a href="/login" className={styles.loginLink}>
+          <a href="/" className={styles.loginLink}>
             ¿Ya estás registrado? ¡Ir a iniciar sesión!
           </a>
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default Registro;
+export default Registro
+

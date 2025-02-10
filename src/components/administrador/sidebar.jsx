@@ -51,7 +51,7 @@ const Sidebar = () => {
           "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
         console.log("Sesión cerrada correctamente.");
-        navigate("/login");
+        navigate("/");
       } else {
         console.error("Error al cerrar sesión:", response.data);
       }

@@ -1,30 +1,38 @@
-import React, { useState } from "react"
+"use client"
+
+import { useState, useEffect } from "react"
 import styles from "./modal.module.css"
 import { Star, Lock, Unlock, Trash2 } from "lucide-react"
+import axios from "axios"
 
-const ClientModal = ({ client, onClose }) => {
-  const [isBlocked, setIsBlocked] = useState(false)
+const ClientModal = ({ client, onClose, onBlockStatusChange }) => {
+  const [isBlocked, setIsBlocked] = useState(client.is_blocked || false)
+
+  useEffect(() => {
+    setIsBlocked(client.is_blocked || false)
+  }, [client.is_blocked])
 
   const handleLocationClick = (service) => {
     try {
-      const point = service.point ? JSON.parse(service.point) : null;
+      const point = service.point ? JSON.parse(service.point) : null
       if (point && point.lat && point.lng) {
-        const url = `https://www.google.com/maps/search/?api=1&query=${point.lat},${point.lng}`;
-        window.open(url, "_blank");
+        const url = `https://www.google.com/maps/search/?api=1&query=${point.lat},${point.lng}`
+        window.open(url, "_blank")
       } else {
-        console.error("Invalid location coordinates");
+        console.error("Invalid location coordinates")
       }
     } catch (error) {
-      console.error("Error parsing location", error);
+      console.error("Error parsing location", error)
     }
-  };
+  }
 
   const blockClient = async () => {
     try {
       await axios.put("http://localhost:3000/api/bloqueo-usuario", {
-        id: client.id
-      });
-      setIsBlocked(true);
+        id: client.id,
+      })
+      setIsBlocked(true)
+      onBlockStatusChange(client.id, true)
     } catch (error) {
       console.error("Error bloqueando cliente", error)
     }
@@ -33,9 +41,10 @@ const ClientModal = ({ client, onClose }) => {
   const unblockClient = async () => {
     try {
       await axios.put("http://localhost:3000/api/desbloqueo-usuario", {
-        id: client.id
-      });
-      setIsBlocked(false);
+        id: client.id,
+      })
+      setIsBlocked(false)
+      onBlockStatusChange(client.id, false)
     } catch (error) {
       console.error("Error desbloqueando cliente", error)
     }
@@ -43,24 +52,24 @@ const ClientModal = ({ client, onClose }) => {
 
   const parseAppointmentServices = (servicesString) => {
     try {
-      return JSON.parse(servicesString || '[]')
+      return JSON.parse(servicesString || "[]")
     } catch (error) {
       return []
     }
   }
 
   const serviceHistory = client.appointment_services
-    ? parseAppointmentServices(client.appointment_services).map(service => ({
-      date: client.service_date ? JSON.parse(client.service_date).start : 'N/A',
-      service: service.title,
-      price: `$${service.price}`,
-      especialista: `${client.specialist_name} ${client.specialist_lastname}`,
-      startTime: client.service_date ? JSON.parse(client.service_date).start.split(', ')[2] : 'N/A',
-      endTime: client.service_date ? JSON.parse(client.service_date).end : 'N/A',
-      address: client.service_address || 'N/A',
-      point: client.service_point || 'N/A',
-      rating: client.service_rating || 'N/A'
-    }))
+    ? parseAppointmentServices(client.appointment_services).map((service) => ({
+        date: client.service_date ? JSON.parse(client.service_date).start : "N/A",
+        service: service.title,
+        price: `$${service.price}`,
+        especialista: `${client.specialist_name} ${client.specialist_lastname}`,
+        startTime: client.service_date ? JSON.parse(client.service_date).start.split(", ")[2] : "N/A",
+        endTime: client.service_date ? JSON.parse(client.service_date).end : "N/A",
+        address: client.service_address || "N/A",
+        point: client.service_point || "N/A",
+        rating: client.service_rating || "N/A",
+      }))
     : []
 
   const handleDelete = () => {
@@ -70,7 +79,10 @@ const ClientModal = ({ client, onClose }) => {
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`${styles.modalContent} ${isBlocked ? styles.blockedContent : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className={styles.closeButton} onClick={onClose}>
           &times;
         </button>
@@ -81,20 +93,18 @@ const ClientModal = ({ client, onClose }) => {
                 ? `http://localhost:3000${client.specialist_image}`
                 : `https://i.pravatar.cc/300?img=${client.id}`
             }
-            alt={`${client.name} ${client.lastname}`}
-            className={styles.clientImage}
+            alt={`${client.specialist_name} ${client.specialist_lastname}`}
+            className={`${styles.clientImage} ${isBlocked ? styles.blockedImage : ""}`}
           />
           <div>
-            <h2>
+            <h2 className={isBlocked ? styles.blockedUser : ""}>
               {client.specialist_name} {client.specialist_lastname}
               <span className={styles.rating}>
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
                     className={
-                      i < (parseFloat(client.specialist_rating) || 0)
-                        ? styles.starFilled
-                        : styles.starEmpty
+                      i < (Number.parseFloat(client.specialist_rating) || 0) ? styles.starFilled : styles.starEmpty
                     }
                     size={16}
                   />
@@ -115,7 +125,7 @@ const ClientModal = ({ client, onClose }) => {
             <strong>Correo:</strong> {client.specialist_email}
           </p>
           <p>
-            <strong>Especialidad:</strong> {client.specialist_specialty || 'N/A'}
+            <strong>Especialidad:</strong> {client.specialist_specialty || "N/A"}
           </p>
         </div>
         <div className={styles.actionButtons}>
@@ -128,6 +138,9 @@ const ClientModal = ({ client, onClose }) => {
               <Unlock size={16} /> Desbloquear
             </button>
           )}
+          <button onClick={handleDelete} className={styles.deleteButton}>
+            <Trash2 size={16} /> Eliminar
+          </button>
         </div>
         <div className={styles.serviceHistory}>
           <h3>Historial de Servicios</h3>
@@ -156,6 +169,7 @@ const ClientModal = ({ client, onClose }) => {
                     <button
                       onClick={() => handleLocationClick(service)}
                       disabled={!service.point}
+                      className={styles.locationButton}
                     >
                       Ubicación
                     </button>
@@ -171,3 +185,4 @@ const ClientModal = ({ client, onClose }) => {
 }
 
 export default ClientModal
+

@@ -96,9 +96,15 @@ const Login = () => {
                 className={styles.input}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                maxLength={8}
                 required
               />
-              <button type="button" className={styles.passwordToggle} onClick={togglePasswordVisibility}>
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={togglePasswordVisibility}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
