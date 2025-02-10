@@ -273,7 +273,7 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
       <div className={styles.modalContent}>
         <ToastContainer position="top-right" autoClose={2000} />
         <div className={styles.modalHeader}>
-          <h2 className={styles.title}>Registrar Nuevo Cliente</h2>
+          <h2 className={styles.title}>Registrar Nuevo Especialista</h2>
           <button className={styles.closeButton} onClick={onClose}>
             <X size={24} />
           </button>
@@ -359,7 +359,7 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   required
                 >
                   <option value="">Seleccione un género</option>
-                  <option value="femenina">Femenina</option>
+                  <option value="femenina">Femenino</option>
                   <option value="masculino">Masculino</option>
                 </select>
               </div>
@@ -615,7 +615,7 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
               className={`${styles.button} ${styles.submitButton}`}
               disabled={!isFormValid}
             >
-              Registrar Cliente
+              Registrar Especialista
             </button>
           </div>
         </form>

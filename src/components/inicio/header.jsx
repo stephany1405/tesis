@@ -24,7 +24,7 @@ const Header = () => {
         Cookies.remove("token", { path: "/" });
         document.cookie =
           "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        navigate("/login");
+        navigate("/");
       } else {
         console.error("Error al cerrar sesión:", response.data);
       }

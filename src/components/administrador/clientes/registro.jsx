@@ -332,7 +332,7 @@ const Registro = ({ isOpen, onClose, onSubmit }) => {
                   required
                 >
                   <option value="">Seleccione un género</option>
-                  <option value="femenina">Femenina</option>
+                  <option value="femenina">Femenino</option>
                   <option value="masculino">Masculino</option>
                 </select>
               </div>

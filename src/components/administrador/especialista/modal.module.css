@@ -23,6 +23,10 @@
   position: relative;
 }
 
+.modalContent.blockedContent {
+  border: 2px solid #ff4d4f;
+}
+
 .closeButton {
   position: absolute;
   top: 15px;
@@ -50,14 +54,26 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.clientImage.blockedImage {
+  opacity: 0.7;
+  border-color: #ff4d4f;
+}
+
 .clientHeader h2 {
   margin: 0;
   font-size: 24px;
   color: #333;
 }
 
+.blockedUser {
+  color: #ff4d4f !important;
+}
+
 .clientInfo {
   margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }
 
 .clientInfo p {
@@ -65,15 +81,27 @@
   color: #666;
 }
 
+.clientInfo strong {
+  color: #333;
+  margin-right: 8px;
+}
+
+.serviceHistory {
+  margin-top: 20px;
+}
+
 .serviceHistory h3 {
   font-size: 20px;
   color: #333;
   margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
 }
 
 .serviceTable {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 10px;
 }
 
 .serviceTable th,
@@ -100,6 +128,7 @@
 .rating {
   display: inline-flex;
   margin-left: 10px;
+  align-items: center;
 }
 
 .starFilled {
@@ -113,34 +142,50 @@
 .blockedStatus {
   display: inline-block;
   margin-left: 10px;
-  padding: 2px 6px;
+  padding: 4px 8px;
   background-color: #ff4d4f;
   color: white;
   border-radius: 4px;
   font-size: 12px;
+  font-weight: 500;
 }
 
 .actionButtons {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin: 20px 0;
 }
 
 .actionButtons button {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
-  margin-left: 10px;
+  gap: 6px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.blockButton,
-.unblockButton {
+.blockButton {
   background-color: #faad14;
   color: white;
+}
+
+.blockButton:hover {
+  background-color: #d48806;
+}
+
+.unblockButton {
+  background-color: #52c41a;
+  color: white;
+}
+
+.unblockButton:hover {
+  background-color: #389e0d;
 }
 
 .deleteButton {
@@ -148,34 +193,60 @@
   color: white;
 }
 
-.actionButtons button svg {
-  margin-right: 5px;
+.deleteButton:hover {
+  background-color: #cf1322;
 }
 
-.sectionTitle {
-  font-size: 18px;
-  color: #333;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 10px;
+.locationButton {
+  padding: 4px 8px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
 }
 
-.infoGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  margin-bottom: 20px;
+.locationButton:hover {
+  background-color: #096dd9;
 }
 
-.infoItem {
-  background-color: #f8f8f8;
-  padding: 10px;
-  border-radius: 8px;
+.locationButton:disabled {
+  background-color: #d9d9d9;
+  cursor: not-allowed;
 }
 
-.infoItem strong {
-  display: block;
-  margin-bottom: 5px;
-  color: #333;
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 20px;
+    margin: 20px;
+    max-height: 90vh;
+  }
+
+  .clientHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .clientImage {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .actionButtons button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .serviceTable {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }
 

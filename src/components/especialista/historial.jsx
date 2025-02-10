@@ -20,7 +20,7 @@ export default function Historial() {
         );
 
         if (data.length === 0) {
-          throw new Error("Error al obtener el historial");
+          throw new Error("No tienes historial");
         }
 
         const transformedData = data.map((item, index) => {
