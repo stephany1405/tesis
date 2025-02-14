@@ -69,10 +69,7 @@ export const generateRecommendations = async (req, res) => {
       .flatMap((row) => JSON.parse(row.services))
       .map((service) => service.id)
       .filter((id, index, self) => self.indexOf(id) === index);
-
-    const genAI = new GoogleGenerativeAI(
-      "AIzaSyA54ISLfYno0VU577oHe6d1zAQBowctdks"
-    );
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     let greetingPrompt;
