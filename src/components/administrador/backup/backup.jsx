@@ -350,36 +350,51 @@ const DatabaseBackup = () => {
       {showModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
-            <h2>Ingrese la contraseña secreta</h2>
-            <form onSubmit={handlePasswordSubmit}>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Contraseña"
-                className={`${styles.passwordInput} ${
-                  passwordError ? styles.errorInput : ""
-                }`}
-              />
-              {passwordError && (
-                <p className={styles.errorMessage}>{passwordError}</p>
-              )}
-              <div className={styles.modalButtons}>
-                <button type="submit" className={styles.button}>
-                  Confirmar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false);
-                    setPasswordError("");
-                  }}
-                  className={`${styles.button} ${styles.cancelButton}`}
-                >
-                  Cancelar
-                </button>
+            <div className={styles.modalContent}>
+              <div className={styles.warningSection}>
+                <h2 className={styles.warningTitle}>Advertencia</h2>
+                <p className={styles.warningMessage}>
+                  Si usted realiza este backup se pueden perder datos que no
+                  estén respaldados.
+                </p>
               </div>
-            </form>
+              <div className={styles.passwordSection}>
+                <h3 className={styles.passwordTitle}>
+                  Ingrese la contraseña secreta
+                </h3>
+                <form onSubmit={handlePasswordSubmit}>
+                  <div className={styles.inputWrapper}>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Contraseña"
+                      className={`${styles.passwordInput} ${
+                        passwordError ? styles.errorInput : ""
+                      }`}
+                    />
+                    {passwordError && (
+                      <p className={styles.errorMessage}>{passwordError}</p>
+                    )}
+                  </div>
+                  <div className={styles.modalButtons}>
+                    <button type="submit" className={styles.confirmButton}>
+                      Confirmar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowModal(false);
+                        setPasswordError("");
+                      }}
+                      className={styles.cancelButton}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -25,6 +25,8 @@ import {
   addSpecialistToAppointment,
   updateAppointmentSpecialist,
   getAvailability,
+  cancelInPersonAppointment,
+  changeAppointmentDay,
 } from "../controllers/service.controller.js";
 import { upload2, upload3 } from "../middlewares/uploadMiddleware.js";
 
@@ -55,6 +57,9 @@ router.put(
   "/agenda/:appointmentId/cambiar-especialista",
   updateAppointmentSpecialist
 );
+router.put("/cancelAppointment/:appointmentId", cancelInPersonAppointment);
+router.put("/agenda/:id/cambiar-fecha", changeAppointmentDay);
+
 router.post("/calificaciones/crear", createRatingController);
 router.post("/calificaciones/crear2", createRatingController2);
 router.get("/historia-especialista", historySpecialist);

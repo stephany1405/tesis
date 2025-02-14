@@ -175,7 +175,79 @@ export const forgotPassword = async (req, res) => {
       from: '"Equipo de Soporte de UÑIMAS" <unimas304@gmail.com',
       to: email,
       subject: "UÑIMAS - Código de recuperación de contraseña 👨‍💻",
-      text: `Hola! ${name} ${lastname} hemos recibido la notificación de que intentas recuperar tu contraseña, el código es el siguiente. ¡Recuerda no compartirlo con nadie!: ${code}`,
+      html: `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Recuperación de Contraseña Cliente</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+            }
+            .logo {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .logo img {
+              max-width: 200px;
+            }
+            .content {
+              background-color: #f9f9f9;
+              padding: 20px;
+              border-radius: 5px;
+            }
+            .code {
+              font-size: 24px;
+              font-weight: bold;
+              color: #4a4a4a;
+              text-align: center;
+              padding: 10px;
+              background-color: #e9e9e9;
+              border-radius: 5px;
+              margin: 20px 0;
+            }
+            .footer {
+              margin-top: 20px;
+              text-align: center;
+              font-size: 12px;
+              color: #888;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="logo">
+              <img src="https://tudominio.com/logo-unimas.png" alt="Logo UÑIMAS">
+            </div>
+            <div class="content">
+              <h2>Recuperación de Contraseña </h2>
+              <p>Hola ${name} ${lastname},</p>
+              <p>Hemos recibido una solicitud para recuperar tu contraseña . A continuación, encontrarás el código de recuperación:</p>
+              <div class="code">${code}</div>
+              <p><strong>¡Importante!</strong> No compartas este código con nadie. Nuestro equipo de soporte nunca te pedirá este código.</p>
+              <p>Si no has solicitado este cambio, por favor ignora este correo o contacta a nuestro equipo de soporte.</p>
+            </div>
+            <div class="footer">
+              <p>UÑIMAS - Tu belleza, nuestra pasión</p>
+              <p>Dirección: Av Casanova, Centro Comercia Cedíaz, Local 36</p>
+              <p>Teléfono: +4241889972 | Email: soporte@unimas.com</p>
+              <p>&copy; 2025 UÑIMAS. Todos los derechos reservados.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
     };
 
     try {
@@ -326,10 +398,82 @@ export const SecretforgotPassword = async (req, res) => {
     );
 
     const mailOptions = {
-      from: '"Equipo de Soporte de UÑIMAS" <unimas304@gmail.com',
+      from: '"Equipo de Soporte de UÑIMAS" <unimas304@gmail.com>',
       to: email,
       subject: "UÑIMAS - Código de recuperación de contraseña Secreta 👨‍💻",
-      text: `Hola Administrador! ${name} ${lastname} hemos recibido la notificación de que intentas recuperar tu contraseña secreta, el código es el siguiente. ¡Recuerda no compartirlo con nadie!: ${code}`,
+      html: `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Recuperación de Contraseña Secreta</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+            }
+            .logo {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+            .logo img {
+              max-width: 200px;
+            }
+            .content {
+              background-color: #f9f9f9;
+              padding: 20px;
+              border-radius: 5px;
+            }
+            .code {
+              font-size: 24px;
+              font-weight: bold;
+              color: #4a4a4a;
+              text-align: center;
+              padding: 10px;
+              background-color: #e9e9e9;
+              border-radius: 5px;
+              margin: 20px 0;
+            }
+            .footer {
+              margin-top: 20px;
+              text-align: center;
+              font-size: 12px;
+              color: #888;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="logo">
+              <img src="https://tudominio.com/logo-unimas.png" alt="Logo UÑIMAS">
+            </div>
+            <div class="content">
+              <h2>Recuperación de Contraseña Secreta</h2>
+              <p>Hola Administrador ${name} ${lastname},</p>
+              <p>Hemos recibido una solicitud para recuperar tu contraseña secreta. A continuación, encontrarás el código de recuperación:</p>
+              <div class="code">${code}</div>
+              <p><strong>¡Importante!</strong> No compartas este código con nadie. Nuestro equipo de soporte nunca te pedirá este código.</p>
+              <p>Si no has solicitado este cambio, por favor ignora este correo o contacta a nuestro equipo de soporte.</p>
+            </div>
+            <div class="footer">
+              <p>UÑIMAS - Tu belleza, nuestra pasión</p>
+              <p>Dirección: Av Casanova, Centro Comercia Cedíaz, Local 36</p>
+              <p>Teléfono: +4241889972 | Email: soporte@unimas.com</p>
+              <p>&copy; 2025 UÑIMAS. Todos los derechos reservados.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
     };
 
     try {

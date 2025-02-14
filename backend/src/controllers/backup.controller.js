@@ -28,7 +28,7 @@ const upload = multer({ storage: storage });
 
 export const backupDatabase = (req, res) => {
   const backupFile = path.join(backupDir, `backup_${Date.now()}.sql`);
-  const pgDumpPath = '"C:\\Program Files\\PostgreSQL\\17\\bin\\pg_dump"';
+  const pgDumpPath = '"C:\\Program Files\\PostgreSQL\\16\\bin\\pg_dump.exe"';
 
   const dumpCommand = `${pgDumpPath} -U ${DB_USER} -h ${DB_HOST} ${DB_DATABASE} > ${backupFile}`;
 
@@ -66,31 +66,59 @@ export const restoreDatabase = [
     }
 
     const backupFile = req.file.path;
-    const psqlPath = '"C:\\Program Files\\PostgreSQL\\17\\bin\\psql"';
-    const restoreCommand = `${psqlPath} -U ${DB_USER} -h ${DB_HOST} -d ${DB_DATABASE} -f "${backupFile}"`;
+    const psqlPath = '"C:\\Program Files\\PostgreSQL\\16\\bin\\psql.exe"';
+
+    const cleanCommand = `${psqlPath} -U ${DB_USER} -h ${DB_HOST} -d ${DB_DATABASE} -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`;
 
     exec(
-      restoreCommand,
+      cleanCommand,
       {
         env: {
           ...process.env,
           PGPASSWORD: DB_PASSWORD,
         },
       },
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error al restaurar el backup: ${error.message}`);
+      (cleanError, cleanStdout, cleanStderr) => {
+        if (cleanError) {
+          console.error(
+            `Error al limpiar la base de datos: ${cleanError.message}`
+          );
           return res.status(500).json({
-            error: "Error al restaurar el backup",
-            details: error.message,
+            error: "Error al limpiar la base de datos",
+            details: cleanError.message,
           });
         }
-        console.log(
-          `Backup restaurado exitosamente desde el archivo: ${backupFile}`
+
+        console.log("Base de datos limpiada correctamente.");
+
+        const restoreCommand = `${psqlPath} -U ${DB_USER} -h ${DB_HOST} -d ${DB_DATABASE} -f "${backupFile}"`;
+
+        exec(
+          restoreCommand,
+          {
+            env: {
+              ...process.env,
+              PGPASSWORD: DB_PASSWORD,
+            },
+          },
+          (restoreError, restoreStdout, restoreStderr) => {
+            if (restoreError) {
+              console.error(
+                `Error al restaurar el backup: ${restoreError.message}`
+              );
+              return res.status(500).json({
+                error: "Error al restaurar el backup",
+                details: restoreError.message,
+              });
+            }
+            console.log(
+              `Backup restaurado exitosamente desde el archivo: ${backupFile}`
+            );
+            return res
+              .status(200)
+              .json({ message: "Backup restaurado exitosamente" });
+          }
         );
-        return res
-          .status(200)
-          .json({ message: "Backup restaurado exitosamente" });
       }
     );
   },
@@ -113,7 +141,7 @@ export const createSecretPassword = async (req, res) => {
     await pool.query(query);
     res.status(200).json({ message: "Contraseña Secreta Creada." });
   } catch (error) {
-    console.error("Error creating secret password:", error);
+    console.error("Error creando contraseña secreta:", error);
     res.status(500).json({ message: "Error interno en el servidor" });
   }
 };
@@ -121,7 +149,6 @@ export const createSecretPassword = async (req, res) => {
 export const compareSecretPassword = async (req, res) => {
   try {
     const { userID, secretPassword } = req.body;
-    console.log(secretPassword);
     if (!secretPassword || !userID) {
       return res.status(401).json({ message: "Data Requerida." });
     }

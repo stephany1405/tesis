@@ -11,14 +11,6 @@ import {
 } from "../models/service.model.js";
 import { pool } from "../db.js";
 import moment from "moment";
-import {
-  parseISO,
-  addHours,
-  addMinutes,
-  areIntervalsOverlapping,
-  formatISO,
-} from "date-fns";
-import { es } from "date-fns/locale";
 export const getActiveAppointment = async (req, res) => {
   try {
     const { userID } = req.query;
@@ -146,7 +138,7 @@ export const getInPersonAppointments = async (req, res) => {
       .map((appointment) => {
         try {
           const services = JSON.parse(appointment.services);
-          const serviceInfo = services[0];
+          const serviceInfo = services;
           const scheduledDate = JSON.parse(appointment.scheduled_date);
 
           const startRaw = scheduledDate.start;
@@ -773,5 +765,75 @@ export const getAvailability = async (req, res) => {
       errorMessage += ". Formato de fecha inválido en la base de datos.";
     }
     res.status(500).json({ error: errorMessage, details: error.message });
+  }
+};
+
+export const cancelInPersonAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    if (!appointmentId) {
+      return res
+        .status(422)
+        .json({ message: "Identificador AppointmentId Requerido." });
+    }
+    const query = {
+      text: `UPDATE PUBLIC.APPOINTMENT SET status_order = false WHERE id = $1`,
+      values: [appointmentId],
+    };
+
+    await pool.query(query);
+
+    res.status(200).json({ message: "Cancelado Exitosamente." });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error interno en el servidor.", error: error });
+    console.error(error);
+  }
+};
+
+export const changeAppointmentDay = async (req, res) => {
+  const { id } = req.params;
+  const { newStartDate, newEndDate } = req.body;
+
+  try {
+    const appointmentCheck = await pool.query(
+      "SELECT scheduled_date FROM public.appointment WHERE id = $1",
+      [id]
+    );
+
+    if (appointmentCheck.rows.length === 0) {
+      return res.status(404).json({ error: "Cita no encontrada" });
+    }
+
+    const currentAppointment = await pool.query(
+      "SELECT scheduled_date FROM public.appointment WHERE id = $1",
+      [id]
+    );
+
+    const currentScheduledDate = JSON.parse(
+      currentAppointment.rows[0].scheduled_date
+    );
+
+    const newScheduledDate = {
+      start: newStartDate,
+      end: newEndDate,
+      duration: currentScheduledDate.duration,
+    };
+    await pool.query(
+      "UPDATE public.appointment SET scheduled_date = $1::jsonb WHERE id = $2",
+      [JSON.stringify(newScheduledDate), id]
+    );
+
+    res.json({
+      message: "Fecha de la cita actualizada exitosamente",
+      scheduledDate: newScheduledDate,
+    });
+  } catch (error) {
+    console.error("Error al actualizar la fecha de la cita:", error);
+    res.status(500).json({
+      error: "Error al actualizar la fecha de la cita",
+      details: error.message,
+    });
   }
 };

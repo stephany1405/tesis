@@ -11,9 +11,6 @@ function InfoAgenda({ data }) {
   const [openIndex, setOpenIndex] = useState(null);
 
   const { ws, isConnected } = useWebSocketContext();
-
-  // console.log("InfoAgenda renderizando.  isConnected:", isConnected, "ws:", ws);
-
   const handleMessage = (message) => {
     console.log("handleMessage llamado con:", message);
     if (message.type === "STATUS_UPDATE") {
@@ -109,7 +106,7 @@ function InfoAgenda({ data }) {
         />
       );
     } catch (error) {
-      return <p>Mapa no disponible</p>;
+      return <p>Av Casanova, Centro Comercia Cedíaz, Local 36</p>;
     }
   };
 

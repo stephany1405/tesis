@@ -190,7 +190,6 @@ const ClientModal = ({ client, onClose, onBlockStatusChange }) => {
                         <tr key={`${index}-${serviceIndex}`}>
                           {serviceIndex === 0 && (
                             <td rowSpan={services.length}>
-                              {/*  Llama a formatDate con la cadena JSON completa */}
                               {formatDate(appointment.service_date)}
                             </td>
                           )}

@@ -10,7 +10,7 @@ import "moment/locale/es";
 import "moment-timezone";
 import styles from "./calendario.module.css";
 import { toast, ToastContainer } from "react-toastify";
-
+import AppointmentDateChanger from "./AppointmentDateChanger.jsx";
 moment.locale("es", {
   months:
     "Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre".split(
@@ -29,6 +29,51 @@ const AdminAppointmentCalendar = () => {
   const [specialists, setSpecialists] = useState([]);
   const [selectedSpecialist, setSelectedSpecialist] = useState("");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showDateChanger, setShowDateChanger] = useState(false);
+
+  const parseDuration = (durationString) => {
+    if (!durationString) return 0;
+
+    const parts = durationString.split(" ");
+    let hours = 0;
+    let minutes = 0;
+
+    for (let i = 0; i < parts.length; i++) {
+      const value = Number.parseInt(parts[i]);
+      if (isNaN(value)) continue;
+
+      if (parts[i + 1] === "hora" || parts[i + 1] === "horas") {
+        hours = value;
+        i++;
+      } else if (parts[i + 1] === "minuto" || parts[i + 1] === "minutos") {
+        minutes = value;
+        i++;
+      }
+    }
+
+    return hours + minutes / 60;
+  };
+
+  const calculateTotalDuration = (services) => {
+    if (!Array.isArray(services)) return "0 minutos";
+
+    const totalHours = services.reduce((total, service) => {
+      return total + parseDuration(service.duration);
+    }, 0);
+
+    const hours = Math.floor(totalHours);
+    const minutes = Math.round((totalHours - hours) * 60);
+
+    let result = "";
+    if (hours > 0) {
+      result += `${hours} ${hours === 1 ? "hora" : "horas"}`;
+    }
+    if (minutes > 0) {
+      if (result) result += " y ";
+      result += `${minutes} ${minutes === 1 ? "minuto" : "minutos"}`;
+    }
+    return result || "0 minutos";
+  };
   useEffect(() => {
     const handleSidebarChange = () => {
       setIsSidebarCollapsed(
@@ -51,14 +96,22 @@ const AdminAppointmentCalendar = () => {
           "http://localhost:3000/api/servicios/agenda/presencial"
         );
         const appointmentsWithLocalTime = response.data.map((appointment) => {
+          const totalDurationMinutes =
+            appointment.extendedProps.serviceInfo.reduce((total, service) => {
+              const hours = parseDuration(service.duration);
+              return total + hours * 60;
+            }, 0);
+
           const start = moment
             .utc(appointment.start)
             .tz(moment.tz.guess())
             .format();
           const end = moment
-            .utc(appointment.end)
+            .utc(appointment.start)
             .tz(moment.tz.guess())
+            .add(totalDurationMinutes, "minutes")
             .format();
+
           return {
             ...appointment,
             start,
@@ -236,6 +289,59 @@ const AdminAppointmentCalendar = () => {
     }
   };
 
+  const handleCancelAppointment = async () => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/servicios/cancelAppointment/${selectedAppointment.id}`
+      );
+      toast.success("Cita cancelada exitosamente.");
+      setAppointments(
+        appointments.filter((app) => app.id !== selectedAppointment.id)
+      );
+      setSelectedAppointment(null);
+    } catch (error) {
+      toast.error("Error al cancelar la cita.");
+      console.error("Error al cancelar la cita:", error);
+    }
+  };
+
+  const handleChangeAppointmentDay = async (newDateTime) => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/servicios/agenda/${newDateTime.appointmentId}/cambiar-fecha`,
+        {
+          newStartDate: newDateTime.start,
+          newEndDate: newDateTime.end,
+        }
+      );
+
+      const updatedAppointments = appointments.map((app) => {
+        if (app.id === newDateTime.appointmentId) {
+          return {
+            ...app,
+            start: moment(
+              newDateTime.start,
+              "dddd, D [de] MMMM [de] YYYY, hh:mm a"
+            ).format(),
+            end: moment(newDateTime.end, "hh:mm a")
+              .year(moment(newDateTime.start).year())
+              .month(moment(newDateTime.start).month())
+              .date(moment(newDateTime.start).date())
+              .format(),
+          };
+        }
+        return app;
+      });
+
+      setAppointments(updatedAppointments);
+      setShowDateChanger(false);
+      setSelectedAppointment(null);
+      toast.success("Fecha de la cita actualizada exitosamente");
+    } catch (error) {
+      console.error("Error al cambiar la fecha de la cita:", error);
+      toast.error("Error al cambiar la fecha de la cita");
+    }
+  };
   return (
     <div
       className={`${styles.pageWrapper} ${
@@ -332,7 +438,31 @@ const AdminAppointmentCalendar = () => {
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>{selectedAppointment.serviceInfo.duration}</span>
+                <span>
+                  Duración total:{" "}
+                  {calculateTotalDuration(selectedAppointment.serviceInfo)}
+                </span>
+              </div>
+              <div className={styles.detailItem}>
+                <h3 className={styles.servicesTitle}>Servicios:</h3>
+                <div className={styles.servicesList}>
+                  {selectedAppointment.serviceInfo.map((service, index) => (
+                    <div
+                      key={service.uniqueId || index}
+                      className={styles.serviceItem}
+                    >
+                      <span className={styles.serviceTitle}>
+                        {service.title}
+                      </span>
+                      <span className={styles.serviceDuration}>
+                        ({service.duration})
+                      </span>
+                      <span className={styles.servicePrice}>
+                        ${service.price}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
               <div className={styles.detailItem}>
                 <svg
@@ -365,6 +495,7 @@ const AdminAppointmentCalendar = () => {
                   {selectedAppointment.specialist || "No asignado"}
                 </span>
               </div>
+
               <div className={styles.addSpecialistContainer}>
                 <select
                   value={selectedSpecialist}
@@ -382,7 +513,13 @@ const AdminAppointmentCalendar = () => {
                     </option>
                   ))}
                 </select>
-
+                {showDateChanger && selectedAppointment && (
+                  <AppointmentDateChanger
+                    appointment={selectedAppointment}
+                    onDateChange={handleChangeAppointmentDay}
+                    onClose={() => setShowDateChanger(false)}
+                  />
+                )}
                 {selectedAppointment.specialist ? (
                   <button
                     onClick={handleChangeSpecialist}
@@ -398,6 +535,18 @@ const AdminAppointmentCalendar = () => {
                     Agregar Especialista
                   </button>
                 )}
+                <button
+                  onClick={handleCancelAppointment}
+                  className={styles.cancelAppointment}
+                >
+                  Cancelar Cita
+                </button>
+                <button
+                  onClick={() => setShowDateChanger(true)}
+                  className={styles.changeDateButton}
+                >
+                  Cambiar Fecha/Hora
+                </button>
               </div>
             </div>
           </div>

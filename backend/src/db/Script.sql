@@ -1,158 +1,194 @@
-DROP DATABASE IF EXISTS DB_UNIMAS;
-CREATE DATABASE DB_UNIMAS;
+BEGIN;
 
 
-DROP TABLE IF EXISTS public."classification";
-
-CREATE TABLE IF NOT EXISTS public."classification"(
-    Id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
-    classification_type VARCHAR(50) NOT NULL,       
-    parent_classification_id BIGINT NULL,           
-    icon_url TEXT NULL,           
-    service_image text NULL             
-    description TEXT NULL,
-    price    NUMERIC(10,2) NULL,
-    service_category BOOLEAN NULL,
-    CONSTRAINT Pk_Classification_Id PRIMARY KEY(Id),
-    CONSTRAINT fk_Classification_Parent FOREIGN KEY (parent_classification_id) REFERENCES public."classification"(Id)
+CREATE TABLE IF NOT EXISTS public.appointment
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    user_id bigint NOT NULL,
+    services text COLLATE pg_catalog."default" NOT NULL,
+    status_id bigint NOT NULL,
+    status_order boolean NOT NULL,
+    paid boolean NOT NULL,
+    address text COLLATE pg_catalog."default" NOT NULL,
+    payment_method integer NOT NULL,
+    amount text COLLATE pg_catalog."default" NOT NULL,
+    scheduled_date text COLLATE pg_catalog."default" NOT NULL,
+    reference_payment character varying(30) COLLATE pg_catalog."default",
+    point character varying(100) COLLATE pg_catalog."default",
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_appointment_id PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS Idx_Classification_classification_type 
-ON public."classification"(classification_type);
-
-
-DROP TABLE IF EXISTS public."user";
-
-CREATE TABLE IF NOT EXISTS public."user"( 
-    Id               BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY,
-    name             VARCHAR(100)    NOT NULL,
-    lastname         VARCHAR(100)    NOT NULL,
-    identification   VARCHAR(10)      NOT NULL,
-    email            VARCHAR(100)    NOT NULL UNIQUE,
-    telephone_number VARCHAR(15)     NOT NULL,
-    password         VARCHAR(255)    NOT NULL,
-    role_id          BIGINT          NOT NULL,
-    date_of_birth    DATE                NULL,
-    created_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT Pk_User_Id               PRIMARY KEY (Id),
-    CONSTRAINT uq_user_email            UNIQUE(email),
-    CONSTRAINT chk_user_email_format    CHECK(email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
-    CONSTRAINT chk_user_telephone       CHECK(telephone_number ~ '^\+?[0-9]{10,15}$'),
-    CONSTRAINT fk_gender_id             FOREIGN KEY (gender_id) REFERENCES public."classification"(Id),
-    CONSTRAINT fk_role_id               FOREIGN KEY (role_id)   REFERENCES public."classification"(Id) 
+CREATE TABLE IF NOT EXISTS public.appointment_specialists
+(
+    appointment_id bigint NOT NULL,
+    specialist_id bigint NOT NULL,
+    service_id bigint,
+    sessions_assigned integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    status_id integer,
+    start_appointment timestamp without time zone,
+    end_appointment timestamp without time zone,
+    earnings numeric(10, 2),
+    CONSTRAINT appointment_specialists_pkey PRIMARY KEY (appointment_id, specialist_id),
+    CONSTRAINT unique_assignment UNIQUE (appointment_id, specialist_id, service_id)
 );
 
-CREATE INDEX IF NOT EXISTS Idx_User_Email ON public."user"(email);
-CREATE INDEX IF NOT EXISTS Idx_User_Role ON public."user"(role_id);
-
-
-DROP TABLE IF EXISTS public."specialist_details";
-CREATE TABLE IF NOT EXISTS public."specialist_details"(
-    Id                  BIGINT      NOT NULL GENERATED ALWAYS AS IDENTITY,
-    user_id             BIGINT      NOT NULL,
-    verification_status BOOLEAN     NOT NULL DEFAULT TRUE,
-    profile_picture     TEXT            NULL,
-    average_rating      INT             NULL,
-    experience          INT         NOT NULL,
-    specialization_id   BIGINT NOT NULL,
-    CONSTRAINT Pk_Specialist_Details_Id PRIMARY KEY(Id),
-    CONSTRAINT fk_user_id 			FOREIGN KEY (user_id) REFERENCES public."user"(Id),
-    CONSTRAINT fk_specialization_type FOREIGN KEY(specialization_id) REFERENCES classification(Id)
+CREATE TABLE IF NOT EXISTS public.classification
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    classification_type character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    parent_classification_id bigint,
+    service_image text COLLATE pg_catalog."default",
+    description text COLLATE pg_catalog."default",
+    price numeric(10, 2),
+    service_category boolean,
+    "time" character varying(100) COLLATE pg_catalog."default",
+    is_active boolean DEFAULT true,
+    CONSTRAINT pk_classification_id PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS Idx_Specialist_Details_User_Id ON public."specialist_details"(user_id);
-CREATE INDEX IF NOT EXISTS Idx_Specialist_Details_Verification_Status ON public."specialist_details"(verification_status);
-
-
-DROP TABLE IF EXISTS public."appointment";
-CREATE TABLE IF NOT EXISTS public."appointment"(
-    Id                              BIGINT          NOT NULL GENERATED ALWAYS AS IDENTITY,
-    user_id                         BIGINT          NOT NULL,
-    specialist_id                   BIGINT              NULL,
-    services                        TEXT            NOT NULL,
-    status_id                       BIGINT          NOT NULL,
-    scheduled_date                  TEXT                NULL,
-    start_appointment               TIMESTAMP           NULL,
-    end_appointment                 TIMESTAMP           NULL,
-    status_order                    BOOLEAN         NOT NULL,
-    paid                            BOOLEAN         NOT NULL,
-    address                         TEXT            NOT NULL,
-    payment_method                  BINGINT         NOT NULL,
-    amount                          TEXT            NOT NULL, 
-
-    CONSTRAINT Pk_Appointment_Id    PRIMARY KEY(Id),
-
-    CONSTRAINT fk_user_id               FOREIGN KEY (user_id)           REFERENCES public."user"(Id),
-    CONSTRAINT fk_specialist_id         FOREIGN KEY (specialist_id)     REFERENCES public."user"(Id),
-    CONSTRAINT fk_status_id             FOREIGN KEY (status_id)         REFERENCES public."classification"(Id)
-    CONSTRAINT fk_payment_method_id     FOREIGN KEY (payment_method)    REFERENCES public."classification"(Id)
+CREATE TABLE IF NOT EXISTS public.ratings
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    user_id bigint NOT NULL,
+    appointment_id bigint NOT NULL,
+    rating integer NOT NULL,
+    rated_by character varying(20) COLLATE pg_catalog."default" NOT NULL,
+    created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_ratings_id PRIMARY KEY (id)
 );
 
-CREATE INDEX IF NOT EXISTS Idx_appointment_user_id ON public."appointment"(user_id);
-CREATE INDEX IF NOT EXISTS Idx_appointment_specialist_id ON public."appointment"(specialist_id);
-CREATE INDEX IF NOT EXISTS Idx_appointment_scheduled_date ON public."appointment"(scheduled_date);
-CREATE INDEX IF NOT EXISTS Idx_appointment_status_id ON public."appointment"(status_id);
-
-CREATE INDEX IF NOT EXISTS Idx_appointment_user_scheduled_date ON public."appointment"(user_id, scheduled_date);
-CREATE INDEX IF NOT EXISTS Idx_appointment_specialist_scheduled_date ON public."appointment"(specialist_id, scheduled_date);
-
-DROP TABLE IF EXISTS public."appointment_payments";
-
-CREATE TABLE IF NOT EXISTS appointment_payments (
-    Id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
-    appointment_id BIGINT NOT NULL,
-    payment_method_id BIGINT NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    payment_date TIMESTAMP NOT NULL,
-    payment_status_id BIGINT NOT NULL,
-    transaction_reference VARCHAR(100) NULL UNIQUE,
-
-    CONSTRAINT pk_appointment_payments_id PRIMARY KEY(Id),
-    CONSTRAINT fk_payment_appointment FOREIGN KEY(appointment_id) REFERENCES appointment(Id),
-    CONSTRAINT fk_payment_method FOREIGN KEY(payment_method_id) REFERENCES classification(Id),
-    CONSTRAINT fk_payment_status FOREIGN KEY(payment_status_id) REFERENCES classification(Id),
-    CONSTRAINT chk_payment_amount_positive CHECK(amount > 0)
+CREATE TABLE IF NOT EXISTS public.specialist_cancelled_appointments
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    specialist_id bigint NOT NULL,
+    appointment_id bigint NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_specialist_cancelled_appointments_id PRIMARY KEY (id)
 );
 
-DROP TABLE IF EXISTS public."log";
-CREATE TABLE IF NOT EXISTS public."log"(
-    Id                  BIGINT  NOT     NULL GENERATED ALWAYS AS IDENTITY,
-    user_id             BIGINT          NULL,                 
-    log_type_id         BIGINT  NOT     NULL,             
-    appointment_id      BIGINT          NULL,          
-    details             TEXT    NOT     NULL,               
-    rating              INT     NOT     NULL DEFAULT 0,            
-    day_and_hour        TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT Pk_Log_Id PRIMARY KEY(Id),
-
-    CONSTRAINT fk_user_id        FOREIGN KEY (user_id)           REFERENCES public."user"(Id),
-    CONSTRAINT fk_log_type_id    FOREIGN KEY (log_type_id)       REFERENCES public."classification"(Id),
-    CONSTRAINT fk_appointment_id FOREIGN KEY (appointment_id)    REFERENCES public."appointment"(Id),
-    CONSTRAINT chk_log_rating    CHECK(rating BETWEEN 0 AND 5)
+CREATE TABLE IF NOT EXISTS public."user"
+(
+    id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    lastname character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    identification character varying(10) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    telephone_number character varying(15) COLLATE pg_catalog."default" NOT NULL,
+    password character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    role_id bigint NOT NULL,
+    date_of_birth date,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    picture_profile text COLLATE pg_catalog."default",
+    security_question character varying(100) COLLATE pg_catalog."default",
+    answer character varying(100) COLLATE pg_catalog."default",
+    score numeric(2, 1) DEFAULT 0.0,
+    specialization character varying(100) COLLATE pg_catalog."default",
+    status boolean DEFAULT true,
+    reset_code character varying(6) COLLATE pg_catalog."default",
+    gender genero,
+    secret_password character varying(120) COLLATE pg_catalog."default",
+    CONSTRAINT pk_user_id PRIMARY KEY (id),
+    CONSTRAINT uq_user_email UNIQUE (email)
 );
 
-CREATE INDEX IF NOT EXISTS idx_log_log_type_id ON public."log"(log_type_id);
-CREATE INDEX IF NOT EXISTS idx_log_day_and_hour ON public."log"(day_and_hour);
-CREATE INDEX IF NOT EXISTS idx_log_user_id ON public."log"(user_id);
-CREATE INDEX IF NOT EXISTS idx_log_appointment_id ON public."log"(appointment_id); 
+ALTER TABLE IF EXISTS public.appointment
+    ADD CONSTRAINT fk_payment_method_id FOREIGN KEY (payment_method)
+    REFERENCES public.classification (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
 
 
+ALTER TABLE IF EXISTS public.appointment
+    ADD CONSTRAINT fk_status_id FOREIGN KEY (status_id)
+    REFERENCES public.classification (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+CREATE INDEX IF NOT EXISTS idx_appointment_status_id
+    ON public.appointment(status_id);
 
---Index apartes--
-CREATE INDEX Idx_specialist_verification ON specialist_details(verification_status) WHERE verification_status = TRUE;
-CREATE INDEX Idx_appointment_date_range ON appointment(scheduled_date, status_id);
-CREATE INDEX Idx_specialist_rating ON specialist_details(average_rating) WHERE average_rating IS NOT NULL;
 
-CREATE TABLE IF NOT EXISTS PUBLIC."specialist_cancelled_appointments" (
-  id                BIGINT NOT  NULL    GENERATED ALWAYS AS IDENTITY,
-  specialist_id     BIGINT NOT  NULL, 
-  appointment_id    BIGINT NOT  NULL, 
-  created_at        TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
+ALTER TABLE IF EXISTS public.appointment
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id)
+    REFERENCES public."user" (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+CREATE INDEX IF NOT EXISTS idx_appointment_user_id
+    ON public.appointment(user_id);
 
-  CONSTRAINT pk_specialist_cancelled_appointments_id PRIMARY KEY(id) ,
-  CONSTRAINT fk_specialist_id FOREIGN KEY (specialist_id)  REFERENCES public."user"(id),
-  CONSTRAINT fk_appointment_id FOREIGN KEY (appointment_id)  REFERENCES public."appointment"(id)
-);
+
+ALTER TABLE IF EXISTS public.appointment_specialists
+    ADD CONSTRAINT appointment_specialists_appointment_id_fkey FOREIGN KEY (appointment_id)
+    REFERENCES public.appointment (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+
+ALTER TABLE IF EXISTS public.appointment_specialists
+    ADD CONSTRAINT appointment_specialists_specialist_id_fkey FOREIGN KEY (specialist_id)
+    REFERENCES public."user" (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+
+ALTER TABLE IF EXISTS public.appointment_specialists
+    ADD CONSTRAINT appointment_specialists_specialist_status_id_fkey FOREIGN KEY (status_id)
+    REFERENCES public.classification (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+
+ALTER TABLE IF EXISTS public.appointment_specialists
+    ADD CONSTRAINT fk_service_id FOREIGN KEY (service_id)
+    REFERENCES public.classification (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS idx_appointment_specialists_service
+    ON public.appointment_specialists(service_id);
+
+
+ALTER TABLE IF EXISTS public.classification
+    ADD CONSTRAINT fk_classification_parent FOREIGN KEY (parent_classification_id)
+    REFERENCES public.classification (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+
+ALTER TABLE IF EXISTS public.ratings
+    ADD CONSTRAINT ratings_appointment_id_fkey FOREIGN KEY (appointment_id)
+    REFERENCES public.appointment (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+
+ALTER TABLE IF EXISTS public.ratings
+    ADD CONSTRAINT ratings_user_id_fkey FOREIGN KEY (user_id)
+    REFERENCES public."user" (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+
+ALTER TABLE IF EXISTS public.specialist_cancelled_appointments
+    ADD CONSTRAINT fk_appointment_id FOREIGN KEY (appointment_id)
+    REFERENCES public.appointment (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+
+ALTER TABLE IF EXISTS public.specialist_cancelled_appointments
+    ADD CONSTRAINT fk_specialist_id FOREIGN KEY (specialist_id)
+    REFERENCES public."user" (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+
+ALTER TABLE IF EXISTS public."user"
+    ADD CONSTRAINT fk_role_id FOREIGN KEY (role_id)
+    REFERENCES public.classification (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+CREATE INDEX IF NOT EXISTS idx_user_role
+    ON public."user"(role_id);
+
+END;

@@ -6,7 +6,17 @@ import {
   DB_DATABASE,
   DB_PORT,
 } from "./config.js";
+//local -> 
+// export const pool = new pg.Pool({
+//   user: DB_USER,
+//   host: DB_HOST,
+//   password: DB_PASSWORD,
+//   database: DB_DATABASE,
+//   port: DB_PORT,
+//   ssl: false,
+// });
 
+//Render ->
 export const pool = new pg.Pool({
   user: DB_USER,
   host: DB_HOST,
@@ -14,11 +24,12 @@ export const pool = new pg.Pool({
   database: DB_DATABASE,
   port: DB_PORT,
   ssl: {
-    rejectUnauthorized : false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
-pool.query("SELECT NOW()")
+pool
+  .query("SELECT NOW()")
   .then((result) => {
     console.log("Conexión exitosa.");
     console.log(result.rows[0].now);

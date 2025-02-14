@@ -1,0 +1,123 @@
+/* inicio.module.css */
+
+.app_container {
+  position: relative;
+  min-height: 100vh;
+}
+
+.recommendation_bubble {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.recommendation_bubble:hover {
+  transform: scale(1.1);
+}
+
+.bubble_icon {
+  background-color: #ec4899;
+  color: white;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation_panel {
+  position: fixed;
+  bottom: 120px;
+  right: 32px;
+  background-color: white;
+  width: 300px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+}
+
+.recommendation_panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.loading_message {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.recommendations_list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recommendation_item {
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  color: #2d3748;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.recommendation_item:hover {
+  background-color: #e2e8f0;
+}
+
+.no_recommendations {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center; 
+}
+
+.popular_service_no_link {
+  padding: 8px;
+  margin-top: 8px;
+  background-color: #f3f4f6;
+  border-radius: 4px;
+  cursor: default;
+}
+
+.popular_service {
+  margin: 0.6rem;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.carousel_container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.categories_container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.greeting {
+  font-size: 1.1em;
+  color: #4a4a4a;
+  margin-bottom: 0.5em;
+  text-align: center;
+  font-style: italic;
+}

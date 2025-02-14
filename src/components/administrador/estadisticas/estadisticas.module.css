@@ -20,6 +20,27 @@
   text-align: center;
 }
 
+.dateRangePicker {
+  display: flex;
+  align-items: center;
+}
+
+.dateInputs {
+  display: flex;
+  align-items: center;
+}
+
+.dateInput {
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.dateSeparator {
+  margin: 0 10px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

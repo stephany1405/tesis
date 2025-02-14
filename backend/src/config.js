@@ -9,7 +9,7 @@ export const SECRET_PASSWORD_JWT = process.env.SECRET_PASSWORD;
 
 export const EMAIL = process.env.EMAIL;
 export const PASSWORD = process.env.PASSWORD;
-
+export const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 // --------------------------------------------------------------------------------------
 
 import nodemailer from "nodemailer";

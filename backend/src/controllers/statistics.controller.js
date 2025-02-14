@@ -47,70 +47,113 @@ export const getAppointmentStatistics = async (req, res) => {
     });
   }
 };
-
 export const getClientStatistics = async (req, res) => {
   try {
+    let { start, end } = req.query;
+
+    // Si no se especifican fechas, para "Clientes Nuevos" filtramos por hoy
+    let startDate, endDate;
+    if (!start && !end) {
+      const today = new Date();
+      startDate = new Date(today.setHours(0, 0, 0, 0));
+      // Para el fin del día, clonamos el objeto o creamos uno nuevo:
+      endDate = new Date();
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      startDate = start ? new Date(start) : null;
+      endDate = end ? new Date(end) : null;
+      if (endDate) endDate.setHours(23, 59, 59, 999);
+    }
+
+    // 1. Total de Clientes (todos los activos sin filtro de fecha)
     const totalClientsResult = await pool.query(`
       SELECT COUNT(*) as total
-      FROM public.USER
-      WHERE role_id = 57 AND status = true
-    `);
-
-    const newClientsResult = await pool.query(`
-      SELECT COUNT(*) as new_clients
-      FROM public.USER
+      FROM public.user
       WHERE role_id = 57 
-      AND status = true
-      AND DATE(created_at) = CURRENT_DATE
+        AND status = true
     `);
 
-    const ageGroupsResult = await pool.query(`
-      WITH age_calc AS (
-        SELECT 
-          EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth::date)) as age
-        FROM public.USER
-        WHERE role_id = 57 AND status = true
-      )
+    // 2. Clientes Nuevos (filtrado por fecha: hoy o el rango seleccionado)
+    let conditions = [];
+    let values = [];
+    if (startDate) {
+      values.push(startDate.toISOString());
+      conditions.push(`created_at >= $${values.length}`);
+    }
+    if (endDate) {
+      values.push(endDate.toISOString());
+      conditions.push(`created_at <= $${values.length}`);
+    }
+    const newClientsQuery = `
+      SELECT COUNT(*) as new_clients
+      FROM public.user
+      WHERE role_id = 57
+        AND status = true
+        ${conditions.length ? "AND " + conditions.join(" AND ") : ""}
+    `;
+    const newClientsResult = await pool.query(newClientsQuery, values);
+
+    // 3. Grupos de Edad (usando data total sin filtro de fecha)
+    const ageGroupsQuery = `
+  SELECT 
+    CASE 
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth)) BETWEEN 18 AND 25 THEN '18-25'
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth)) BETWEEN 26 AND 35 THEN '26-35'
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth)) BETWEEN 36 AND 45 THEN '36-45'
+      ELSE '46+'
+    END AS name,
+    COUNT(*) AS value
+  FROM public.user
+  WHERE role_id = 57
+    AND status = true
+  GROUP BY 
+    CASE 
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth)) BETWEEN 18 AND 25 THEN '18-25'
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth)) BETWEEN 26 AND 35 THEN '26-35'
+      WHEN EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth)) BETWEEN 36 AND 45 THEN '36-45'
+      ELSE '46+'
+    END
+  ORDER BY name
+`;
+
+    const ageGroupsResult = await pool.query(ageGroupsQuery);
+
+    // 4. Grupos de Género (usando data total sin filtro de fecha)
+    const genderGroupsQuery = `
       SELECT 
         CASE 
-          WHEN age BETWEEN 18 AND 25 THEN '18-25'
-          WHEN age BETWEEN 26 AND 35 THEN '26-35'
-          WHEN age BETWEEN 36 AND 45 THEN '36-45'
-          ELSE '46+'
-        END as name,
-        COUNT(*) as value
-      FROM age_calc
-      GROUP BY name
+          WHEN gender = 'femenino' THEN 'Femenino'
+          WHEN gender = 'masculino' THEN 'Masculino'
+          ELSE 'No especificado'
+        END AS name, 
+        COUNT(*) AS value
+      FROM public.user
+      WHERE role_id = 57
+        AND status = true
+      GROUP BY gender
       ORDER BY name
-    `);
-
-    const genderGroupsResult = await pool.query(`
-    SELECT 
-    CASE 
-        WHEN gender = 'femenino' THEN 'Femenino'
-        WHEN gender = 'masculino' THEN 'Masculino'
-        ELSE 'No especificado' 
-    END AS name, 
-    COUNT(*) AS value
-    FROM public."user"
-    WHERE role_id = 57 AND status = TRUE 
-    GROUP BY gender  -- Incluir "gender" aquí
-    ORDER BY name;
-    `);
+    `;
+    const genderGroupsResult = await pool.query(genderGroupsQuery);
 
     res.json({
       totalClients: totalClientsResult.rows[0].total,
-      newClients: newClientsResult.rows[0].new_clients,
+      newClients: newClientsResult.rows[0]?.new_clients || 0,
       ageGroups: ageGroupsResult.rows,
       genderGroups: genderGroupsResult.rows,
     });
   } catch (error) {
     console.error("Error en getClientStatistics:", error);
-    res.status(500).json({ error: "error interno en el servidor" });
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 };
+
 export const getSpecialistStatistics = async (req, res) => {
   try {
+    const { start, end } = req.query;
+
+    const startDate = start ? new Date(start).toISOString() : null;
+    const endDate = end ? new Date(end + "T23:59:59").toISOString() : null;
+
     const query = `
       SELECT 
         u.id,
@@ -122,15 +165,20 @@ export const getSpecialistStatistics = async (req, res) => {
       LEFT JOIN 
         appointment_specialists aps ON u.id = aps.specialist_id
         AND aps.status_id = 73 
+        ${startDate ? "AND aps.start_appointment >= $1" : ""}
+        ${endDate ? "AND aps.start_appointment <= $2" : ""}
       WHERE 
         u.role_id = 58
       GROUP BY 
         u.id, u.name, u.lastname
       ORDER BY 
         ingresos DESC;
-      `;
+    `;
 
-    const result = await pool.query(query);
+    const result = await pool.query(
+      query,
+      [startDate, endDate].filter(Boolean)
+    );
 
     const processedData = result.rows.map((row) => ({
       nombre: row.nombre,
@@ -147,29 +195,54 @@ export const getSpecialistStatistics = async (req, res) => {
 
 export const dashboardConnect = async (req, res) => {
   try {
+    const { start, end } = req.query;
+
     const { rows } = await pool.query(
       `SELECT ID FROM classification WHERE classification_type = 'Asignando especialista'`
     );
-
     const status_id = parseInt(rows[0].id);
-    const newClientsResult = await pool.query(`
-   SELECT COUNT(*) as new_clients
-   FROM public.USER
-   WHERE role_id = 57
-   AND status = true
-   AND DATE(created_at) = CURRENT_DATE
- `);
 
-    const services =
-      await pool.query(`SELECT COUNT(*) as service from PUBLIC.APPOINTMENT
- `);
-
-    const pendingQuotes = await pool.query(
-      `SELECT COUNT(*) as pendingQuotes from PUBLIC.APPOINTMENT WHERE status_id = $1
- `,
-      [status_id]
+    // Consulta para nuevos clientes
+    let newClientsQuery = `
+      SELECT COUNT(*) as new_clients
+      FROM public.user
+      WHERE role_id = 57
+      AND status = true
+    `;
+    const newClientsValues = [];
+    if (start && end) {
+      newClientsQuery += ` AND DATE(created_at) BETWEEN $1 AND $2`;
+      newClientsValues.push(start, end);
+    } else {
+      newClientsQuery += ` AND DATE(created_at) = CURRENT_DATE`;
+    }
+    const newClientsResult = await pool.query(
+      newClientsQuery,
+      newClientsValues
     );
 
+    let servicesQuery = `SELECT COUNT(*) as service FROM PUBLIC.APPOINTMENT`;
+    const servicesValues = [];
+    if (start && end) {
+      servicesQuery += ` WHERE DATE(created_at) BETWEEN $1 AND $2`;
+      servicesValues.push(start, end);
+    }
+    const services = await pool.query(servicesQuery, servicesValues);
+
+    let pendingQuotesQuery = `
+      SELECT COUNT(*) as pendingQuotes 
+      FROM PUBLIC.APPOINTMENT 
+      WHERE status_id = $1
+    `;
+    const pendingQuotesValues = [status_id];
+    if (start && end) {
+      pendingQuotesQuery += ` AND DATE(created_at) BETWEEN $2 AND $3`;
+      pendingQuotesValues.push(start, end);
+    }
+    const pendingQuotes = await pool.query(
+      pendingQuotesQuery,
+      pendingQuotesValues
+    );
     res.status(200).json({
       newClientsResult: newClientsResult.rows[0].new_clients || 0,
       services: services.rows[0].service || 0,
@@ -180,9 +253,11 @@ export const dashboardConnect = async (req, res) => {
     res.status(500).json({ error: "error interno en el servidor" });
   }
 };
+
 export const getPaymentMethod = async (req, res) => {
   try {
-    const query = `
+    const { start, end } = req.query;
+    let query = `
       SELECT 
         CASE
           WHEN "payment_method" = 59 THEN 'Tarjeta'
@@ -192,9 +267,15 @@ export const getPaymentMethod = async (req, res) => {
         END AS metodo,
         COUNT(*) AS cantidad
       FROM appointment
-      GROUP BY "payment_method"
     `;
-    const result = await pool.query(query);
+    const values = [];
+    if (start && end) {
+      query += ` WHERE "created_at" BETWEEN $1 AND $2`;
+      values.push(start, end);
+    }
+    query += ` GROUP BY "payment_method"`;
+
+    const result = await pool.query(query, values);
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener los métodos de pago:", error);

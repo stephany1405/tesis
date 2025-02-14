@@ -1,10 +1,10 @@
 .homeBody {
-  padding-left: 280px; /* Same as sidebar width */
+  padding-left: 280px;
   transition: padding-left 0.3s ease;
 }
 
 .homeBodyCollapsed {
-  padding-left: 80px; /* Same as collapsed sidebar width */
+  padding-left: 80px;
 }
 
 .adminDashboard {
@@ -94,4 +94,36 @@
   font-size: 2rem;
   font-weight: 700;
   color: #f518ab;
+}
+.dateFilters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.dateFilters input[type="date"] {
+  padding: 0.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.dateFilters span {
+  color: #666;
+  font-size: 0.9rem;
+}
+.homeServiceButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #fc8bcd;
 }
