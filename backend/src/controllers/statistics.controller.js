@@ -51,12 +51,10 @@ export const getClientStatistics = async (req, res) => {
   try {
     let { start, end } = req.query;
 
-    // Si no se especifican fechas, para "Clientes Nuevos" filtramos por hoy
     let startDate, endDate;
     if (!start && !end) {
       const today = new Date();
       startDate = new Date(today.setHours(0, 0, 0, 0));
-      // Para el fin del día, clonamos el objeto o creamos uno nuevo:
       endDate = new Date();
       endDate.setHours(23, 59, 59, 999);
     } else {
@@ -65,7 +63,6 @@ export const getClientStatistics = async (req, res) => {
       if (endDate) endDate.setHours(23, 59, 59, 999);
     }
 
-    // 1. Total de Clientes (todos los activos sin filtro de fecha)
     const totalClientsResult = await pool.query(`
       SELECT COUNT(*) as total
       FROM public.user
@@ -73,7 +70,6 @@ export const getClientStatistics = async (req, res) => {
         AND status = true
     `);
 
-    // 2. Clientes Nuevos (filtrado por fecha: hoy o el rango seleccionado)
     let conditions = [];
     let values = [];
     if (startDate) {
@@ -93,7 +89,6 @@ export const getClientStatistics = async (req, res) => {
     `;
     const newClientsResult = await pool.query(newClientsQuery, values);
 
-    // 3. Grupos de Edad (usando data total sin filtro de fecha)
     const ageGroupsQuery = `
   SELECT 
     CASE 
@@ -118,7 +113,6 @@ export const getClientStatistics = async (req, res) => {
 
     const ageGroupsResult = await pool.query(ageGroupsQuery);
 
-    // 4. Grupos de Género (usando data total sin filtro de fecha)
     const genderGroupsQuery = `
       SELECT 
         CASE 
@@ -202,7 +196,6 @@ export const dashboardConnect = async (req, res) => {
     );
     const status_id = parseInt(rows[0].id);
 
-    // Consulta para nuevos clientes
     let newClientsQuery = `
       SELECT COUNT(*) as new_clients
       FROM public.user

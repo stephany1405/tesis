@@ -113,11 +113,15 @@ const EstadisticasClientes = () => {
       return (pageWidth - textWidth) / 2;
     };
 
-    const img = new Image();
-    img.src = logo;
-    pdf.addImage(img, "PNG", margin, currentY, 40, 15);
-    currentY += 20;
-
+    pdf.setFontSize(16)
+    pdf.setFont("helvetica", "bold")
+    pdf.text("UÑIMAS", margin, currentY)
+    pdf.setFontSize(10)
+    pdf.setFont("helvetica", "normal")
+    pdf.text("Av Casanova al frente de Damasco Sabana Grande", margin, currentY + 7)
+    pdf.text("0412-1314372", margin, currentY + 14)
+    currentY += 20
+    
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
     const title = "REPORTE DE ESTADÍSTICAS DE CLIENTES";

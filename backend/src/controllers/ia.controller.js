@@ -1,11 +1,10 @@
 import { pool } from "../db.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
 export const getServicesData = async () => {
   try {
     const categoriesQuery = `
         SELECT id, classification_type AS name
-        FROM classification
+        FROM public.classification
         WHERE service_category = true
       `;
 
@@ -17,8 +16,8 @@ export const getServicesData = async () => {
     c.classification_type AS category_name,
     s.id as classification_id,
     s.classification_type
-FROM classification s
-JOIN classification c ON s.parent_classification_id = c.id
+FROM public.classification s
+JOIN public.classification c ON s.parent_classification_id = c.id
 WHERE s.service_category = false AND s.is_active = true;
       `;
 
@@ -69,7 +68,7 @@ export const generateRecommendations = async (req, res) => {
       .flatMap((row) => JSON.parse(row.services))
       .map((service) => service.id)
       .filter((id, index, self) => self.indexOf(id) === index);
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const genAI = new GoogleGenerativeAI("AIzaSyA54ISLfYno0VU577oHe6d1zAQBowctdks");
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     let greetingPrompt;
@@ -93,8 +92,8 @@ export const generateRecommendations = async (req, res) => {
       const historyContext =
         serviceNames.length > 0
           ? `El usuario ha disfrutado previamente de: ${serviceNames.join(
-              ", "
-            )}.`
+            ", "
+          )}.`
           : "";
 
       greetingPrompt = `
@@ -156,9 +155,8 @@ export const generateRecommendations = async (req, res) => {
           );
           return null;
         }
-        const url = `http://localhost:5173/servicios/${service.classification_type.toLowerCase()}/${
-          service.classification_id
-        }`;
+        const url = `http://localhost:5173/servicios/${service.classification_type.toLowerCase()}/${service.classification_id
+          }`;
         return {
           ...service,
           url,
@@ -193,9 +191,8 @@ async function getPopularServices(res, allServices, greeting = "¡Bienvenido!") 
 
         return {
           ...service,
-          url: `http://localhost:5173/servicios/${service.classification_type.toLowerCase()}/${
-            service.classification_id
-          }`,
+          url: `http://localhost:5173/servicios/${service.classification_type.toLowerCase()}/${service.classification_id
+            }`,
         };
       })
       .filter((service) => service !== null);
