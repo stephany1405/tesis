@@ -59,28 +59,24 @@ export const generateRecommendations = async (req, res) => {
     allServices = servicesData.services;
 
     const historyQuery = `
-          SELECT services FROM appointment
-          WHERE user_id = $1
-        `;
+              SELECT services FROM appointment
+              WHERE user_id = $1
+          `;
     const historyResult = await pool.query(historyQuery, [userId]);
 
     const userServices = historyResult.rows
       .flatMap((row) => JSON.parse(row.services))
       .map((service) => service.id)
       .filter((id, index, self) => self.indexOf(id) === index);
-    const genAI = new GoogleGenerativeAI("AIzaSyA54ISLfYno0VU577oHe6d1zAQBowctdks");
+    const genAI = new GoogleGenerativeAI(
+      "AIzaSyA54ISLfYno0VU577oHe6d1zAQBowctdks" 
+    );
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     let greetingPrompt;
 
     if (userServices.length === 0) {
-      greetingPrompt = `Eres un asistente amigable de un salón de belleza.
-            Genera un saludo corto (máximo 30 palabras) para un nuevo usuario.
-            Dale la bienvenida y expresa entusiasmo por su primera visita.
-            El saludo debe ser diferente cada vez, creativo y entusiasta. Evita frases repetitivas o genéricas.
-            NO INCLUYAS NINGUN TIPO DE LISTA, SOLO EL SALUDO.
-            NO USES NOMBRES DE USUARIO NI NOMBRES DE SALONES, sé genérico pero amigable.
-            `;
+      greetingPrompt = `Eres un asistente amigable de un salón de belleza...`;
     } else {
       const serviceNames = userServices
         .map((serviceId) => {
@@ -92,19 +88,11 @@ export const generateRecommendations = async (req, res) => {
       const historyContext =
         serviceNames.length > 0
           ? `El usuario ha disfrutado previamente de: ${serviceNames.join(
-            ", "
-          )}.`
+              ", "
+            )}.`
           : "";
 
-      greetingPrompt = `
-              Eres un asistente amigable de un salón de belleza.
-              Genera un saludo corto (máximo 30 palabras) y personalizado para un usuario que ha reservado servicios recientemente.
-              ${historyContext}
-              El saludo debe ser diferente cada vez, creativo y entusiasta.  Sé creativo y entusiasta.
-              NO menciones los IDs de los servicios.  Usa el historial de servicios SOLO como contexto, NO lo incluyas directamente en el saludo visible.
-              NO INCLUYAS NINGUN TIPO DE LISTA, SOLO EL SALUDO.
-              NO USES NOMBRES DE USUARIO NI NOMBRES DE SALONES, sé genérico pero amigable.
-            `;
+      greetingPrompt = `Eres un asistente amigable de un salón de belleza...`; 
     }
 
     const greetingResult = await model.generateContent(greetingPrompt);
@@ -116,20 +104,44 @@ export const generateRecommendations = async (req, res) => {
     }
 
     const recommendationPrompt = `
-    Eres un recomendador de servicios de belleza. 
-    Historial del usuario: ${JSON.stringify(userServices)}
-    Catálogo completo (con nombres de servicios y categorías): ${JSON.stringify(
-      allServices
-    )}
-
-    Recomienda EXCLUSIVAMENTE 3 servicios relevantes del catálogo en formato JSON válido,
-    usando este formato: [{"id": 1}, {"id": 2}, {"id": 3}].  Debes incluir el id del servicio.
-    Considera:
-    1. Servicios relacionados con los que el usuario ya ha usado
-    2. Servicios complementarios
-    3. Servicios populares si no hay suficientes recomendaciones
-    NO INCLUYAS NINGÚN TEXTO EXTRA NI COMENTARIOS (ni siquiera el saludo)
-  `;
+      Eres un recomendador de servicios de belleza.  Tu tarea es la siguiente:
+      
+      1.  **Si el usuario tiene historial:** Recomienda 3 servicios del catálogo, considerando las siguientes prioridades, EN ORDEN:
+          *   Servicios *relacionados* con los que el usuario ya ha usado.
+          *   Servicios *complementarios* a los que ha usado.
+          *   Si no hay suficientes servicios relacionados o complementarios, completa las 3 recomendaciones con servicios *populares*.
+      
+      2.  **Si el usuario NO tiene historial:** Recomienda los 3 servicios *más populares* del catálogo.
+      
+      3. **SIEMPRE, para cada servicio recomendado, genera su URL de categoría correspondiente y necesitaré que seas muy muy muy preciso con los nombres de las categorias ( category_name) y sus id (category_id).**
+      
+      **Datos de entrada:**
+      
+      *   Historial del usuario (array de IDs de servicios): ${JSON.stringify(
+        userServices
+      )}
+      *   Catálogo completo (con nombres de servicios, categorías, classification_type y classification_id): ${JSON.stringify(
+        allServices
+      )}
+      
+      **Formato de salida (JSON ESTRICTO):**
+      
+      \`\`\`json
+      [
+        {
+          "id": ID_DEL_SERVICIO,
+          "url": "http://localhost:5173/servicios/category_name/category_id"
+        }
+      ]
+      \`\`\`
+      
+      **Reglas OBLIGATORIAS:**
+      
+      *   Devuelve **EXACTAMENTE 3** servicios en formato JSON.  Respeta *estrictamente* el formato de salida.
+      *   La "url" debe construirse *exactamente* como se muestra en el ejemplo, usando el "classification_type" y "classification_id" del servicio recomendado. Reemplaza "ID_DEL_SERVICIO", "classification_type_del_servicio" y "classification_id_del_servicio" con los valores correctos.
+      *   NO incluyas NINGÚN texto adicional, comentarios, explicaciones, ni siquiera el saludo.  SOLO el JSON.
+      * Si el historial de usuario esta vacio, recomienda los 3 servicios mas populares.
+      `;
 
     const result = await model.generateContent(recommendationPrompt);
     const responseText = (await result.response).text();
@@ -139,35 +151,39 @@ export const generateRecommendations = async (req, res) => {
       .replace(/```/g, "")
       .trim();
 
-    const response = JSON.parse(cleanResponse);
+    try {
+      const response = JSON.parse(cleanResponse);
 
-    if (!Array.isArray(response)) {
-      throw new Error("Formato de respuesta inválido");
+      if (!Array.isArray(response)) {
+        throw new Error("Formato de respuesta inválido");
+      }
+
+      const recommendedServices = response
+        .map((item) => {
+          const service = allServices.find((s) => s.id === String(item.id));
+          if (!service) {
+            console.warn("Servicio no encontrado:", item.id);
+            return null;
+          }
+
+          return {
+            ...service,
+            url: item.url,
+          };
+        })
+        .filter((service) => service !== null);
+
+      res.json({
+        greeting: cleanGreeting,
+        recommendations: recommendedServices,
+      });
+    } catch (parseError) {
+      console.error("Error al parsear la respuesta JSON:", parseError);
+      console.error("Respuesta cruda de la IA:", responseText);
+      throw new Error(
+        "Respuesta de IA no es un JSON válido: " + parseError.message
+      );
     }
-
-    const recommendedServices = allServices
-      .filter((service) => response.some((r) => r.id === service.id))
-      .map((service) => {
-        if (!service.classification_type || !service.classification_id) {
-          console.warn(
-            "Warning: Service missing classification data:",
-            service
-          );
-          return null;
-        }
-        const url = `http://localhost:5173/servicios/${service.classification_type.toLowerCase()}/${service.classification_id
-          }`;
-        return {
-          ...service,
-          url,
-        };
-      })
-      .filter((service) => service !== null);
-
-    res.json({
-      greeting: cleanGreeting,
-      recommendations: recommendedServices.slice(0, 3),
-    });
   } catch (error) {
     console.error("Error:", error);
     const defaultGreeting =
@@ -191,8 +207,9 @@ async function getPopularServices(res, allServices, greeting = "¡Bienvenido!") 
 
         return {
           ...service,
-          url: `http://localhost:5173/servicios/${service.classification_type.toLowerCase()}/${service.classification_id
-            }`,
+          url: `http://localhost:5173/servicios/${service.classification_type.toLowerCase()}/${
+            service.classification_id
+          }`,
         };
       })
       .filter((service) => service !== null);

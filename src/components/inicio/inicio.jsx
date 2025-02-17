@@ -116,6 +116,7 @@ const Inicio = () => {
                   recommendations.map((service) => (
                     <Link
                       key={service.id}
+                      to={service.url}
                       className={styles.recommendation_item}
                     >
                       {service.name} - Categoria :{" "}
@@ -129,6 +130,7 @@ const Inicio = () => {
                     {categorias.slice(0, 3).map((cat) => (
                       <div
                         key={cat.id}
+                        to={cat.url}
                         className={styles.popular_service_no_link}
                       >
                         {cat.name}
