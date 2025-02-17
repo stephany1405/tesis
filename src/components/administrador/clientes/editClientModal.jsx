@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -28,7 +28,7 @@ const EditClientModal = ({ client, onClose, onUpdateClient }) => {
   }, [client]);
 
   const validateForm = async () => {
-    let tempErrors = {};
+    const tempErrors = {};
     let isValid = true;
 
     if (formData.identification !== client.identification) {
@@ -72,10 +72,16 @@ const EditClientModal = ({ client, onClose, onUpdateClient }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    if (name === "identification") {
+      const cleanValue = value.replace(/\D/g, "").slice(0, 8);
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }));
+    } else if (name === "telephone_number") {
+      const cleanValue = value.replace(/\D/g, "").slice(0, 11);
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -165,12 +171,13 @@ const EditClientModal = ({ client, onClose, onUpdateClient }) => {
           <div className="formGroup">
             <label htmlFor="identification">Identificación</label>
             <input
-              type="text"
+              type="tel"
               id="identification"
               name="identification"
               value={formData.identification}
               onChange={handleChange}
               required
+              maxLength={8}
             />
             {errors.identification && (
               <p className="errorText">{errors.identification}</p>
@@ -180,12 +187,13 @@ const EditClientModal = ({ client, onClose, onUpdateClient }) => {
           <div className="formGroup">
             <label htmlFor="telephone_number">Teléfono</label>
             <input
-              type="text"
+              type="tel"
               id="telephone_number"
               name="telephone_number"
               value={formData.telephone_number}
               onChange={handleChange}
               required
+              maxLength={11}
               placeholder="Ej: 04241234567"
             />
             {errors.telephone_number && (

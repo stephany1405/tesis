@@ -1,48 +1,42 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "./editmodal.css";
 
-// Función para parsear las especialidades (¡CORREGIDA!)
 const parsespecialization = (specializationString) => {
   if (!specializationString) {
     return [];
   }
   try {
-    // Intenta parsear como JSON.  Esta es la clave.
     const parsed = JSON.parse(specializationString);
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error("Error parsing specialization:", error, specializationString);
-    return []; // Devuelve un array vacío si hay error
+    return [];
   }
 };
 
-// Función para formatear las especialidades (¡CORREGIDA!)
 const formatspecializationForDB = (specialization) => {
   if (!specialization || specialization.length === 0) {
-    return null; // O "" si prefieres una cadena vacía en la BD
+    return null;
   }
-  // Convierte el array a una cadena JSON.
   return JSON.stringify(specialization);
 };
 
 const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
-  // Estado inicial del formulario (¡CORREGIDO!)
   const [formData, setFormData] = useState({
     name: client.specialist_name || "",
     lastname: client.specialist_lastname || "",
     identification: client.specialist_identification || "",
     telephone_number: client.specialist_phone || "",
     email: client.specialist_email || "",
-    specialization: [], // Inicializa como array vacío
+    specialization: [],
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // useEffect para cargar los datos del cliente (¡CORREGIDO!)
   useEffect(() => {
     if (client) {
       setFormData({
@@ -51,7 +45,6 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
         identification: client.specialist_identification || "",
         telephone_number: client.specialist_phone || "",
         email: client.specialist_email || "",
-        // Usa parsespecialization SOLO si client.specialization existe y NO es un array
         specialization: client.specialization
           ? Array.isArray(client.specialization)
             ? client.specialization
@@ -61,14 +54,13 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
     }
   }, [client]);
 
-  const formatSelectedspecialization = (specialization) => specialization.join(", ");
+  const formatSelectedspecialization = (specialization) =>
+    specialization.join(", ");
 
-  //Validaciones del formulario
   const validateForm = async () => {
-    let tempErrors = {};
+    const tempErrors = {};
     let isValid = true;
 
-    //Verifica la identificacion
     if (
       formData.identification &&
       formData.identification !== client.specialist_identification
@@ -86,7 +78,6 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
       }
     }
 
-    //Valida el numero de telefono
     if (formData.telephone_number) {
       const phoneRegex = /^(0424|0414|0416|0426|0412)\d{7}$/;
       if (!phoneRegex.test(formData.telephone_number)) {
@@ -95,7 +86,6 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
         isValid = false;
       }
     }
-    //Verifica el correo
     if (formData.email && formData.email !== client.specialist_email) {
       try {
         const response = await axios.get(
@@ -114,16 +104,20 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
     return isValid;
   };
 
-  //Manejo de los cambios de los inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    if (name === "identification") {
+      const cleanValue = value.replace(/\D/g, "").slice(0, 8);
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }));
+    } else if (name === "telephone_number") {
+      const cleanValue = value.replace(/\D/g, "").slice(0, 11);
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  //Manejo de las especialidades
   const handleSpecialtyChange = (e) => {
     const { value, checked } = e.target;
     setFormData((prev) => {
@@ -131,12 +125,14 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
       if (checked) {
         return { ...prev, specialization: [...specialization, value] };
       } else {
-        return { ...prev, specialization: specialization.filter((s) => s !== value) };
+        return {
+          ...prev,
+          specialization: specialization.filter((s) => s !== value),
+        };
       }
     });
   };
 
-  //Manejo del envio del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -147,19 +143,17 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
         const updatedFields = {};
         Object.entries(formData).forEach(([key, value]) => {
           if (key === "specialization") {
-            // Compara las especialidades, formateándolas primero
             const currentspecialization = client.specialization
               ? Array.isArray(client.specialization)
                 ? client.specialization
                 : parsespecialization(client.specialization)
               : [];
 
-            // Compara las versiones JSON stringificadas
             if (
               JSON.stringify(value.sort()) !==
               JSON.stringify(currentspecialization.sort())
             ) {
-              updatedFields.specialization = value; // Envía el array, no la cadena formateada
+              updatedFields.specialization = value;
             }
           } else if (key === "name" && value !== client.specialist_name) {
             updatedFields.name = value;
@@ -186,7 +180,7 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
         if (Object.keys(updatedFields).length > 0) {
           const response = await axios.put(
             `http://localhost:3000/api/actualizar-especialista/${client.specialist_id}`,
-            updatedFields //Se envia el objeto actualizado
+            updatedFields
           );
 
           if (response.status === 200) {
@@ -195,10 +189,9 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
               autoClose: 3000,
             });
 
-            // Actualiza el cliente en el estado del componente padre (¡IMPORTANTE!)
             const updatedClient = {
-              ...client, // Copia las propiedades existentes
-              ...response.data.specialist, // Sobrescribe con las nuevas
+              ...client,
+              ...response.data.specialist,
             };
 
             if (typeof onUpdateClient === "function") {
@@ -259,11 +252,12 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
           <div className="formGroup">
             <label htmlFor="identification">Identificación</label>
             <input
-              type="text"
+              type="tel"
               id="identification"
               name="identification"
               value={formData.identification}
               onChange={handleChange}
+              maxLength={8}
             />
             {errors.identification && (
               <p className="errorText">{errors.identification}</p>
@@ -273,11 +267,12 @@ const EditSpecialistModal = ({ client, onClose, onUpdateClient }) => {
           <div className="formGroup">
             <label htmlFor="telephone_number">Teléfono</label>
             <input
-              type="text"
+              type="tel"
               id="telephone_number"
               name="telephone_number"
               value={formData.telephone_number}
               onChange={handleChange}
+              maxLength={11}
               placeholder="Ej: 04241234567"
             />
             {errors.telephone_number && (
