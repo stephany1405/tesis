@@ -231,11 +231,11 @@ const ForgotPassword = () => {
                 className={styles.input}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                maxLength={8}
+                maxLength={12}
                 pattern="[a-zA-Z0-9]{1,8}"
                 required
               />
-              <p className={styles.passwordHint}>(máx. 8 caracteres, sin caracteres especiales)</p>
+              <p className={styles.passwordHint}>(máx. 12 caracteres, sin caracteres especiales)</p>
             </div>
             <div className={styles.inputGroup}>
               <label htmlFor="confirmPassword" className={styles.label}>
@@ -247,7 +247,7 @@ const ForgotPassword = () => {
                 className={styles.input}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                maxLength={8}
+                maxLength={12}
                 pattern="[a-zA-Z0-9]{1,8}"
                 required
               />

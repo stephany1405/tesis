@@ -73,8 +73,8 @@ const Registro = () => {
   }
 
   const validatePassword = (password) => {
-    if (password.length !== 8 || !/^[A-Za-z0-9]{8}$/.test(password)) {
-      return "Debe tener exactamente 8 caracteres alfanuméricos"
+    if (password.length < 8 || password.length > 12 || !/^[A-Za-z0-9]{8,12}$/.test(password)) {
+      return "Debe tener entre 8 y 12 caracteres alfanuméricos"
     }
     return ""
   }
@@ -89,10 +89,11 @@ const Registro = () => {
   const validateDateOfBirth = (date) => {
     const birthDate = new Date(date)
     const now = new Date()
+    const eighteenYearsAgo = new Date(now.getFullYear() - 18, now.getMonth(), now.getDate())
     const hundredYearsAgo = new Date(now.getFullYear() - 100, now.getMonth(), now.getDate())
 
-    if (birthDate > now) {
-      return "No es válida esa fecha"
+    if (birthDate > eighteenYearsAgo) {
+      return "Debe ser mayor de 18 años para registrarse"
     }
     if (birthDate < hundredYearsAgo) {
       return "La fecha no puede ser más de 100 años atrás"
@@ -101,8 +102,8 @@ const Registro = () => {
   }
 
   const validateSecurityAnswer = (answer) => {
-    if (answer.length < 3 || /[^a-zA-Z0-9\s]/.test(answer)) {
-      return "La respuesta debe tener al menos 3 caracteres y solo puede contener letras, números y espacios"
+    if (answer.length > 14 || /[^a-zA-Z0-9\s]/.test(answer)) {
+      return "La respuesta debe tener máximo 14 caracteres y solo puede contener letras, números y espacios"
     }
     return ""
   }
@@ -127,15 +128,18 @@ const Registro = () => {
         newValue = value.replace(/\D/g, "").slice(0, 8)
         break
       case "email":
-        newValue = value 
+        newValue = value
         break
       case "password":
       case "confirmPassword":
-        newValue = value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8)
+        newValue = value.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12)
         break
       case "security_answer":
       case "confirm_security_answer":
-        newValue = value.replace(/[^a-zA-Z0-9\s]/g, "")
+        newValue = value.replace(/[^a-zA-Z0-9\s]/g, "").slice(0, 14)
+        break
+      case "telephone_number":
+        newValue = value.replace(/\D/g, "").slice(0, 11)
         break
       default:
         newValue = value
@@ -146,6 +150,8 @@ const Registro = () => {
     let error = ""
     if (name === "name" || name === "lastname") {
       error = validateName(newValue)
+    } else if (name === "identification") {
+      error = newValue.length !== 8 ? "Debe tener exactamente 8 números" : ""
     } else if (name === "password") {
       error = validatePassword(newValue)
     } else if (name === "confirmPassword") {
@@ -156,6 +162,12 @@ const Registro = () => {
       error = validateSecurityAnswer(newValue)
     } else if (name === "confirm_security_answer") {
       error = validateConfirmSecurityAnswer(newValue)
+    } else if (name === "telephone_number") {
+      error = newValue.length !== 11 ? "Debe tener exactamente 11 números" : ""
+    } else if (name === "gender") {
+      error = newValue === "" ? "Debe seleccionar un género" : ""
+    } else if (name === "security_question") {
+      error = newValue === "" ? "Debe seleccionar una pregunta de seguridad" : ""
     }
 
     setErrors({ ...errors, [name]: error })
@@ -168,7 +180,10 @@ const Registro = () => {
     try {
       const response = await axios.post("http://localhost:3000/api/usuario/register", formData)
       setSuccess(true)
-      setTimeout(() => navigate(""), 2000)
+      // Cambiamos el setTimeout para que redirija a la página de inicio de sesión
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 2000)
     } catch (error) {
       console.error("Error al registrar:", error)
 
@@ -202,18 +217,22 @@ const Registro = () => {
     const formErrors = {
       name: validateName(formData.name),
       lastname: validateName(formData.lastname),
+      identification: formData.identification.length !== 8 ? "Debe tener exactamente 8 números" : "",
       password: validatePassword(formData.password),
       confirmPassword: validateConfirmPassword(formData.confirmPassword),
       date_of_birth: validateDateOfBirth(formData.date_of_birth),
       security_answer: validateSecurityAnswer(formData.security_answer),
       confirm_security_answer: validateConfirmSecurityAnswer(formData.confirm_security_answer),
+      telephone_number: formData.telephone_number.length !== 11 ? "Debe tener exactamente 11 números" : "",
+      gender: formData.gender === "" ? "Debe seleccionar un género" : "",
+      security_question: formData.security_question === "" ? "Debe seleccionar una pregunta de seguridad" : "",
     }
 
     const isValid =
       Object.values(formErrors).every((error) => error === "") && Object.values(formData).every((value) => value !== "")
 
     setIsFormValid(isValid)
-  }, [formData, validateName, validateConfirmPassword, validateConfirmSecurityAnswer, validateDateOfBirth]) // Added validateName to dependencies
+  }, [formData, validateConfirmPassword, validateDateOfBirth, validateConfirmSecurityAnswer, validateName])
 
   const renderErrors = () => {
     const errorMessages = []
@@ -300,6 +319,7 @@ const Registro = () => {
               required
               placeholder="Ingrese su número de identificación"
             />
+            {errors.identification && <p className={styles.error}>{errors.identification}</p>}
           </div>
 
           <div className={styles.inputGroup}>
@@ -319,6 +339,7 @@ const Registro = () => {
               <option value="femenina">Femenina</option>
               <option value="masculino">Masculino</option>
             </select>
+            {errors.gender && <p className={styles.error}>{errors.gender}</p>}
           </div>
 
           <div className={styles.inputGroup}>
@@ -352,6 +373,7 @@ const Registro = () => {
               placeholder="Ingrese su número de teléfono"
               className={styles.input}
             />
+            {errors.telephone_number && <p className={styles.error}>{errors.telephone_number}</p>}
           </div>
 
           <div className={styles.inputGroup}>
@@ -386,7 +408,7 @@ const Registro = () => {
               onChange={handleChange}
               required
               placeholder="Ingrese su contraseña"
-              maxLength={8}
+              maxLength={12}
             />
             <button type="button" className={styles.passwordToggle} onClick={togglePasswordVisibility}>
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -408,7 +430,7 @@ const Registro = () => {
               onChange={handleChange}
               required
               placeholder="Confirme su contraseña"
-              maxLength={8}
+              maxLength={12}
             />
             {errors.confirmPassword && <p className={styles.error}>{errors.confirmPassword}</p>}
           </div>
@@ -450,6 +472,7 @@ const Registro = () => {
               onChange={handleChange}
               required
               placeholder="Ingrese su respuesta"
+              maxLength={14}
             />
             <button type="button" className={styles.passwordToggle} onClick={toggleSecurityAnswerVisibility}>
               {showSecurityAnswer ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -471,6 +494,7 @@ const Registro = () => {
               onChange={handleChange}
               required
               placeholder="Confirme su respuesta"
+              maxLength={14}
             />
             {errors.confirm_security_answer && <p className={styles.error}>{errors.confirm_security_answer}</p>}
           </div>

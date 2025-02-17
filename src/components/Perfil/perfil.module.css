@@ -155,3 +155,38 @@
   color: #2d3748;
 }
 
+.inputWrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.error {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+.input.error {
+  border-color: #e53e3e;
+}
+
+.input.error:focus {
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.5);
+}
+

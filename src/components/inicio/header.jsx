@@ -63,7 +63,7 @@ const Header = () => {
     <header className={styles.header}>
       <div className={styles.headerContent}>
         <Link to="/inicio" className={styles.logo}>
-          uñimass
+          uñimas
         </Link>
         <button className={styles.menuToggle} onClick={toggleMenu}>
           {menuOpen ? "✕" : "☰"}
