@@ -46,6 +46,7 @@ const SpecialistProfiles = () => {
         ...specialist,
         name: `${specialist.specialist_name} ${specialist.specialist_lastname}`,
       }));
+      console.log(transformedClients);
       setClients(transformedClients);
       setIsLoading(false);
     } catch (error) {

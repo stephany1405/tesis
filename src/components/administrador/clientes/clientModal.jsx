@@ -41,13 +41,43 @@ const ClientModal = ({ client, onClose, onDeleteClient, onUpdateClient }) => {
 
   const handleLocationClick = (service) => {
     try {
-      const point = JSON.parse(service.point);
-      if (point && point.lat && point.lng) {
-        const url = `https://www.google.com/maps/@?api=1&map_action=map&center=${point.lat},${point.lng}&zoom=15`;
-        window.open(url, "_blank");
+      const point = service.point;
+      console.log("Valor de service.point:", point);
+
+      if (point) {
+        let lat, lng;
+
+        if (
+          typeof point === "object" &&
+          point !== null &&
+          "lat" in point &&
+          "lng" in point
+        ) {
+          lat = point.lat;
+          lng = point.lng;
+        } else if (typeof point === "string") {
+          const parsedPoint = JSON.parse(point.replace(/'/g, '"'));
+          if (
+            parsedPoint &&
+            "latitud" in parsedPoint &&
+            "longitud" in parsedPoint
+          ) {
+            lat = parsedPoint.latitud;
+            lng = parsedPoint.longitud;
+          }
+        }
+
+        if (lat !== undefined && lng !== undefined) {
+          const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+          window.open(url, "_blank");
+        } else {
+          console.error("Coordenadas inválidas:", point);
+        }
+      } else {
+        console.warn("No hay información de ubicación.");
       }
     } catch (error) {
-      console.error("Error localización", error);
+      console.error("Error en handleLocationClick:", error);
     }
   };
 

@@ -19,14 +19,33 @@ const ClientModal = ({
     setIsBlocked(!client.status_user);
   }, [client.status_user]);
 
-  const handleLocationClick = (point) => {
+  const handleLocationClick = (pointStr) => {
     try {
-      const coords = typeof point === "string" ? JSON.parse(point) : point;
-      if (coords && coords.lat && coords.lng) {
-        const url = `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}`;
-        window.open(url, "_blank");
+      let coords;
+
+      if (typeof pointStr === "string") {
+        try {
+          coords = JSON.parse(pointStr);
+        } catch (error) {
+          const cleaned = pointStr.replace(/'/g, '"');
+          coords = JSON.parse(cleaned);
+        }
       } else {
-        console.error("Coordenadas invalidas.");
+        coords = pointStr;
+      }
+
+      if (coords) {
+        const lat = coords.lat || coords.latitud;
+        const lng = coords.lng || coords.longitud;
+
+        if (lat !== undefined && lng !== undefined) {
+          const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+          window.open(url, "_blank");
+        } else {
+          console.error("Coordenadas invalidas.", coords);
+        }
+      } else {
+        console.error("Formato de punto inválido:", pointStr);
       }
     } catch (error) {
       console.error("Error localización", error);
@@ -254,7 +273,6 @@ const ClientModal = ({
                   const services = parseAppointmentServices(
                     appointment.appointment_services
                   );
-
                   return (
                     <React.Fragment key={index}>
                       {services.map((service, serviceIndex) => (
