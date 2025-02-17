@@ -7,6 +7,7 @@ const SubServiceForm = ({
   onSubmit,
   onClose,
   initialData = null,
+  isCategoryEdit = false,
 }) => {
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
@@ -15,7 +16,9 @@ const SubServiceForm = ({
     price: initialData?.price || "",
     image: null,
   });
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   useEffect(() => {
     const handleSidebarChange = () => {
       setIsSidebarCollapsed(
@@ -31,13 +34,14 @@ const SubServiceForm = ({
 
     return () => observer.disconnect();
   }, []);
+
   useEffect(() => {
     if (initialData) {
       setFormData({
         name: initialData.name,
         description: initialData.description,
-        duration: initialData.duration,
-        price: initialData.price,
+        duration: initialData.duration || "",
+        price: initialData.price || "",
         image: null,
       });
     }
@@ -47,16 +51,9 @@ const SubServiceForm = ({
     e.preventDefault();
     const formDataToSubmit = new FormData();
 
-    formDataToSubmit.append("id", categoryId);
-
     for (const key in formData) {
-      if (key === "image") {
-        if (formData[key] || !initialData) {
-          formDataToSubmit.append(key, formData[key]);
-        }
-      } else {
-        formDataToSubmit.append(key, formData[key]);
-      }
+      if (formData[key] === undefined) continue;
+      formDataToSubmit.append(key, formData[key]);
     }
 
     onSubmit(formDataToSubmit);
@@ -66,7 +63,7 @@ const SubServiceForm = ({
     const { name, value, type, files } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "file" ? files[0] : value,
+      [name]: type === "file" ? files[0] : value || "",
     }));
   };
 
@@ -78,12 +75,20 @@ const SubServiceForm = ({
         </button>
 
         <h2 className={styles.formTitle}>
-          {initialData ? "Editar Subservicio" : "Agregar Nuevo Subservicio"}
+          {isCategoryEdit
+            ? "Editar Categoría"
+            : initialData
+            ? "Editar Subservicio"
+            : "Agregar Nuevo Subservicio"}
         </h2>
 
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="name">Nombre del Subservicio</label>
+            <label htmlFor="name">
+              {isCategoryEdit
+                ? "Nombre de la Categoría"
+                : "Nombre del Subservicio"}
+            </label>
             <input
               type="text"
               id="name"
@@ -101,39 +106,46 @@ const SubServiceForm = ({
               name="description"
               value={formData.description}
               onChange={handleChange}
-              required
             />
           </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="duration">Duración</label>
-            <input
-              type="text"
-              id="duration"
-              name="duration"
-              value={formData.duration}
-              onChange={handleChange}
-              placeholder="ejemplo: 1 hora 30 minutos o 10 minutos o 2 hora"
-              required
-            />
-          </div>
+          {!isCategoryEdit && (
+            <>
+              <div className={styles.formGroup}>
+                <label htmlFor="duration">Duración</label>
+                <input
+                  type="text"
+                  id="duration"
+                  name="duration"
+                  value={formData.duration}
+                  onChange={handleChange}
+                  placeholder="Ejemplo: 1 hora 30 minutos"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="price">Precio $</label>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0"
+                  required
+                />
+              </div>
+            </>
+          )}
 
           <div className={styles.formGroup}>
-            <label htmlFor="price">Precio $</label>
-            <input
-              type="number"
-              id="price"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              step="0.01"
-              min="0"
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="image">Imagen del Subservicio</label>
+            <label htmlFor="image">
+              {isCategoryEdit
+                ? "Imagen de la Categoría"
+                : "Imagen del Subservicio"}
+            </label>
             {initialData && initialData.service_image && (
               <div>
                 <img
@@ -154,7 +166,11 @@ const SubServiceForm = ({
           </div>
 
           <button type="submit" className={styles.submitButton}>
-            {initialData ? "Guardar Cambios" : "Agregar Subservicio"}
+            {initialData
+              ? "Guardar Cambios"
+              : isCategoryEdit
+              ? "Guardar Categoría"
+              : "Agregar Subservicio"}
           </button>
         </form>
       </div>

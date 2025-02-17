@@ -378,6 +378,15 @@ const AdminAppointmentCalendar = () => {
             slotMaxTime="20:00:00"
             allDaySlot={false}
             height="auto"
+            weekends={false} // Oculta los fines de semana
+            businessHours={{
+              daysOfWeek: [1, 2, 3, 4, 5], // Lunes a Viernes
+              startTime: "09:00",
+              endTime: "20:00",
+            }}
+            selectConstraint={{
+              daysOfWeek: [1, 2, 3, 4, 5], // Solo permite seleccionar de Lunes a Viernes
+            }}
             slotLabelFormat={{
               hour: "numeric",
               minute: "2-digit",

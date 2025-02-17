@@ -268,7 +268,7 @@ const EstadisticasCitas = () => {
           }
         />
         <button className={styles.homeServiceButton} onClick={resetDates}>
-          Resetear
+          Reiniciar
         </button>
       </div>
       <div className={styles.statsGrid}>

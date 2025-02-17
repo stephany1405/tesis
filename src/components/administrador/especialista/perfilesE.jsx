@@ -42,7 +42,6 @@ const SpecialistProfiles = () => {
       const response = await axios.get(
         "http://localhost:3000/api/consulta-especialista"
       );
-      console.log(response.data)
       const transformedClients = response.data.map((specialist) => ({
         ...specialist,
         name: `${specialist.specialist_name} ${specialist.specialist_lastname}`,
@@ -95,6 +94,30 @@ const SpecialistProfiles = () => {
     return <div className={styles.loading}>Cargando especialistas...</div>;
   if (error) return <div className={styles.error}>Error: {error}</div>;
 
+  const handleDeleteClient = async (clientId) => {
+    try {
+      setClients((prevClients) =>
+        prevClients.filter((client) => client.specialist_id !== clientId)
+      );
+    } catch (error) {
+      console.error("Error al eliminar cliente:", error);
+    }
+  };
+  const handleUpdateClient = (updatedClient) => {
+    setClients((prevClients) =>
+      prevClients.map((client) =>
+        client.specialist_id === updatedClient.specialist_id
+          ? { ...client, ...updatedClient }
+          : client
+      )
+    );
+    if (
+      selectedClient &&
+      selectedClient.specialist_id === updatedClient.specialist_id
+    ) {
+      setSelectedClient({ ...selectedClient, ...updatedClient });
+    }
+  };
   return (
     <div
       className={`${styles.pageWrapper} ${
@@ -147,6 +170,8 @@ const SpecialistProfiles = () => {
             client={selectedClient}
             onClose={closeModal}
             onBlockStatusChange={handleBlockStatusChange}
+            onDeleteClient={handleDeleteClient}
+            onUpdateClient={handleUpdateClient}
           />
         )}
         {isRegistrationModalOpen && (

@@ -12,23 +12,16 @@ function InfoAgenda({ data }) {
 
   const { ws, isConnected } = useWebSocketContext();
   const handleMessage = (message) => {
-    console.log("handleMessage llamado con:", message);
     if (message.type === "STATUS_UPDATE") {
       const appointmentId = Number(message.data.appointmentId);
       const specialistId = Number(message.data.specialistId);
-      console.log(
-        "Updating status:",
-        appointmentId,
-        specialistId,
-        message.data.status
-      );
+
       setSpecialistStatuses((prev) => {
         console.log("Previous specialistStatuses:", prev);
         const newState = {
           ...prev,
           [`${appointmentId}_${specialistId}`]: message.data.status,
         };
-        console.log("New specialistStatuses:", newState);
         return newState;
       });
     }
@@ -229,69 +222,76 @@ function InfoAgenda({ data }) {
 
                 <div className={styles.specialistSection}>
                   <h3 className={styles.subsectionTitle}>Especialistas:</h3>
-                  <div className={styles.specialistsContainer}>
-                    {servicio.especialistas.map((especialista, index) => {
-                      const specialistKey = `${servicio.id}_${especialista.id}`;
-                      const currentStatus =
-                        specialistStatuses[specialistKey] ||
-                        "Especialista asignado";
+                  {servicio.especialistas &&
+                  servicio.especialistas.length > 0 ? (
+                    <div className={styles.specialistsContainer}>
+                      {servicio.especialistas.map((especialista, index) => {
+                        const specialistKey = `${servicio.id}_${especialista.id}`;
+                        const currentStatus =
+                          specialistStatuses[specialistKey] ||
+                          "Especialista asignado";
 
-                      return (
-                        <div key={index} className={styles.specialistInfo}>
-                          <img
-                            src={
-                              especialista.picture_profile
-                                ? `http://localhost:3000${especialista.picture_profile}`
-                                : "https://cdn-icons-png.flaticon.com/512/2920/2920072.png"
-                            }
-                            alt={`${especialista.name} ${especialista.lastname}`}
-                            className={styles.specialistPhoto}
-                          />
-                          <div className={styles.specialistDetails}>
-                            <p className={styles.specialistName}>
-                              {especialista.name} {especialista.lastname}
-                            </p>
-                            <p className={styles.specialistPhone}>
-                              Tel: {especialista.telephone_number}
-                            </p>
-                            <p className={styles.specialistRating}>
-                              Calificación: {especialista.score || "N/A"} ★
-                            </p>
-                            <p className={styles.specialistStatus}>
-                              Estado: {currentStatus}
-                            </p>
-                            {currentStatus === "Final del servicio" && (
-                              <div className={styles.ratingSection}>
-                                <p>Califica tu experiencia:</p>
-                                <div className={styles.ratingStars}>
-                                  {[1, 2, 3, 4, 5].map((rating) => (
-                                    <span
-                                      key={rating}
-                                      onClick={() =>
-                                        handleRating(
-                                          servicio.id,
-                                          especialista.id,
-                                          rating
-                                        )
-                                      }
-                                      className={`${styles.ratingStar}`}
-                                    >
-                                      ★
-                                    </span>
-                                  ))}
+                        return (
+                          <div key={index} className={styles.specialistInfo}>
+                            <img
+                              src={
+                                especialista.picture_profile
+                                  ? `http://localhost:3000${especialista.picture_profile}`
+                                  : "https://cdn-icons-png.flaticon.com/512/2920/2920072.png"
+                              }
+                              alt={`${especialista.name} ${especialista.lastname}`}
+                              className={styles.specialistPhoto}
+                            />
+                            <div className={styles.specialistDetails}>
+                              <p className={styles.specialistName}>
+                                {especialista.name} {especialista.lastname}
+                              </p>
+                              <p className={styles.specialistPhone}>
+                                Tel: {especialista.telephone_number}
+                              </p>
+                              <p className={styles.specialistRating}>
+                                Calificación: {especialista.score || "N/A"} ★
+                              </p>
+                              <p className={styles.specialistStatus}>
+                                Estado: {currentStatus}
+                              </p>
+                              {currentStatus === "Final del servicio" && (
+                                <div className={styles.ratingSection}>
+                                  <p>Califica tu experiencia:</p>
+                                  <div className={styles.ratingStars}>
+                                    {[1, 2, 3, 4, 5].map((rating) => (
+                                      <span
+                                        key={rating}
+                                        onClick={() =>
+                                          handleRating(
+                                            servicio.id,
+                                            especialista.id,
+                                            rating
+                                          )
+                                        }
+                                        className={`${styles.ratingStar}`}
+                                      >
+                                        ★
+                                      </span>
+                                    ))}
+                                  </div>
+                                  {ratingMessages[specialistKey] && (
+                                    <p className={styles.ratingSuccessMessage}>
+                                      {ratingMessages[specialistKey]}
+                                    </p>
+                                  )}
                                 </div>
-                                {ratingMessages[specialistKey] && (
-                                  <p className={styles.ratingSuccessMessage}>
-                                    {ratingMessages[specialistKey]}
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className={styles.noSpecialist}>
+                      Especialista no asignado
+                    </p>
+                  )}
                 </div>
               </div>
             )}

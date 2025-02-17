@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
 import styles from "./modal.module.css";
-import { Star, Lock, Unlock, Trash2 } from "lucide-react";
+import { Star, Lock, Unlock, Trash2, UserX, Edit } from "lucide-react";
 import axios from "axios";
-
-const ClientModal = ({ client, onClose, onBlockStatusChange }) => {
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import EditSpecialistModal from "./editEspecialistModal.jsx";
+const ClientModal = ({
+  client,
+  onClose,
+  onBlockStatusChange,
+  onDeleteClient,
+  onUpdateClient,
+}) => {
   const [isBlocked, setIsBlocked] = useState(client.status_user === false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     setIsBlocked(!client.status_user);
@@ -95,9 +104,58 @@ const ClientModal = ({ client, onClose, onBlockStatusChange }) => {
       return "N/A";
     }
   };
+  const deleteSpecialist = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/eliminar-usuario/${client.specialist_id}`
+      );
+      toast.success("Usuario eliminado exitosamente", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      if (typeof onDeleteClient === "function") {
+        onDeleteClient(client.specialist_id);
+      }
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+    } catch (error) {
+      console.error("Error eliminando usuario:", error);
+      toast.error("Error al eliminar usuario", {
+        position: "top-right",
+      });
+    }
+  };
 
+  const handleUpdateClient = (updatedClient) => {
+    if (typeof onUpdateClient === "function") {
+      onUpdateClient(updatedClient);
+    }
+  };
+  const parseSpecialties = (specialtiesString) => {
+    try {
+      if (!specialtiesString) {
+        return "Sin especialidades";
+      }
+      let cleanedString = specialtiesString.replace(/[{}]/g, "");
+      cleanedString = cleanedString.replace(/"/g, "");
+      const specialtiesArray = cleanedString.split(",").map((s) => s.trim());
+      return specialtiesArray.join(", ");
+    } catch (error) {
+      console.error("Error al parsear specialist_specialty:", error);
+      return "Error al cargar especialidades";
+    }
+  };
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
+      <ToastContainer position="top-right" autoClose={2000} />
+
       <div
         className={`${styles.modalContent} ${
           isBlocked ? styles.blockedContent : ""
@@ -151,6 +209,10 @@ const ClientModal = ({ client, onClose, onBlockStatusChange }) => {
           <p>
             <strong>Correo:</strong> {client.specialist_email}
           </p>
+          <p>
+            <strong>Especialidades:</strong>{" "}
+            {parseSpecialties(client.specialist_specialty)}
+          </p>
         </div>
         <div className={styles.actionButtons}>
           {!isBlocked ? (
@@ -162,6 +224,15 @@ const ClientModal = ({ client, onClose, onBlockStatusChange }) => {
               <Unlock size={16} /> Desbloquear
             </button>
           )}
+          <button onClick={deleteSpecialist} className={styles.deleteButton}>
+            <UserX size={14} /> Eliminar Especialista
+          </button>
+          <button
+            onClick={() => setShowEditModal(true)}
+            className={styles.editButton}
+          >
+            <Edit size={14} /> Editar Cliente
+          </button>
         </div>
         <div className={styles.serviceHistory}>
           <h3>Historial de Servicios</h3>
@@ -233,6 +304,13 @@ const ClientModal = ({ client, onClose, onBlockStatusChange }) => {
           </table>
         </div>
       </div>
+      {showEditModal && (
+        <EditSpecialistModal
+          client={client}
+          onClose={() => setShowEditModal(false)}
+          onUpdateClient={handleUpdateClient}
+        />
+      )}
     </div>
   );
 };

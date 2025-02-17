@@ -172,7 +172,7 @@ export const forgotPassword = async (req, res) => {
     );
 
     const mailOptions = {
-      from: '"Equipo de Soporte de UÑIMAS" <unimas304@gmail.com',
+      from: '"Equipo de Soporte de UÑIMAS" <unimas304@gmail.com>',
       to: email,
       subject: "UÑIMAS - Código de recuperación de contraseña 👨‍💻",
       html: `
@@ -187,53 +187,62 @@ export const forgotPassword = async (req, res) => {
               font-family: Arial, sans-serif;
               line-height: 1.6;
               color: #333;
+              background-color: #f7f7f7;
+              margin: 0;
+              padding: 0;
             }
             .container {
               max-width: 600px;
-              margin: 0 auto;
-              padding: 20px;
-              border: 1px solid #ddd;
-              border-radius: 5px;
+              margin: 20px auto;
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
             }
-            .logo {
+            .header {
+              background-color: #ff6f61;
+              color: #fff;
               text-align: center;
-              margin-bottom: 20px;
+              padding: 20px;
             }
-            .logo img {
-              max-width: 200px;
+            .header h1 {
+              margin: 0;
+              font-size: 24px;
             }
             .content {
-              background-color: #f9f9f9;
               padding: 20px;
-              border-radius: 5px;
+              background-color: #ffffff;
             }
             .code {
-              font-size: 24px;
+              font-size: 28px;
               font-weight: bold;
-              color: #4a4a4a;
+              color: #ff6f61;
               text-align: center;
-              padding: 10px;
-              background-color: #e9e9e9;
+              padding: 15px;
+              background-color: #f9f9f9;
               border-radius: 5px;
               margin: 20px 0;
             }
             .footer {
-              margin-top: 20px;
               text-align: center;
-              font-size: 12px;
+              padding: 15px;
+              background-color: #f9f9f9;
               color: #888;
+              font-size: 12px;
+            }
+            .footer p {
+              margin: 5px 0;
             }
           </style>
         </head>
         <body>
           <div class="container">
-            <div class="logo">
-              <img src="https://tudominio.com/logo-unimas.png" alt="Logo UÑIMAS">
+            <div class="header">
+              <h1>Recuperación de Contraseña</h1>
             </div>
             <div class="content">
-              <h2>Recuperación de Contraseña </h2>
               <p>Hola ${name} ${lastname},</p>
-              <p>Hemos recibido una solicitud para recuperar tu contraseña . A continuación, encontrarás el código de recuperación:</p>
+              <p>Hemos recibido una solicitud para recuperar tu contraseña. A continuación, encontrarás el código de recuperación:</p>
               <div class="code">${code}</div>
               <p><strong>¡Importante!</strong> No compartas este código con nadie. Nuestro equipo de soporte nunca te pedirá este código.</p>
               <p>Si no has solicitado este cambio, por favor ignora este correo o contacta a nuestro equipo de soporte.</p>

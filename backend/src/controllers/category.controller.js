@@ -85,7 +85,7 @@ export const updateServiceOfCategory = async (req, res, next) => {
     const { id } = req.params;
     const { name, description, price, duration } = req.body;
 
-    if (!name) {
+    if (!name || !description || !price || !duration) {
       return res
         .status(400)
         .json({ error: "classification_type es obligatorio" });
@@ -135,5 +135,63 @@ export const deleteService = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error interno en el servidor." });
     console.error(error);
+  }
+};
+
+export const editCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let { name, description } = req.body;
+
+    if (!id) {
+      return res.status(404).json({ message: "Id Categoria no recibido." });
+    }
+
+    const existingServiceQuery = {
+      text: "SELECT service_image, description,classification_type FROM public.classification WHERE id = $1",
+      values: [id],
+    };
+    const existingServiceResult = await pool.query(existingServiceQuery);
+
+    if (existingServiceResult.rowCount === 0) {
+      return res.status(404).json({ message: "Categoría no encontrada." });
+    }
+
+    const existingService = existingServiceResult.rows[0];
+    console.log(existingService);
+    if (
+      description === undefined ||
+      description === null ||
+      description.trim() === ""
+    ) {
+      description = existingService.description;
+    }
+    if (name === undefined || name === null) {
+      name = existingService.classification_type;
+    }
+
+    let service_image;
+    if (req.file) {
+      service_image = `/uploads/categories/${req.file.filename}`;
+    } else {
+      service_image = existingService.service_image;
+    }
+
+    const query = {
+      text: "UPDATE public.classification SET classification_type = $1, description = $2, service_image = $3 WHERE id = $4",
+      values: [name, description, service_image, id],
+    };
+    console.log(req.body);
+
+    const result = await pool.query(query);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Categoría no encontrada." });
+    }
+
+    res.json({ message: "Categoría actualizada correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error interno en el servidor." });
   }
 };

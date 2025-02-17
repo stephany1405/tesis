@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from "react";
 import styles from "./clientModal.module.css";
-import { Star, Lock, Unlock, CloudCog } from "lucide-react";
+import { Star, Lock, Unlock, UserX, Edit } from "lucide-react";
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import EditClientModal from "./editClientModal.jsx";
 
-const ClientModal = ({ client, onClose }) => {
+const ClientModal = ({ client, onClose, onDeleteClient, onUpdateClient }) => {
   const [isBlocked, setIsBlocked] = useState(client.status_user === false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [currentClient, setCurrentClient] = useState(client);
 
   useEffect(() => {
-    setIsBlocked(client.status_user === false);
-  }, [client.status_user]);
+    setIsBlocked(currentClient.status_user === false);
+  }, [currentClient.status_user]);
 
   const blockClient = async () => {
     try {
       await axios.put("http://localhost:3000/api/bloqueo-usuario", {
-        id: client.id,
+        id: currentClient.id,
       });
       setIsBlocked(true);
+      setCurrentClient((prev) => ({ ...prev, status_user: false }));
     } catch (error) {
       console.error("Error bloqueando cliente", error);
     }
@@ -24,9 +30,10 @@ const ClientModal = ({ client, onClose }) => {
   const unblockClient = async () => {
     try {
       await axios.put("http://localhost:3000/api/desbloqueo-usuario", {
-        id: client.id,
+        id: currentClient.id,
       });
       setIsBlocked(false);
+      setCurrentClient((prev) => ({ ...prev, status_user: true }));
     } catch (error) {
       console.error("Error desbloqueando cliente", error);
     }
@@ -57,30 +64,72 @@ const ClientModal = ({ client, onClose }) => {
     return formattedTime;
   };
 
+  const deleteClient = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/eliminar-usuario/${currentClient.id}`
+      );
+
+      toast.success("Usuario eliminado exitosamente", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+
+      if (typeof onDeleteClient === "function") {
+        onDeleteClient(currentClient.id);
+      }
+
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+    } catch (error) {
+      console.error("Error eliminando usuario:", error);
+      toast.error("Error al eliminar usuario", {
+        position: "top-right",
+      });
+    }
+  };
+
+  const handleUpdateClient = (updatedClient) => {
+    setCurrentClient(updatedClient);
+    if (typeof onUpdateClient === "function") {
+      onUpdateClient(updatedClient);
+    }
+  };
+
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
+      <ToastContainer position="top-right" autoClose={2000} />
+
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>
           &times;
         </button>
+
         <div className={styles.clientHeader}>
           <img
             src={
-              client.picture_profile
-                ? `http://localhost:3000${client.picture_profile}`
-                : `https://i.pravatar.cc/300?img=${client.id}`
+              currentClient.picture_profile
+                ? `http://localhost:3000${currentClient.picture_profile}`
+                : `https://i.pravatar.cc/300?img=${currentClient.id}`
             }
-            alt={`${client.name} ${client.lastname}`}
+            alt={`${currentClient.name} ${currentClient.lastname}`}
             className={styles.clientImage}
           />
           <h2>
-            {client.name} {client.lastname}
+            {currentClient.name} {currentClient.lastname}
             <span className={styles.rating}>
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
                   className={
-                    i < (parseFloat(client.score) || 0)
+                    i < (parseFloat(currentClient.score) || 0)
                       ? styles.starFilled
                       : styles.starEmpty
                   }
@@ -99,15 +148,15 @@ const ClientModal = ({ client, onClose }) => {
             <div className={styles.infoGrid}>
               <div className={styles.infoItem}>
                 <strong>Identificación:</strong>
-                {client.identification}
+                {currentClient.identification}
               </div>
               <div className={styles.infoItem}>
                 <strong>Teléfono:</strong>
-                {client.telephone_number}
+                {currentClient.telephone_number}
               </div>
               <div className={styles.infoItem}>
                 <strong>Correo:</strong>
-                {client.email}
+                {currentClient.email}
               </div>
             </div>
           </div>
@@ -121,6 +170,15 @@ const ClientModal = ({ client, onClose }) => {
                 <Unlock size={14} /> Desbloquear
               </button>
             )}
+            <button onClick={deleteClient} className={styles.deleteUser}>
+              <UserX size={14} /> Eliminar Cliente
+            </button>
+            <button
+              onClick={() => setShowEditModal(true)}
+              className={styles.editButton}
+            >
+              <Edit size={14} /> Editar Cliente
+            </button>
           </div>
           <div className={styles.serviceHistory}>
             <h3 className={styles.sectionTitle}>Historial de Servicios</h3>
@@ -139,10 +197,10 @@ const ClientModal = ({ client, onClose }) => {
                 </tr>
               </thead>
               <tbody>
-                {client.serviceHistory &&
-                client.serviceHistory.length > 0 &&
-                client.serviceHistory[0].service !== "N/A" ? (
-                  client.serviceHistory.map((service, index) => {
+                {currentClient.serviceHistory &&
+                currentClient.serviceHistory.length > 0 &&
+                currentClient.serviceHistory[0].service !== "N/A" ? (
+                  currentClient.serviceHistory.map((service, index) => {
                     let parsedDate = service.date;
                     try {
                       const dateObj = JSON.parse(service.date);
@@ -184,6 +242,14 @@ const ClientModal = ({ client, onClose }) => {
           </div>
         </div>
       </div>
+
+      {showEditModal && (
+        <EditClientModal
+          client={currentClient}
+          onClose={() => setShowEditModal(false)}
+          onUpdateClient={handleUpdateClient}
+        />
+      )}
     </div>
   );
 };

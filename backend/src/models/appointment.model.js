@@ -16,7 +16,7 @@ export const getAllCategory = async (req, res, next) => {
 export const getServices = async (categoryID) => {
   try {
     const query = {
-      text: `SELECT id, classification_type, description, service_image, price, time FROM classification WHERE parent_classification_id = $1 AND is_active = true`,
+      text: `SELECT id, classification_type,parent_classification_id, description, service_image, price, time FROM classification WHERE parent_classification_id = $1 AND is_active = true`,
       values: [categoryID],
     };
 

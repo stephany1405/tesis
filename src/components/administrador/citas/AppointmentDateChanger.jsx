@@ -62,6 +62,14 @@ const AppointmentDateChanger = ({ appointment, onDateChange, onClose }) => {
   }, [appointment]);
 
   const handleDateClick = (clickInfo) => {
+    const date = clickInfo.date;
+    const dayOfWeek = date.getDay();
+
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      setError("No se pueden seleccionar fines de semana (sábados o domingos)");
+      return;
+    }
+
     const startDate = clickInfo.date;
     const totalDurationInHours = calculateTotalDuration(
       appointment.serviceInfo
@@ -161,6 +169,12 @@ const AppointmentDateChanger = ({ appointment, onDateChange, onClose }) => {
             slotMinTime="09:00:00"
             slotMaxTime="20:00:00"
             allDaySlot={false}
+            weekends={false}
+            businessHours={{
+              daysOfWeek: [1, 2, 3, 4, 5],
+              startTime: "09:00",
+              endTime: "20:00",
+            }}
             headerToolbar={{
               left: "prev,next",
               center: "title",

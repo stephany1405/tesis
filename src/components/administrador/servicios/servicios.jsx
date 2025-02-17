@@ -11,6 +11,32 @@ const Servicios = () => {
   const [isNewServiceFormOpen, setIsNewServiceFormOpen] = useState(false);
   const [services, setServices] = useState([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const fetchCategorias = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/servicios/categoria"
+      );
+      const transformedCategorias = response.data.map((category) => ({
+        id: category.id,
+        name: category.classification_type,
+        imageUrl: category.service_image
+          ? category.service_image.startsWith("/uploads")
+            ? `http://localhost:3000${category.service_image}`
+            : category.service_image
+          : "/placeholder.svg",
+        description: category.description,
+      }));
+      setServices(transformedCategorias);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategorias();
+  }, []);
+
   useEffect(() => {
     const handleSidebarChange = () => {
       setIsSidebarCollapsed(
@@ -23,31 +49,7 @@ const Servicios = () => {
       attributes: true,
       attributeFilter: ["class"],
     });
-
     return () => observer.disconnect();
-  }, []);
-  useEffect(() => {
-    const fetchCategorias = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3000/api/servicios/categoria"
-        );
-        const transformedCategorias = response.data.map((category) => ({
-          id: category.id,
-          name: category.classification_type,
-          imageUrl: category.service_image
-            ? category.service_image.startsWith("/uploads")
-              ? `http://localhost:3000${category.service_image}`
-              : category.service_image
-            : "/placeholder.svg",
-        }));
-        setServices(transformedCategorias);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategorias();
   }, []);
 
   const filteredServices = useMemo(() => {
@@ -121,7 +123,11 @@ const Servicios = () => {
           ))}
         </div>
         {selectedService && (
-          <Modal service={selectedService} onClose={closeModal} />
+          <Modal
+            service={selectedService}
+            onClose={closeModal}
+            onUpdate={fetchCategorias}
+          />
         )}
         {isNewServiceFormOpen && (
           <NuevoServicio

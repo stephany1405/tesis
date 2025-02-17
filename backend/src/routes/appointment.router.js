@@ -7,6 +7,7 @@ import {
   deleteServiceOfCategory,
   updateServiceOfCategory,
   deleteService,
+  editCategory,
 } from "../controllers/category.controller.js";
 import {
   getActiveAppointment,
@@ -43,6 +44,7 @@ router.put(
   upload3.single("image"),
   updateServiceOfCategory
 );
+router.put("/actualizar-categoria/:id", upload2.single("image"), editCategory);
 
 router.get("/agenda/activo", getActiveAppointment);
 router.get("/agenda/noactivo", getAnonActiveAppointment);

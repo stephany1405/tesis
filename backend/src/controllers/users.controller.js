@@ -215,7 +215,7 @@ export const getSpecialistsWithHistory = async (req, res) => {
           specialist_rating: row.specialist_rating,
           specialist_specialty: row.specialist_specialty,
           status_user: row.status_user,
-          appointments: [], 
+          appointments: [],
         };
         specialists.push(specialist);
       }
@@ -243,7 +243,7 @@ export const getSpecialistsWithHistory = async (req, res) => {
     console.error(err);
     res
       .status(500)
-      .json({ error: "Error al obtener el historial de especialistas" }); 
+      .json({ error: "Error al obtener el historial de especialistas" });
   }
 };
 
@@ -265,6 +265,7 @@ export const getClientsWithHistory = async (req, res) => {
           u.identification,
           u.telephone_number,
           u.email,
+          u.gender,
           u.picture_profile,
           u.score,
           u.status AS status_user,
@@ -332,6 +333,7 @@ export const getClientsWithHistory = async (req, res) => {
           score: row.score,
           serviceHistory: [serviceHistory],
           status_user: row.status_user,
+          gender: row.gender,
         });
       }
       return acc;
@@ -367,5 +369,191 @@ export const unlockUser = async (req, res) => {
     res.status(200).json({ message: "Usuario desbloqueado exitosamente." });
   } catch (error) {
     console.log(error);
+  }
+};
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "ID del Usuario es requerido." });
+    }
+
+    await pool.query("BEGIN");
+
+    await pool.query(
+      "DELETE FROM public.ratings WHERE appointment_id IN (SELECT id FROM public.appointment WHERE user_id = $1)",
+      [id]
+    );
+
+    await pool.query(
+      "DELETE FROM public.specialist_cancelled_appointments WHERE appointment_id IN (SELECT id FROM public.appointment WHERE user_id = $1)",
+      [id]
+    );
+    await pool.query(
+      "DELETE FROM public.appointment_specialists WHERE appointment_id IN (SELECT id FROM public.appointment WHERE user_id = $1)",
+      [id]
+    );
+
+    await pool.query(
+      "DELETE FROM public.appointment_specialists WHERE specialist_id = $1",
+      [id]
+    );
+
+    await pool.query("DELETE FROM public.appointment WHERE user_id = $1", [id]);
+
+    await pool.query("DELETE FROM public.user WHERE id = $1", [id]);
+
+    await pool.query("COMMIT");
+
+    res.status(200).json({ message: "Usuario Eliminado Exitosamente." });
+  } catch (error) {
+    await pool.query("ROLLBACK");
+    console.error(error);
+    res.status(500).json({ message: "Error interno en el servidor" });
+  }
+};
+
+export const identification = async (req, res) => {
+  try {
+    const { identification } = req.params;
+
+    const result = await pool.query(
+      "SELECT id FROM public.user WHERE identification = $1",
+      [identification]
+    );
+
+    res.json({ exists: result.rows.length > 0 });
+  } catch (error) {
+    console.error("Error al verificar identificación:", error);
+    res.status(500).json({ message: "Error al verificar identificación" });
+  }
+};
+
+export const email = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const result = await pool.query(
+      "SELECT id FROM public.user WHERE email = $1",
+      [email]
+    );
+
+    res.json({ exists: result.rows.length > 0 });
+  } catch (error) {
+    console.error("Error al verificar email:", error);
+    res.status(500).json({ message: "Error al verificar email" });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const fields = [];
+    const values = [];
+    let paramIndex = 1;
+
+    Object.entries(updates).forEach(([key, value]) => {
+      fields.push(`${key} = $${paramIndex}`);
+      values.push(value);
+      paramIndex++;
+    });
+
+    if (fields.length === 0) {
+      return res.status(200).json({
+        message: "No hay cambios para actualizar",
+      });
+    }
+
+    values.push(id);
+
+    const query = `
+      UPDATE public.user 
+      SET ${fields.join(", ")} 
+      WHERE id = $${paramIndex}
+      RETURNING id, name, lastname, identification, email, telephone_number, status, picture_profile, score
+
+    `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.status(200).json({
+      message: "Usuario actualizado exitosamente",
+      user: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    res.status(500).json({ message: "Error al actualizar usuario" });
+  }
+};
+
+export const updateSpecialist = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const setClauses = [];
+    const values = [];
+    let paramIndex = 1;
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (key === "specialties") {
+        setClauses.push(`specialization = $${paramIndex}`);
+        values.push(JSON.stringify(value));
+      } else {
+        setClauses.push(`${key} = $${paramIndex}`);
+        values.push(value);
+      }
+      paramIndex++;
+    });
+
+    if (setClauses.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "No hay campos válidos para actualizar" });
+    }
+
+    values.push(id);
+
+    const query = `
+          UPDATE public.user
+          SET ${setClauses.join(", ")}
+          WHERE id = $${paramIndex}
+          RETURNING
+              id,
+              name AS specialist_name,
+              lastname AS specialist_lastname,
+              identification AS specialist_identification,
+              email AS specialist_email,
+              telephone_number AS specialist_phone,
+              picture_profile AS specialist_image,
+              score AS specialist_rating,
+              status AS status_user,
+              specialization AS specialties
+      `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Especialista no encontrado" });
+    }
+
+    const specialist = result.rows[0];
+    if (specialist.specialties && typeof specialist.specialties === "string") {
+      specialist.specialties = JSON.parse(specialist.specialties);
+    }
+
+    res.status(200).json({
+      message: "Especialista actualizado exitosamente",
+      specialist,
+    });
+  } catch (error) {
+    console.error("Error al actualizar especialista:", error);
+    res.status(500).json({ message: "Error al actualizar especialista" });
   }
 };

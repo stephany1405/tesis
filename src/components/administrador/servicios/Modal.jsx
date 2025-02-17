@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { X, Plus, Edit, Trash } from "lucide-react";
+import { X, Plus, Edit, Trash, Pencil } from "lucide-react";
 import styles from "./Modal.module.css";
 import Form from "./form";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const SubServiceModal = ({ service, onClose }) => {
+const SubServiceModal = ({ service, onClose, onUpdate }) => {
   const [subServices, setSubServices] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingSubService, setEditingSubService] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [noSubServicesShown, setNoSubServicesShown] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const normalizeImageUrl = (url) => {
+    if (!url) return "";
+    let normalizedUrl = url.replace("http://localhost:5173", "");
+    if (normalizedUrl.startsWith("/uploads/")) {
+      return `http://localhost:5173/backend${normalizedUrl}`;
+    }
+    return `http://localhost:5173/${normalizedUrl}`;
+  };
 
   const fetchServices = async () => {
     setIsLoading(true);
@@ -30,21 +39,19 @@ const SubServiceModal = ({ service, onClose }) => {
         }
       );
       if (!Array.isArray(response.data)) {
-        console.error(response.data);
+        console.error("Respuesta no válida:", response.data);
         return;
       }
 
       const fetchedServices = response.data.map((service) => ({
         id: service.id,
-        name: service.classification_type,
+        parent_id: service.parent_classification_id,
+        name: service.name || service.classification_type,
         description: service.description,
-        service_image: service.service_image.startsWith("http")
-          ? service.service_image
-          : `http://localhost:5173/${service.service_image}`,
+        service_image: normalizeImageUrl(service.service_image),
         price: service.price,
-        duration: service.time,
+        duration: service.duration || service.time,
       }));
-
       setSubServices(fetchedServices);
 
       if (fetchedServices.length === 0 && !noSubServicesShown) {
@@ -55,7 +62,7 @@ const SubServiceModal = ({ service, onClose }) => {
       console.error("Error detallado:", error);
       if (error.response) {
         if (error.response.status === 404) {
-          toast.error("No se encontró los servicios de categoria");
+          toast.error("No se encontraron los servicios de categoría");
         } else {
           toast.error(`Error del servidor: ${error.response.status}`);
         }
@@ -88,6 +95,7 @@ const SubServiceModal = ({ service, onClose }) => {
       setShowForm(false);
       toast.success("¡Subservicio registrado correctamente!");
     } catch (error) {
+      console.error("Error al agregar subservicio:", error);
       toast.error("Error al registrar el subservicio.");
     }
   };
@@ -103,12 +111,14 @@ const SubServiceModal = ({ service, onClose }) => {
         await fetchServices();
         toast.success("Categoría eliminada correctamente!");
       } catch (error) {
+        console.error("Error al eliminar categoría:", error);
         toast.error("Error al eliminar la Categoría.");
       }
     }
   };
+
   const handleDeleteService = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar esta servicio?")) {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este servicio?")) {
       try {
         await axios.put(
           `http://localhost:3000/api/servicios/eliminarServiciodeCategoria/${id}`
@@ -116,6 +126,7 @@ const SubServiceModal = ({ service, onClose }) => {
         await fetchServices();
         toast.success("Servicio eliminado correctamente!");
       } catch (error) {
+        console.error("Error al eliminar servicio:", error);
         toast.error("Error al eliminar el servicio.");
       }
     }
@@ -140,6 +151,7 @@ const SubServiceModal = ({ service, onClose }) => {
       setShowForm(false);
       toast.success("¡Subservicio actualizado correctamente!");
     } catch (error) {
+      console.error("Error al actualizar subservicio:", error);
       toast.error("Error al actualizar el subservicio.");
     }
   };
@@ -148,15 +160,52 @@ const SubServiceModal = ({ service, onClose }) => {
     setShowForm(false);
     setEditingSubService(null);
   };
+  const handleEditService = () => {
+    setEditingCategory(service);
+    setShowForm(true);
+  };
+  const handleUpdateCategory = async (formData) => {
+    try {
+      await axios.put(
+        `http://localhost:3000/api/servicios/actualizar-categoria/${editingCategory.id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      await fetchServices();
+      toast.success("¡Categoría actualizada correctamente!");
+
+      if (onUpdate) {
+        onUpdate();
+      }
+      setTimeout(() => {
+        onClose();
+      }, 2500);
+    } catch (error) {
+      console.error("Error al actualizar categoría:", error);
+      toast.error("Error al actualizar la categoría.");
+    }
+  };
+
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <ToastContainer position="top-right" autoClose={3000} />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
         <button className={styles.closeButton} onClick={onClose}>
           <X size={24} />
         </button>
 
         <h2 className={styles.modalTitle}>{service.name}</h2>
+        <p className={styles.serviceDescription}>{service.description}</p>
         <div className={styles.headerActions}>
           <button
             className={`${styles.deleteButton} ${styles.deleteCategoryButton}`}
@@ -164,6 +213,13 @@ const SubServiceModal = ({ service, onClose }) => {
           >
             <Trash size={18} />
             Eliminar Categoría
+          </button>
+          <button
+            className={`${styles.deleteButton} ${styles.deleteCategoryButton}`}
+            onClick={() => handleEditService(service.id)}
+          >
+            <Pencil size={18} />
+            Editar Categoría
           </button>
         </div>
 
@@ -230,10 +286,14 @@ const SubServiceModal = ({ service, onClose }) => {
 
       {showForm && (
         <Form
-          categoryId={service.id}
-          initialData={editingSubService}
+          isCategoryEdit={!!editingCategory}
+          initialData={editingCategory || editingSubService}
           onSubmit={
-            editingSubService ? handleUpdateSubService : handleAddSubService
+            editingCategory
+              ? handleUpdateCategory
+              : editingSubService
+              ? handleUpdateSubService
+              : handleAddSubService
           }
           onClose={handleCloseForm}
         />

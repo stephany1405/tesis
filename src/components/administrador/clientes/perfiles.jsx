@@ -13,6 +13,7 @@ const ClientProfiles = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   useEffect(() => {
     const handleSidebarChange = () => {
       setIsSidebarCollapsed(
@@ -28,6 +29,7 @@ const ClientProfiles = () => {
 
     return () => observer.disconnect();
   }, []);
+
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -57,6 +59,28 @@ const ClientProfiles = () => {
   const closeModal = () => setSelectedClient(null);
   const handleSearchChange = (event) => setSearchTerm(event.target.value);
   const handleAddClient = () => setIsRegistrationModalOpen(true);
+
+  const handleDeleteClient = async (clientId) => {
+    try {
+      setClients((prevClients) =>
+        prevClients.filter((client) => client.id !== clientId)
+      );
+    } catch (error) {
+      console.error("Error al eliminar cliente:", error);
+    }
+  };
+
+  const handleUpdateClient = (updatedClient) => {
+    setClients((prevClients) =>
+      prevClients.map((client) =>
+        client.id === updatedClient.id ? updatedClient : client
+      )
+    );
+    if (selectedClient && selectedClient.id === updatedClient.id) {
+      setSelectedClient(updatedClient);
+    }
+  };
+
   const handleSubmitRegistrationForm = (newClient) => {
     const newId =
       clients.length > 0
@@ -118,13 +142,19 @@ const ClientProfiles = () => {
           ))}
         </div>
         {selectedClient && (
-          <ClientModal client={selectedClient} onClose={closeModal} />
+          <ClientModal
+            client={selectedClient}
+            onClose={closeModal}
+            onDeleteClient={handleDeleteClient}
+            onUpdateClient={handleUpdateClient}
+          />
         )}
         {isRegistrationModalOpen && (
           <Registro
             isOpen={isRegistrationModalOpen}
             onClose={() => setIsRegistrationModalOpen(false)}
             onSubmit={handleSubmitRegistrationForm}
+            onDeleteClient={handleDeleteClient}
           />
         )}
       </div>

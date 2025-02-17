@@ -16,14 +16,20 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration }) => {
   };
 
   const handleDateClick = (clickInfo) => {
+    const date = clickInfo.date;
+    const dayOfWeek = date.getDay();
     const now = new Date();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      alert("No se pueden seleccionar fines de semana (sábados o domingos)");
+      return;
+    }
     if (clickInfo.date < now) {
       alert("No puedes seleccionar fechas pasadas");
       return;
     }
 
     const startDate = new Date(clickInfo.date);
-    const durationInMs = totalDuration * 60 * 60 * 1000; 
+    const durationInMs = totalDuration * 60 * 60 * 1000;
     const endDate = new Date(startDate.getTime() + durationInMs);
 
     const maxEndTime = new Date(startDate);
@@ -103,7 +109,15 @@ export const AppointmentCalendar = ({ onDateSelect, totalDuration }) => {
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
         dayMaxEvents={true}
-        weekends={true}
+        weekends={false}
+        validRange={(nowDate) => ({
+          start: nowDate,
+        })}
+        businessHours={{
+          daysOfWeek: [1, 2, 3, 4, 5],
+          startTime: `${BUSINESS_HOURS.start}:00`,
+          endTime: `${BUSINESS_HOURS.end}:00`,
+        }}
         locale={esLocale}
         dateClick={handleDateClick}
         headerToolbar={{

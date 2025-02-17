@@ -171,6 +171,7 @@
   display: flex;
   justify-content: flex-end;
   margin-bottom: 1.5rem;
+  gap: 1rem;
 }
 
 .deleteCategoryButton {
@@ -193,4 +194,10 @@
 .deleteCategoryButton:active {
   background-color: #dc2626;
   transform: translateY(0);
+}
+.serviceDescription {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
 }

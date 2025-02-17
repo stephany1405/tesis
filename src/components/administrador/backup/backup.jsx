@@ -59,9 +59,18 @@ const DatabaseBackup = () => {
     setPassword("");
   };
 
+  // Se restringe la selección a archivos SQL
   const handleFileChange = (event) => {
-    if (event.target.files) {
-      setSelectedFile(event.target.files[0]);
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      const fileExtension = file.name.split(".").pop().toLowerCase();
+      if (fileExtension !== "sql") {
+        toast.error("Solo se permiten archivos SQL.");
+        event.target.value = "";
+        setSelectedFile(null);
+      } else {
+        setSelectedFile(file);
+      }
     }
   };
 
@@ -195,6 +204,7 @@ const DatabaseBackup = () => {
             <h2>Restaurar Backup</h2>
             <input
               type="file"
+              accept=".sql"
               onChange={handleFileChange}
               className={styles.fileInput}
             />
@@ -351,13 +361,15 @@ const DatabaseBackup = () => {
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <div className={styles.modalContent}>
-              <div className={styles.warningSection}>
-                <h2 className={styles.warningTitle}>Advertencia</h2>
-                <p className={styles.warningMessage}>
-                  Si usted realiza este backup se pueden perder datos que no
-                  estén respaldados.
-                </p>
-              </div>
+              {modalAction === "restore" && (
+                <div className={styles.warningSection}>
+                  <h2 className={styles.warningTitle}>Advertencia</h2>
+                  <p className={styles.warningMessage}>
+                    Si usted realiza este backup se pueden perder datos que no
+                    estén respaldados.
+                  </p>
+                </div>
+              )}
               <div className={styles.passwordSection}>
                 <h3 className={styles.passwordTitle}>
                   Ingrese la contraseña secreta
