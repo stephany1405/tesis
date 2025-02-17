@@ -11,6 +11,7 @@ function Agenda() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showHistorial, setShowHistorial] = useState(false);
+  const [selectedService, setSelectedService] = useState(null); // Añadido nuevo estado
 
   useEffect(() => {
     const fetchActiveServices = async () => {
@@ -63,6 +64,11 @@ function Agenda() {
     especialistas: servicio.specialists || [],
   });
 
+  const handleServiceSelect = (service) => {
+    setSelectedService(service);
+    setShowHistorial(false); 
+  };
+
   if (loading)
     return <div className={styles.loadingContainer}>Cargando...</div>;
   if (error) return <div className={styles.errorContainer}>{error}</div>;
@@ -75,7 +81,7 @@ function Agenda() {
     return (
       <div className={styles.noActiveServicesContainer}>
         No hay servicios activos
-        <Historial />
+        <Historial setSelectedService={handleServiceSelect} />
       </div>
     );
   }
@@ -83,10 +89,12 @@ function Agenda() {
   return (
     <div className={styles.container}>
       {showHistorial ? (
-        <Historial />
+        <Historial setSelectedService={handleServiceSelect} />
       ) : (
         <>
-          <InfoAgenda data={serviciosActivos} />
+          <InfoAgenda
+            data={selectedService ? [selectedService] : serviciosActivos}
+          />
           <button
             className={styles.historialButton}
             onClick={() => setShowHistorial(true)}

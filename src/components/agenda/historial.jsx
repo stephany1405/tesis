@@ -32,11 +32,17 @@ const StarRating = ({ rating }) => {
 };
 
 const ServiceItem = ({ service, setSelectedService }) => {
-  const services = service.services;
-  const scheduledDate = service.scheduled_date;
+  // Verificar si service y sus propiedades existen
+  if (!service) {
+    return <div>Error: Servicio no válido</div>;
+  }
+
+  const services = service.services || [];
+  const scheduledDate = service.scheduled_date || {};
+
   const parseCustomDate = (dateStr) => {
     try {
-      if (typeof dateStr !== "string") {
+      if (!dateStr || typeof dateStr !== "string") {
         console.error("Expected string but got:", typeof dateStr, dateStr);
         return null;
       }
@@ -87,7 +93,6 @@ const ServiceItem = ({ service, setSelectedService }) => {
           .replace(" a. m.", "")
           .replace(" p. m.", "")
           .trim();
-
         const [hours, minutes] = timeStr
           .split(":")
           .map((num) => parseInt(num, 10));
@@ -103,22 +108,24 @@ const ServiceItem = ({ service, setSelectedService }) => {
 
   const formatDate = (dateString) => {
     try {
+      if (!dateString) return "Fecha no disponible";
       const date = parseCustomDate(dateString);
       if (!date) return "Fecha no disponible";
       return format(date, "d 'de' MMMM 'de' yyyy", { locale: es });
     } catch (error) {
-      console.error("error formateando la fecha:", error);
+      console.error("Error formateando la fecha:", error);
       return "Fecha no disponible";
     }
   };
 
   const formatTime = (dateString) => {
     try {
+      if (!dateString) return "Hora no disponible";
       const date = parseCustomDate(dateString);
       if (!date) return "Hora no disponible";
       return format(date, "HH:mm");
     } catch (error) {
-      console.error("error formateando hora:", error);
+      console.error("Error formateando hora:", error);
       return "Hora no disponible";
     }
   };
@@ -129,17 +136,26 @@ const ServiceItem = ({ service, setSelectedService }) => {
       onClick={() => setSelectedService(service)}
     >
       <div className={styles.serviceName}>
-        {services[0]?.title || "Servicio sin nombre"}
+        {services.length > 0 && services[0]?.title
+          ? services[0].title
+          : "Servicio sin nombre"}
       </div>
       <div className={styles.serviceInfo}>
         <div className={styles.infoItem}>
           <Calendar size={16} />
-          <span>{formatDate(scheduledDate.start)}</span>{" "}
+          <span>
+            {scheduledDate.start
+              ? formatDate(scheduledDate.start)
+              : "Fecha no disponible"}
+          </span>
         </div>
         <div className={styles.infoItem}>
           <Clock size={16} />
           <span>
-            {formatTime(scheduledDate.start)} - {scheduledDate.end}
+            {scheduledDate.start
+              ? formatTime(scheduledDate.start)
+              : "Hora no disponible"}
+            {scheduledDate.end ? ` - ${scheduledDate.end}` : ""}
           </span>
         </div>
         <div className={styles.infoItem}>
@@ -202,7 +218,7 @@ const ServiceItem = ({ service, setSelectedService }) => {
 };
 
 function Historial({ setSelectedService }) {
-  const [servicioNoActivo, setServicioNoActivo] = useState(null);
+  const [servicioNoActivo, setServicioNoActivo] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -222,16 +238,17 @@ function Historial({ setSelectedService }) {
         );
 
         const data = await response.json();
-        console.log(data);
-        if (data) {
-          setServicioNoActivo(data);
+
+        if (response.ok) {
+          setServicioNoActivo(Array.isArray(data) ? data : data ? [data] : []);
+        } else {
+          setServicioNoActivo([]);
+          console.log("No inactive services found:", data.message);
         }
       } catch (error) {
         setError("Error al cargar el historial de servicios");
         console.error("Error detalles:", error);
-        if (error.response && error.response.status === 404) {
-          setServicioNoActivo(null);
-        }
+        setServicioNoActivo([]);
       } finally {
         setLoading(false);
       }
@@ -241,10 +258,11 @@ function Historial({ setSelectedService }) {
 
   if (loading) return <div className={styles.loading}>Cargando...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
-  if (!servicioNoActivo || servicioNoActivo.length === 0)
+  if (!servicioNoActivo || servicioNoActivo.length === 0) {
     return (
       <div className={styles.noHistory}>No hay historial de servicios</div>
     );
+  }
 
   return (
     <div className={styles.historyList}>
